@@ -3,13 +3,19 @@
 
 void eHooks::Init()
 {
-	CIniReader ini("mugenhook.ini");
+	CIniReader ini("");
 	bGameModeTagShow = ini.ReadBoolean("Settings", "bGameModeTagShow", 0);
 	bGameModeSingleHide = ini.ReadBoolean("Settings", "bGameModeSingleHide", 0);
 	bGameModeSimulHide = ini.ReadBoolean("Settings", "bGameModeSimulHide", 0);
 	bGameModeTurnsHide = ini.ReadBoolean("Settings", "bGameModeTurnsHide", 0);
 	bHookCursorTable = ini.ReadBoolean("Settings", "bHookCursorTable", 0);
+	bRandomStageConfirmSounds = ini.ReadBoolean("Settings", "bRandomStageConfirmSounds", 0);
     bChangeStrings= ini.ReadBoolean("Settings", "bChangeStrings", 0);
+
+	iSelectableFighters = ini.ReadInteger("Settings", "iSelectableFighters", 0);
+
+	stage_group = ini.ReadInteger("Settings", "iRandomStageGroup", 0);
+	stage_max = ini.ReadInteger("Settings", "iRandomStageRandomMax", 0);
 
 	if (bChangeStrings)
 	{
@@ -17,6 +23,7 @@ void eHooks::Init()
 		Patch<const char*>(0x40AE04 + 3, ini.ReadString("Strings", "szGameModeSimul", "Simul"));
 		Patch<const char*>(0x40AE5F + 3, ini.ReadString("Strings", "szGameModeTurns", "Turns"));
 		Patch<const char*>(0x40AE30 + 3, ini.ReadString("Strings", "szGameModeTag", "Tag"));
+		
 		Patch<const char*>(0x42BD3B + 7, ini.ReadString("Strings","szKeyA","A"));
 		Patch<const char*>(0x42BD46 + 7, ini.ReadString("Strings","szKeyB","B"));
 		Patch<const char*>(0x42BD51 + 7, ini.ReadString("Strings","szKeyC","C"));
@@ -28,17 +35,24 @@ void eHooks::Init()
 		Patch<const char*>(0x407E73 + 1, ini.ReadString("Strings", "szSelectStage", "Stage %i: %s"));
 	}
 
+	if (iSelectableFighters)
+	Patch<int>(0x4063F0, iSelectableFighters);
+
 	if (bHookCursorTable)
 	{
-		eHooks::CursorTabMan::Init();
-		eHooks::CursorTabMan::ReadFile("cfg\\soundAnn.dat");
+		CursorTabMan::Init();
+		CursorTabMan::ReadFile("cfg\\soundAnn.dat");
+		//CursorTabMan::AnimatedPortaits::ReadFile("cfg\\animatedPortraits.dat");
 		Patch<char>(0x406E51, 0xE9);
 		Patch<int>(0x406E51 + 1, (int)eHooks::HookCursorSounds - ((int)0x406E51 + 5));
 	}
+
+
 	if (bGameModeTagShow)    Patch<char>(0x40AE10, 6);
 	if (bGameModeSimulHide)  Patch<char>(0x40ADE4, 4);
 	if (bGameModeSingleHide) Patch<char>(0x40ADC2, 4);
 	if (bGameModeTurnsHide)  Patch<char>(0x40AE3C, 4);
+	
 }
 
 void __declspec(naked) eHooks::HookCursorSounds()
@@ -49,22 +63,29 @@ void __declspec(naked) eHooks::HookCursorSounds()
 		add eax, 14864
 		pushad
 	}
-	// C0 p2
-	FoundEntry = CursorTabMan::FindSound(*(int*)(cursor_eax + 14864 + 16), *(int*)(cursor_eax + 14864));
-	FoundEntryp2 = CursorTabMan::FindSound(*(int*)(cursor_eax + 14864 + 0xC0 + 16), *(int*)(cursor_eax + 14864 + 0xC0));
-	// p1.cursor.done.snd, group
-	*(int*)(*(int*)Mugen_ResourcesPointer + 0x340) = cursorTable[FoundEntry].snd_group;
-	// p1.cursor.done.snd, value
-	*(int*)(*(int*)Mugen_ResourcesPointer + 0x348) = cursorTable[FoundEntry].snd_select;
-	// p1.cursor.done.snd, group
-	*(int*)(*(int*)Mugen_ResourcesPointer + 0x344) = cursorTable[FoundEntryp2].snd_groupp2;
-	// p1.cursor.done.snd, value
-	*(int*)(*(int*)Mugen_ResourcesPointer + 0x34C) = cursorTable[FoundEntryp2].snd_selectp2;
+	CursorTabMan::ProcessSelectScreen();
 	_asm {
 		popad
 		jmp cursor_jmp
 	}
 }
+
+void eHooks::PrintCharacterNames()
+{
+	MugenCharacter* CharactersArray = *(MugenCharacter**)0x503394;
+	std::ofstream oFile("characters.txt", std::ofstream::binary);
+
+	if (CharactersArray)
+	{
+		for (int i = 0; i < row * column; i++)
+		{
+			std::string strName(CharactersArray[i].name, strlen(CharactersArray[i].name));
+			oFile << "Character: " << strName << " ID:" << std::to_string(CharactersArray[i].id) << std::endl;
+		}
+	}
+
+}
+
 
 
 void eHooks::CursorTabMan::Init()
@@ -78,9 +99,10 @@ void eHooks::CursorTabMan::Init()
 		if (line)
 		{
 			CIniReader system(line);
-			int row = system.ReadInteger("Select Info", "rows",0);
-			int column = system.ReadInteger("Select Info", "columns", 0);
-
+			row = system.ReadInteger("Select Info", "rows",0);
+			column = system.ReadInteger("Select Info", "columns", 0);
+			sscanf(system.ReadString("Select Info", "p1.cursor.done.snd", 0), "%d,%d", &select_default_grp, &select_default_sound);
+			sscanf(system.ReadString("Select Info", "p2.cursor.done.snd", 0), "%d,%d", &select_default_grp2, &select_default_sound2);
 			memSize = row * column;
 		}
 	}
@@ -89,7 +111,9 @@ void eHooks::CursorTabMan::Init()
 
 
 	cursorTable = std::make_unique<eCursorEntry[]>(memSize);
-	printf("CursorTabMan: Init, allocated %d\n", memSize * sizeof(eCursorEntry));
+	animTable = std::make_unique<ePortraitEntry[]>(memSize);
+	printf("CursorTabMan: Init allocated %d bytes\n", memSize * sizeof(eCursorEntry));
+	printf("Animated Portraits: Init allocated %d bytes\n", memSize * sizeof(ePortraitEntry));
 }
 
 void eHooks::CursorTabMan::ReadFile(const char * file)
@@ -135,8 +159,55 @@ void eHooks::CursorTabMan::ReadFile(const char * file)
 			}
 
 		}
-		printf("CursorTabMan: Found %d entities!\n", lastEntry + 1);
+		printf("CursorTabMan: Found %d entities!\n", lastEntry);
 		fclose(pFile);
+	}
+
+}
+
+void eHooks::CursorTabMan::ProcessSelectScreen()
+{
+	FoundEntry = CursorTabMan::FindSound(*(int*)(cursor_eax + 14864 + 16), *(int*)(cursor_eax + 14864));
+	FoundEntryp2 = CursorTabMan::FindSound(*(int*)(cursor_eax + 14864 + 0xC0 + 16), *(int*)(cursor_eax + 14864 + 0xC0));
+
+
+	int PlayeroneSelected = (*(int*)(cursor_eax + 14592));
+	int PlayeroneSelectedTurns = (*(int*)(cursor_eax + 14592 + 36));
+	int PlayertwoSelected = (*(int*)(cursor_eax + 14592 + 4));
+	int PlayertwoSelectedTurns = (*(int*)(cursor_eax + 14592 + 36 + 116));
+	int PlayerTraining = (*(int*)(cursor_eax + 14864 + 24));
+
+
+
+	// fix for repeating turns/training/watch sounds
+
+	if (PlayertwoSelectedTurns == 0)
+	{
+		*(int*)(*(int*)Mugen_ResourcesPointer + 0x344) = cursorTable[FoundEntryp2].snd_groupp2;
+		*(int*)(*(int*)Mugen_ResourcesPointer + 0x34C) = cursorTable[FoundEntryp2].snd_selectp2;
+	}
+	else {
+		*(int*)(*(int*)Mugen_ResourcesPointer + 0x344) = select_default_grp2;
+		*(int*)(*(int*)Mugen_ResourcesPointer + 0x34C) = select_default_sound2;
+	}
+
+	if (PlayerTraining == 1)
+	{
+			*(int*)(*(int*)Mugen_ResourcesPointer + 0x340) = cursorTable[FoundEntry].snd_group;
+			*(int*)(*(int*)Mugen_ResourcesPointer + 0x348) = cursorTable[FoundEntry].snd_select;
+	}
+	else {
+		*(int*)(*(int*)Mugen_ResourcesPointer + 0x340) = select_default_grp;
+		*(int*)(*(int*)Mugen_ResourcesPointer + 0x348) = select_default_sound;
+	}
+
+
+
+	// we're at select screen anyway
+	if (bRandomStageConfirmSounds)
+	{
+		*(int*)(*(int*)Mugen_ResourcesPointer + 0x36C) = stage_group;
+		*(int*)(*(int*)Mugen_ResourcesPointer + 0x36C + 4) = rand() % stage_max;
 	}
 }
 
@@ -154,4 +225,59 @@ int eHooks::CursorTabMan::FindSound(int row, int col)
 		}
 	}
 	return iFind;
+}
+
+void eHooks::CursorTabMan::AnimatedPortaits::ReadFile(const char * file)
+{
+	FILE* pFile = fopen(file, "rb");
+	if (!pFile)
+	{
+		printf("CursorTabMan: Animated Portraits: ERROR: Could not open %s!\n", file);
+	}
+	if (pFile)
+	{
+		printf("CursorTabMan: Animated Portraits: Reading %s\n", file);
+		char line[1536];
+		while (fgets(line, sizeof(line), pFile))
+		{
+			// check if comment
+			if (line[0] == ';' || line[0] == '#' || line[0] == '\n')
+				continue;
+
+			int row_id = 0;
+			if (sscanf(line, "%d", &row_id) == 1)
+			{
+
+				int column_id = 0;
+				int maxframes = 0;
+				int frametime = 0;
+				sscanf(line, "%d %d %d %d", &row_id, &column_id, &maxframes, &frametime);
+
+				// create thing
+				ePortraitEntry ent;
+				ent.id_row = row_id;
+				ent.id_column = column_id;
+				ent.frametime = frametime;
+				ent.max_frames = maxframes;
+
+				animTable[lastAnim] = ent;
+				lastAnim++;
+			}
+
+		}
+		printf("CursorTabMan: Animated Portraits: Found %d entities!\n", lastAnim);
+		fclose(pFile);
+	}
+}
+
+int eHooks::CursorTabMan::AnimatedPortaits::DisplaySprites(int a1, int a2, int a3, int a4, int a5, float x, float y)
+{
+    printf("%X %X %X %X %X %f %f\n", a1, a2, a3, a4, a5, x, y);
+	return  ((int(__cdecl*)(int, int, int, int, int, float, float))0x411C00)(a1, a2, a3, a4,a5,x,y);
+}
+
+int eHooks::CursorTabMan::AnimatedPortaits::LoadSprites(int a1, int a2)
+{
+		return ((int(__cdecl*)(int, int))0x467B30)(a1, a2);
+
 }
