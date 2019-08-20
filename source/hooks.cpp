@@ -11,6 +11,7 @@ void eHooks::Init()
 	bHookCursorTable = ini.ReadBoolean("Settings", "bHookCursorTable", 0);
 	bRandomStageConfirmSounds = ini.ReadBoolean("Settings", "bRandomStageConfirmSounds", 0);
     bChangeStrings= ini.ReadBoolean("Settings", "bChangeStrings", 0);
+	bDumpCharacterInfo = ini.ReadBoolean("Settings", "bDumpCharacterInfo", 0);
 
 	iSelectableFighters = ini.ReadInteger("Settings", "iSelectableFighters", 0);
 
@@ -23,7 +24,6 @@ void eHooks::Init()
 		Patch<const char*>(0x40AE04 + 3, ini.ReadString("Strings", "szGameModeSimul", "Simul"));
 		Patch<const char*>(0x40AE5F + 3, ini.ReadString("Strings", "szGameModeTurns", "Turns"));
 		Patch<const char*>(0x40AE30 + 3, ini.ReadString("Strings", "szGameModeTag", "Tag"));
-		
 		Patch<const char*>(0x42BD3B + 7, ini.ReadString("Strings","szKeyA","A"));
 		Patch<const char*>(0x42BD46 + 7, ini.ReadString("Strings","szKeyB","B"));
 		Patch<const char*>(0x42BD51 + 7, ini.ReadString("Strings","szKeyC","C"));
@@ -33,6 +33,7 @@ void eHooks::Init()
 		Patch<const char*>(0x42BD7D + 7, ini.ReadString("Strings","szKeyStart","Start"));
 		Patch<const char*>(0x407E43 + 1, ini.ReadString("Strings", "szSelectStageRandom", "Stage: Random"));
 		Patch<const char*>(0x407E73 + 1, ini.ReadString("Strings", "szSelectStage", "Stage %i: %s"));
+		Patch<const char*>(0x41A591 + 1, ini.ReadString("Strings", "szAppTitle ", "M.U.G.E.N"));
 	}
 
 	if (iSelectableFighters)
@@ -80,16 +81,18 @@ void eHooks::PrintCharacterNames()
 		for (int i = 0; i < row * column; i++)
 		{
 			std::string strName(CharactersArray[i].name, strlen(CharactersArray[i].name));
-			oFile << "Character: " << strName << " ID:" << std::to_string(CharactersArray[i].id) << std::endl;
+			oFile << "Character: " << strName << " ID:" << std::to_string(CharactersArray[i].id) <<  "\n Folder: " << CharactersArray[i].foldername << std::endl;
 		}
+		oFile.close();
 	}
+
 
 }
 
 
 
 void eHooks::CursorTabMan::Init()
-{
+{	
 	int memSize;
 	if (std::experimental::filesystem::exists("data\\mugen.cfg"))
 	{
@@ -179,9 +182,27 @@ void eHooks::CursorTabMan::ProcessSelectScreen()
 
 
 
-	// fix for repeating turns/training/watch sounds
+	int player1_row = (*(int*)(cursor_eax + 14864 + 4));
+	int player1_column = (*(int*)(cursor_eax + 14864));
 
-	if (PlayertwoSelectedTurns == 0)
+	int player2_row = (*(int*)(cursor_eax + 14864 + 0xC0 + 4));
+	int player2_column = (*(int*)(cursor_eax + 14864 + 0xC0));
+
+
+	MugenCharacter* CharactersArray = *(MugenCharacter**)0x503394;
+
+
+	if (GetAsyncKeyState(VK_F5) && bDumpCharacterInfo)
+		PrintCharacterNames();
+
+	// fix for repeating turns/training/watch sounds
+	// -2 = random  -1 = empty cell
+	
+	int charP2 = (player2_column + (player2_row * row) + player2_row);
+	int charP1 = (player1_column + (player1_row * row) + player1_row);
+
+
+	if (PlayertwoSelectedTurns == 0  && (CharactersArray[charP2].id >= 0))
 	{
 		*(int*)(*(int*)Mugen_ResourcesPointer + 0x344) = cursorTable[FoundEntryp2].snd_groupp2;
 		*(int*)(*(int*)Mugen_ResourcesPointer + 0x34C) = cursorTable[FoundEntryp2].snd_selectp2;
@@ -191,7 +212,7 @@ void eHooks::CursorTabMan::ProcessSelectScreen()
 		*(int*)(*(int*)Mugen_ResourcesPointer + 0x34C) = select_default_sound2;
 	}
 
-	if (PlayerTraining == 1)
+	if (PlayerTraining == 1  && (CharactersArray[charP1].id >= 0))
 	{
 			*(int*)(*(int*)Mugen_ResourcesPointer + 0x340) = cursorTable[FoundEntry].snd_group;
 			*(int*)(*(int*)Mugen_ResourcesPointer + 0x348) = cursorTable[FoundEntry].snd_select;
@@ -272,8 +293,17 @@ void eHooks::CursorTabMan::AnimatedPortaits::ReadFile(const char * file)
 
 int eHooks::CursorTabMan::AnimatedPortaits::DisplaySprites(int a1, int a2, int a3, int a4, int a5, float x, float y)
 {
-    printf("%X %X %X %X %X %f %f\n", a1, a2, a3, a4, a5, x, y);
-	return  ((int(__cdecl*)(int, int, int, int, int, float, float))0x411C00)(a1, a2, a3, a4,a5,x,y);
+	// a1 - unk
+	// a2 - graphics pointer
+	// a3 - sprite data pointer
+	// a4 - scale pointer
+	// a5 - ?
+	// a6
+
+	int test = ((int(__cdecl*)(int, int, int, int, int, float, float))0x411C00)(a1, a2, a3, a4, a5, x, y);
+	//printf("%d %X %X %X\n", test, a1, a2, a3);
+	//return  ((int(__cdecl*)(int, int, int, int, int, float, float))0x411C00)(a1, a2, a3, a4,a5,x ,y);
+	return test;
 }
 
 int eHooks::CursorTabMan::AnimatedPortaits::LoadSprites(int a1, int a2)

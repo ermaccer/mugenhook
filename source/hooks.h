@@ -31,8 +31,15 @@ struct MugenCharacter {
 	char name[48];
 	char filename[512];
 	char foldername[512];
-	int unknown_2;
+	int  sprite_ptr;
 	float scale;
+};
+
+struct MugenData {
+	char pad[512];
+	char gameFolder[512];
+	char _pad[16];
+	char lastStage[1024];
 };
 
 namespace eHooks {
@@ -68,6 +75,7 @@ namespace eHooks {
 	static bool bChangeStrings;
 	static bool bRandomStageConfirmSounds;
 	static int  iSelectableFighters;
+	static bool bDumpCharacterInfo;
 
 	static int lastEntry = 0;
 	static int lastAnim = 0;
