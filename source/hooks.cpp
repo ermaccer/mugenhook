@@ -9,6 +9,7 @@ void eHooks::Init()
 	bGameModeSimulHide = ini.ReadBoolean("Settings", "bGameModeSimulHide", 0);
 	bGameModeTurnsHide = ini.ReadBoolean("Settings", "bGameModeTurnsHide", 0);
 	bHookCursorTable = ini.ReadBoolean("Settings", "bHookCursorTable", 0);
+	bHookAnimatedPortraits = ini.ReadBoolean("Settings", "bHookAnimatedPortraits", 0);
 	bRandomStageConfirmSounds = ini.ReadBoolean("Settings", "bRandomStageConfirmSounds", 0);
     bChangeStrings= ini.ReadBoolean("Settings", "bChangeStrings", 0);
 	bDumpCharacterInfo = ini.ReadBoolean("Settings", "bDumpCharacterInfo", 0);
@@ -38,15 +39,23 @@ void eHooks::Init()
 
 	if (iSelectableFighters)
 	Patch<int>(0x4063F0, iSelectableFighters);
+	CursorTabMan::Init();
 
 	if (bHookCursorTable)
 	{
-		CursorTabMan::Init();
 		CursorTabMan::ReadFile("cfg\\soundAnn.dat");
-		//CursorTabMan::AnimatedPortaits::ReadFile("cfg\\animatedPortraits.dat");
 		Patch<char>(0x406E51, 0xE9);
 		Patch<int>(0x406E51 + 1, (int)eHooks::HookCursorSounds - ((int)0x406E51 + 5));
+		if (bHookAnimatedPortraits)
+		{
+			CursorTabMan::AnimatedPortaits::ReadFile("cfg\\animatedPortraits.dat");
+			CursorTabMan::AnimatedPortaits::ReadFrameFile("cfg\\frameLoader.dat");
+			Patch<char>(0x404CE2, 0xE9);
+			Patch<int>(0x404CE2 + 1, (int)CursorTabMan::AnimatedPortaits::HookLoadSprites - ((int)0x404CE2 + 5));
+		}
+
 	}
+
 
 
 	if (bGameModeTagShow)    Patch<char>(0x40AE10, 6);
@@ -115,8 +124,10 @@ void eHooks::CursorTabMan::Init()
 
 	cursorTable = std::make_unique<eCursorEntry[]>(memSize);
 	animTable = std::make_unique<ePortraitEntry[]>(memSize);
-	printf("CursorTabMan: Init allocated %d bytes\n", memSize * sizeof(eCursorEntry));
-	printf("Animated Portraits: Init allocated %d bytes\n", memSize * sizeof(ePortraitEntry));
+	frameTable = std::make_unique<eSprite[]>(MAX_FRAMES);
+	printf("CursorTabMan: Allocated %d bytes\n", memSize * sizeof(eCursorEntry));
+	printf("Animated Portraits: Allocated %d bytes\n", memSize * sizeof(ePortraitEntry));
+	printf("FrameLoader: Allocated %d bytes\n", MAX_FRAMES * sizeof(eSprite));
 }
 
 void eHooks::CursorTabMan::ReadFile(const char * file)
@@ -170,6 +181,8 @@ void eHooks::CursorTabMan::ReadFile(const char * file)
 
 void eHooks::CursorTabMan::ProcessSelectScreen()
 {
+
+
 	FoundEntry = CursorTabMan::FindSound(*(int*)(cursor_eax + 14864 + 16), *(int*)(cursor_eax + 14864));
 	FoundEntryp2 = CursorTabMan::FindSound(*(int*)(cursor_eax + 14864 + 0xC0 + 16), *(int*)(cursor_eax + 14864 + 0xC0));
 
@@ -230,6 +243,34 @@ void eHooks::CursorTabMan::ProcessSelectScreen()
 		*(int*)(*(int*)Mugen_ResourcesPointer + 0x36C) = stage_group;
 		*(int*)(*(int*)Mugen_ResourcesPointer + 0x36C + 4) = rand() % stage_max;
 	}
+
+	// animated ports
+
+	int frameEntry = CursorTabMan::AnimatedPortaits::FindFrame(player1_row, player1_column);
+	int frameTime_p1 = animTable[frameEntry].frametime;
+	int frameEntry_p2 = CursorTabMan::AnimatedPortaits::FindFrame(player2_row, player2_column);
+	int frameTime_p2 = animTable[frameEntry_p2].frametime;
+
+	if (iFrameCounter_p1 > animTable[frameEntry].max_frames) iFrameCounter_p1 = 0;
+	if (iFrameCounter_p2 > animTable[frameEntry_p2].max_frames) iFrameCounter_p2 = 0;
+
+
+	*(int*)(*(int*)Mugen_ResourcesPointer + 0x80C) = animTable[frameEntry].group;
+	*(int*)(*(int*)Mugen_ResourcesPointer + 0x810) = iFrameCounter_p1;
+
+	*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 4) = animTable[frameEntry_p2].group_p2;
+	*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 8) = iFrameCounter_p2;
+
+	if (GetTickCount() - iTickCounter_p1 <= frameTime_p1) return;
+	iFrameCounter_p1++;
+	iTickCounter_p1 = GetTickCount();
+
+
+	if (GetTickCount() - iTickCounter_p2 <= frameTime_p2) return;
+	iFrameCounter_p2++;
+	iTickCounter_p2 = GetTickCount();
+
+
 }
 
 int eHooks::CursorTabMan::FindSound(int row, int col)
@@ -269,15 +310,19 @@ void eHooks::CursorTabMan::AnimatedPortaits::ReadFile(const char * file)
 			if (sscanf(line, "%d", &row_id) == 1)
 			{
 
+				int group_id = 0;
+				int group_id2 = 0;
 				int column_id = 0;
 				int maxframes = 0;
 				int frametime = 0;
-				sscanf(line, "%d %d %d %d", &row_id, &column_id, &maxframes, &frametime);
+				sscanf(line, "%d %d %d %d %d %d", &row_id, &column_id, &group_id, &group_id2, &maxframes, &frametime);
 
 				// create thing
 				ePortraitEntry ent;
 				ent.id_row = row_id;
 				ent.id_column = column_id;
+				ent.group = group_id;
+				ent.group_p2 = group_id2;
 				ent.frametime = frametime;
 				ent.max_frames = maxframes;
 
@@ -291,23 +336,79 @@ void eHooks::CursorTabMan::AnimatedPortaits::ReadFile(const char * file)
 	}
 }
 
-int eHooks::CursorTabMan::AnimatedPortaits::DisplaySprites(int a1, int a2, int a3, int a4, int a5, float x, float y)
+void eHooks::CursorTabMan::AnimatedPortaits::ReadFrameFile(const char * file)
 {
-	// a1 - unk
-	// a2 - graphics pointer
-	// a3 - sprite data pointer
-	// a4 - scale pointer
-	// a5 - ?
-	// a6
+	FILE* pFile = fopen(file, "rb");
+	if (!pFile)
+	{
+		printf("FrameLoader: ERROR: Could not open %s!\n", file);
+	}
+	if (pFile)
+	{
+		printf("FrameLoader:  Reading %s\n", file);
+		char line[1536];
+		while (fgets(line, sizeof(line), pFile))
+		{
+			// check if comment
+			if (line[0] == ';' || line[0] == '#' || line[0] == '\n')
+				continue;
 
-	int test = ((int(__cdecl*)(int, int, int, int, int, float, float))0x411C00)(a1, a2, a3, a4, a5, x, y);
-	//printf("%d %X %X %X\n", test, a1, a2, a3);
-	//return  ((int(__cdecl*)(int, int, int, int, int, float, float))0x411C00)(a1, a2, a3, a4,a5,x ,y);
-	return test;
+			int group_id = 0;
+			if (sscanf(line, "%d", &group_id) == 1)
+			{
+
+				int index_id = 0;
+				sscanf(line, "%d %d", &group_id, &index_id);
+
+				// create thing
+				eSprite spr;
+				spr.group = group_id;
+				spr.index = index_id;
+
+				frameTable[lastFrame] = spr;
+				lastFrame++;
+			}
+
+		}
+		printf("FrameLoader: Found %d entities!\n", lastFrame);
+		fclose(pFile);
+	}
 }
 
 int eHooks::CursorTabMan::AnimatedPortaits::LoadSprites(int a1, int a2)
 {
-		return ((int(__cdecl*)(int, int))0x467B30)(a1, a2);
+	return ((int(__cdecl*)(int, int))0x467B30)(a1, a2);
+}
+
+int eHooks::CursorTabMan::AnimatedPortaits::FindFrame(int row, int col)
+{
+	int iFind = 0;
+	for (int i = 0; i < lastFrame; i++)
+	{
+		if (animTable[i].id_row == row) {
+			if (animTable[i].id_column == col)
+			{
+				iFind = i;
+				break;
+			}
+		}
+	}
+	return iFind;
+}
+
+void __declspec(naked) eHooks::CursorTabMan::AnimatedPortaits::HookLoadSprites()
+{
+
+	frameTablePtr = (int)frameTable.get();
+	_asm {
+		//lea ecx, eHooks::frameTable
+		push frameTablePtr
+		call 	eHooks::CursorTabMan::AnimatedPortaits::LoadSprites
+		pushad
+	}
+	_asm {
+		popad
+		jmp sprite_jmp
+	}
 
 }
