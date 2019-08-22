@@ -27,6 +27,10 @@ struct ePortraitEntry {
 	int       group_p2;
 	int       max_frames;
 	int       frametime;
+	int       win_group;
+	int       win_group_p2;
+	int       win_max_frames;
+	int       win_frametime;
 };
 
 struct eSprite {
@@ -57,6 +61,9 @@ namespace eHooks {
 	// anim ports
 	static int iFrameCounter_p1 = 0;
 	static int iFrameCounter_p2 = 0;
+
+	static int iWinFrameCounter_p1 = 0;
+	static int iWinFrameCounter_p2 = 0;
 
 	static int iTickCounter_p1 = GetTickCount();
 	static int iTickCounter_p2 = GetTickCount();
@@ -91,6 +98,7 @@ namespace eHooks {
 	static bool bGameModeTurnsHide;
 	static bool bHookCursorTable;
 	static bool bHookAnimatedPortraits;
+	static bool bEnableSelectAnimations;
 	static bool bChangeStrings;
 	static bool bRandomStageConfirmSounds;
 	static int  iSelectableFighters;

@@ -11,6 +11,7 @@ void eHooks::Init()
 	bHookCursorTable = ini.ReadBoolean("Settings", "bHookCursorTable", 0);
 	bHookAnimatedPortraits = ini.ReadBoolean("Settings", "bHookAnimatedPortraits", 0);
 	bRandomStageConfirmSounds = ini.ReadBoolean("Settings", "bRandomStageConfirmSounds", 0);
+	bEnableSelectAnimations = ini.ReadBoolean("Settings", "bEnableSelectAnimations", 0);
     bChangeStrings= ini.ReadBoolean("Settings", "bChangeStrings", 0);
 	bDumpCharacterInfo = ini.ReadBoolean("Settings", "bDumpCharacterInfo", 0);
 
@@ -167,6 +168,7 @@ void eHooks::CursorTabMan::ReadFile(const char * file)
 				ent.snd_select = snd_value;
 				ent.snd_groupp2 = snd_group_p2;
 				ent.snd_selectp2 = snd_value_p2;
+			
 
 				cursorTable[lastEntry] = ent;
 				lastEntry++;
@@ -255,20 +257,67 @@ void eHooks::CursorTabMan::ProcessSelectScreen()
 	if (iFrameCounter_p2 > animTable[frameEntry_p2].max_frames) iFrameCounter_p2 = 0;
 
 
-	*(int*)(*(int*)Mugen_ResourcesPointer + 0x80C) = animTable[frameEntry].group;
-	*(int*)(*(int*)Mugen_ResourcesPointer + 0x810) = iFrameCounter_p1;
-
-	*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 4) = animTable[frameEntry_p2].group_p2;
-	*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 8) = iFrameCounter_p2;
-
-	if (GetTickCount() - iTickCounter_p1 <= frameTime_p1) return;
-	iFrameCounter_p1++;
-	iTickCounter_p1 = GetTickCount();
+	if (!bEnableSelectAnimations)
+	{
+		*(int*)(*(int*)Mugen_ResourcesPointer + 0x80C) = animTable[frameEntry].group;
+		*(int*)(*(int*)Mugen_ResourcesPointer + 0x810) = iFrameCounter_p1;
+		if (GetTickCount() - iTickCounter_p1 <= frameTime_p1) return;
+		iFrameCounter_p1++;
+		iTickCounter_p1 = GetTickCount();
 
 
-	if (GetTickCount() - iTickCounter_p2 <= frameTime_p2) return;
-	iFrameCounter_p2++;
-	iTickCounter_p2 = GetTickCount();
+		*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 4) = animTable[frameEntry_p2].group_p2;
+		*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 8) = iFrameCounter_p2;
+		if (GetTickCount() - iTickCounter_p2 <= frameTime_p2) return;
+		iFrameCounter_p2++;
+		iTickCounter_p2 = GetTickCount();
+
+	}
+	else
+	{
+
+		if (!PlayeroneSelected)
+		{
+			*(int*)(*(int*)Mugen_ResourcesPointer + 0x80C) = animTable[frameEntry].group;
+			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810) = iFrameCounter_p1;
+			if (GetTickCount() - iTickCounter_p1 <= frameTime_p1) return;
+			iFrameCounter_p1++;
+			iTickCounter_p1 = GetTickCount();
+			iWinFrameCounter_p1 = 0;
+		}
+		else
+		{
+			if (iWinFrameCounter_p1 > animTable[frameEntry].win_max_frames) iWinFrameCounter_p1 = animTable[frameEntry].win_max_frames;
+			*(int*)(*(int*)Mugen_ResourcesPointer + 0x80C) = animTable[frameEntry].win_group;
+			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810) = iWinFrameCounter_p1;
+			if (GetTickCount() - iTickCounter_p1 <= animTable[frameEntry].win_frametime) return;
+			iWinFrameCounter_p1++;
+			iTickCounter_p1 = GetTickCount();
+		}
+
+		if (!PlayertwoSelected)
+		{
+			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 4) = animTable[frameEntry_p2].group_p2;
+			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 8) = iFrameCounter_p2;
+			if (GetTickCount() - iTickCounter_p2 <= frameTime_p2) return;
+			iFrameCounter_p2++;
+			iTickCounter_p2 = GetTickCount();
+			iWinFrameCounter_p2 = 0;
+		}
+		else
+		{
+			if (iWinFrameCounter_p2 > animTable[frameEntry_p2].win_max_frames) iWinFrameCounter_p2 = animTable[frameEntry_p2].win_max_frames;
+			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 4) = animTable[frameEntry_p2].win_group_p2;
+			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 8) = iWinFrameCounter_p2;
+			if (GetTickCount() - iTickCounter_p2 <= animTable[frameEntry_p2].win_frametime) return;
+			iWinFrameCounter_p2++;
+			iTickCounter_p2 = GetTickCount();
+		}
+		
+	}
+
+
+
 
 
 }
@@ -315,7 +364,11 @@ void eHooks::CursorTabMan::AnimatedPortaits::ReadFile(const char * file)
 				int column_id = 0;
 				int maxframes = 0;
 				int frametime = 0;
-				sscanf(line, "%d %d %d %d %d %d", &row_id, &column_id, &group_id, &group_id2, &maxframes, &frametime);
+				int win_grp = 0;
+				int win_grp_p2 = 0;
+				int win_max = 0;
+				int win_frametime = 0;
+				sscanf(line, "%d %d %d %d %d %d %d %d %d %d", &row_id, &column_id, &group_id, &group_id2, &maxframes, &frametime, &win_grp, &win_grp_p2, &win_max, &win_frametime);
 
 				// create thing
 				ePortraitEntry ent;
@@ -325,6 +378,10 @@ void eHooks::CursorTabMan::AnimatedPortaits::ReadFile(const char * file)
 				ent.group_p2 = group_id2;
 				ent.frametime = frametime;
 				ent.max_frames = maxframes;
+				ent.win_group = win_grp;
+				ent.win_group_p2 = win_grp_p2;
+				ent.win_max_frames = win_max;
+				ent.win_frametime = win_frametime;
 
 				animTable[lastAnim] = ent;
 				lastAnim++;
