@@ -248,78 +248,78 @@ void eHooks::CursorTabMan::ProcessSelectScreen()
 
 	// animated ports
 
-	int frameEntry = CursorTabMan::AnimatedPortaits::FindFrame(player1_row, player1_column);
-	int frameTime_p1 = animTable[frameEntry].frametime;
-	int frameEntry_p2 = CursorTabMan::AnimatedPortaits::FindFrame(player2_row, player2_column);
-	int frameTime_p2 = animTable[frameEntry_p2].frametime;
-
-	if (iFrameCounter_p1 > animTable[frameEntry].max_frames) iFrameCounter_p1 = 0;
-	if (iFrameCounter_p2 > animTable[frameEntry_p2].max_frames) iFrameCounter_p2 = 0;
-
-
-	if (!bEnableSelectAnimations)
-	{
-		*(int*)(*(int*)Mugen_ResourcesPointer + 0x80C) = animTable[frameEntry].group;
-		*(int*)(*(int*)Mugen_ResourcesPointer + 0x810) = iFrameCounter_p1;
-		if (GetTickCount() - iTickCounter_p1 <= frameTime_p1) return;
-		iFrameCounter_p1++;
-		iTickCounter_p1 = GetTickCount();
-
-
-		*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 4) = animTable[frameEntry_p2].group_p2;
-		*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 8) = iFrameCounter_p2;
-		if (GetTickCount() - iTickCounter_p2 <= frameTime_p2) return;
-		iFrameCounter_p2++;
-		iTickCounter_p2 = GetTickCount();
-
-	}
-	else
+	if (bHookAnimatedPortraits)
 	{
 
-		if (!PlayeroneSelected)
+		int frameEntry = CursorTabMan::AnimatedPortaits::FindFrame(player1_row, player1_column);
+		int frameTime_p1 = animTable[frameEntry].frametime;
+		int frameEntry_p2 = CursorTabMan::AnimatedPortaits::FindFrame(player2_row, player2_column);
+		int frameTime_p2 = animTable[frameEntry_p2].frametime;
+
+		if (iFrameCounter_p1 > animTable[frameEntry].max_frames) iFrameCounter_p1 = 0;
+		if (iFrameCounter_p2 > animTable[frameEntry_p2].max_frames) iFrameCounter_p2 = 0;
+
+
+		if (!bEnableSelectAnimations)
 		{
 			*(int*)(*(int*)Mugen_ResourcesPointer + 0x80C) = animTable[frameEntry].group;
 			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810) = iFrameCounter_p1;
 			if (GetTickCount() - iTickCounter_p1 <= frameTime_p1) return;
 			iFrameCounter_p1++;
 			iTickCounter_p1 = GetTickCount();
-			iWinFrameCounter_p1 = 0;
-		}
-		else
-		{
-			if (iWinFrameCounter_p1 > animTable[frameEntry].win_max_frames) iWinFrameCounter_p1 = animTable[frameEntry].win_max_frames;
-			*(int*)(*(int*)Mugen_ResourcesPointer + 0x80C) = animTable[frameEntry].win_group;
-			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810) = iWinFrameCounter_p1;
-			if (GetTickCount() - iTickCounter_p1 <= animTable[frameEntry].win_frametime) return;
-			iWinFrameCounter_p1++;
-			iTickCounter_p1 = GetTickCount();
-		}
 
-		if (!PlayertwoSelected)
-		{
+
 			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 4) = animTable[frameEntry_p2].group_p2;
 			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 8) = iFrameCounter_p2;
 			if (GetTickCount() - iTickCounter_p2 <= frameTime_p2) return;
 			iFrameCounter_p2++;
 			iTickCounter_p2 = GetTickCount();
-			iWinFrameCounter_p2 = 0;
+
 		}
 		else
 		{
-			if (iWinFrameCounter_p2 > animTable[frameEntry_p2].win_max_frames) iWinFrameCounter_p2 = animTable[frameEntry_p2].win_max_frames;
-			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 4) = animTable[frameEntry_p2].win_group_p2;
-			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 8) = iWinFrameCounter_p2;
-			if (GetTickCount() - iTickCounter_p2 <= animTable[frameEntry_p2].win_frametime) return;
-			iWinFrameCounter_p2++;
-			iTickCounter_p2 = GetTickCount();
+
+			if (!PlayeroneSelected)
+			{
+				*(int*)(*(int*)Mugen_ResourcesPointer + 0x80C) = animTable[frameEntry].group;
+				*(int*)(*(int*)Mugen_ResourcesPointer + 0x810) = iFrameCounter_p1;
+				if (GetTickCount() - iTickCounter_p1 <= frameTime_p1) return;
+				iFrameCounter_p1++;
+				iTickCounter_p1 = GetTickCount();
+				iWinFrameCounter_p1 = 0;
+			}
+			else
+			{
+				if (iWinFrameCounter_p1 > animTable[frameEntry].win_max_frames) iWinFrameCounter_p1 = animTable[frameEntry].win_max_frames;
+				*(int*)(*(int*)Mugen_ResourcesPointer + 0x80C) = animTable[frameEntry].win_group;
+				*(int*)(*(int*)Mugen_ResourcesPointer + 0x810) = iWinFrameCounter_p1;
+				if (GetTickCount() - iTickCounter_p1 <= animTable[frameEntry].win_frametime) return;
+				iWinFrameCounter_p1++;
+				iTickCounter_p1 = GetTickCount();
+			}
+
+			if (!PlayertwoSelected)
+			{
+				*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 4) = animTable[frameEntry_p2].group_p2;
+				*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 8) = iFrameCounter_p2;
+				if (GetTickCount() - iTickCounter_p2 <= frameTime_p2) return;
+				iFrameCounter_p2++;
+				iTickCounter_p2 = GetTickCount();
+				iWinFrameCounter_p2 = 0;
+			}
+			else
+			{
+				if (iWinFrameCounter_p2 > animTable[frameEntry_p2].win_max_frames) iWinFrameCounter_p2 = animTable[frameEntry_p2].win_max_frames;
+				*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 4) = animTable[frameEntry_p2].win_group_p2;
+				*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 8) = iWinFrameCounter_p2;
+				if (GetTickCount() - iTickCounter_p2 <= animTable[frameEntry_p2].win_frametime) return;
+				iWinFrameCounter_p2++;
+				iTickCounter_p2 = GetTickCount();
+			}
+
 		}
-		
+
 	}
-
-
-
-
-
 }
 
 int eHooks::CursorTabMan::FindSound(int row, int col)
