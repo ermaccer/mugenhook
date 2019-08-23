@@ -31,6 +31,7 @@ struct ePortraitEntry {
 	int       win_group_p2;
 	int       win_max_frames;
 	int       win_frametime;
+	int       flags;
 };
 
 struct eSprite {
@@ -103,6 +104,8 @@ namespace eHooks {
 	static bool bRandomStageConfirmSounds;
 	static int  iSelectableFighters;
 	static bool bDumpCharacterInfo;
+	static bool bDevMode;
+	static bool bDev_DisplayPos;
 
 	static int lastEntry = 0;
 	static int lastAnim = 0;
@@ -124,8 +127,10 @@ namespace eHooks {
 			void ReadFile(const char* file);
 			void ReadFrameFile(const char* file);
 			int LoadSprites(int a1, int a2);
+			int HookDisplaySprites(int a1, int a2, int a3, int a4, int a5, float a6, float a7);
 			int FindFrame(int row, int col);
 			void HookLoadSprites();
+			void Process();
 		}
 	}
 }

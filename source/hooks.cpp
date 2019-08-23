@@ -14,11 +14,22 @@ void eHooks::Init()
 	bEnableSelectAnimations = ini.ReadBoolean("Settings", "bEnableSelectAnimations", 0);
     bChangeStrings= ini.ReadBoolean("Settings", "bChangeStrings", 0);
 	bDumpCharacterInfo = ini.ReadBoolean("Settings", "bDumpCharacterInfo", 0);
+	bDevMode = ini.ReadBoolean("Settings", "bDevMode", 0);
+	bDev_DisplayPos = ini.ReadBoolean("Settings", "bDev_DisplayPos", 0);
 
 	iSelectableFighters = ini.ReadInteger("Settings", "iSelectableFighters", 0);
 
 	stage_group = ini.ReadInteger("Settings", "iRandomStageGroup", 0);
 	stage_max = ini.ReadInteger("Settings", "iRandomStageRandomMax", 0);
+
+
+	if (bDevMode)
+	{
+		AllocConsole();
+		freopen("CONIN$", "r", stdin);
+		freopen("CONOUT$", "w", stdout);
+		freopen("CONOUT$", "w", stderr);
+	}
 
 	if (bChangeStrings)
 	{
@@ -40,6 +51,7 @@ void eHooks::Init()
 
 	if (iSelectableFighters)
 	Patch<int>(0x4063F0, iSelectableFighters);
+
 	CursorTabMan::Init();
 
 	if (bHookCursorTable)
@@ -53,6 +65,7 @@ void eHooks::Init()
 			CursorTabMan::AnimatedPortaits::ReadFrameFile("cfg\\frameLoader.dat");
 			Patch<char>(0x404CE2, 0xE9);
 			Patch<int>(0x404CE2 + 1, (int)CursorTabMan::AnimatedPortaits::HookLoadSprites - ((int)0x404CE2 + 5));
+			Patch<int>(0x406FF3 + 1, (int)CursorTabMan::AnimatedPortaits::HookDisplaySprites - ((int)0x406FF3 + 5));
 		}
 
 	}
@@ -63,9 +76,9 @@ void eHooks::Init()
 	if (bGameModeSimulHide)  Patch<char>(0x40ADE4, 4);
 	if (bGameModeSingleHide) Patch<char>(0x40ADC2, 4);
 	if (bGameModeTurnsHide)  Patch<char>(0x40AE3C, 4);
+
 	
 }
-
 void __declspec(naked) eHooks::HookCursorSounds()
 {
 	_asm
@@ -80,7 +93,6 @@ void __declspec(naked) eHooks::HookCursorSounds()
 		jmp cursor_jmp
 	}
 }
-
 void eHooks::PrintCharacterNames()
 {
 	MugenCharacter* CharactersArray = *(MugenCharacter**)0x503394;
@@ -98,9 +110,6 @@ void eHooks::PrintCharacterNames()
 
 
 }
-
-
-
 void eHooks::CursorTabMan::Init()
 {	
 	int memSize;
@@ -130,7 +139,6 @@ void eHooks::CursorTabMan::Init()
 	printf("Animated Portraits: Allocated %d bytes\n", memSize * sizeof(ePortraitEntry));
 	printf("FrameLoader: Allocated %d bytes\n", MAX_FRAMES * sizeof(eSprite));
 }
-
 void eHooks::CursorTabMan::ReadFile(const char * file)
 {
 	FILE* pFile = fopen(file, "rb");
@@ -180,19 +188,22 @@ void eHooks::CursorTabMan::ReadFile(const char * file)
 	}
 
 }
-
 void eHooks::CursorTabMan::ProcessSelectScreen()
 {
-
 
 	FoundEntry = CursorTabMan::FindSound(*(int*)(cursor_eax + 14864 + 16), *(int*)(cursor_eax + 14864));
 	FoundEntryp2 = CursorTabMan::FindSound(*(int*)(cursor_eax + 14864 + 0xC0 + 16), *(int*)(cursor_eax + 14864 + 0xC0));
 
 
+	// gets set to 1 if finished all selection
 	int PlayeroneSelected = (*(int*)(cursor_eax + 14592));
-	int PlayeroneSelectedTurns = (*(int*)(cursor_eax + 14592 + 36));
 	int PlayertwoSelected = (*(int*)(cursor_eax + 14592 + 4));
+
+	// how many times someone selected
+	int PlayeroneSelectedTurns = (*(int*)(cursor_eax + 14592 + 36));
 	int PlayertwoSelectedTurns = (*(int*)(cursor_eax + 14592 + 36 + 116));
+
+	// was selection made in training
 	int PlayerTraining = (*(int*)(cursor_eax + 14864 + 24));
 
 
@@ -222,7 +233,8 @@ void eHooks::CursorTabMan::ProcessSelectScreen()
 		*(int*)(*(int*)Mugen_ResourcesPointer + 0x344) = cursorTable[FoundEntryp2].snd_groupp2;
 		*(int*)(*(int*)Mugen_ResourcesPointer + 0x34C) = cursorTable[FoundEntryp2].snd_selectp2;
 	}
-	else {
+	else 
+	{
 		*(int*)(*(int*)Mugen_ResourcesPointer + 0x344) = select_default_grp2;
 		*(int*)(*(int*)Mugen_ResourcesPointer + 0x34C) = select_default_sound2;
 	}
@@ -232,11 +244,11 @@ void eHooks::CursorTabMan::ProcessSelectScreen()
 			*(int*)(*(int*)Mugen_ResourcesPointer + 0x340) = cursorTable[FoundEntry].snd_group;
 			*(int*)(*(int*)Mugen_ResourcesPointer + 0x348) = cursorTable[FoundEntry].snd_select;
 	}
-	else {
+	else 
+	{
 		*(int*)(*(int*)Mugen_ResourcesPointer + 0x340) = select_default_grp;
 		*(int*)(*(int*)Mugen_ResourcesPointer + 0x348) = select_default_sound;
 	}
-
 
 
 	// we're at select screen anyway
@@ -246,82 +258,17 @@ void eHooks::CursorTabMan::ProcessSelectScreen()
 		*(int*)(*(int*)Mugen_ResourcesPointer + 0x36C + 4) = rand() % stage_max;
 	}
 
-	// animated ports
-
-	if (bHookAnimatedPortraits)
+	if (bDevMode)
 	{
-
-		int frameEntry = CursorTabMan::AnimatedPortaits::FindFrame(player1_row, player1_column);
-		int frameTime_p1 = animTable[frameEntry].frametime;
-		int frameEntry_p2 = CursorTabMan::AnimatedPortaits::FindFrame(player2_row, player2_column);
-		int frameTime_p2 = animTable[frameEntry_p2].frametime;
-
-		if (iFrameCounter_p1 > animTable[frameEntry].max_frames) iFrameCounter_p1 = 0;
-		if (iFrameCounter_p2 > animTable[frameEntry_p2].max_frames) iFrameCounter_p2 = 0;
-
-
-		if (!bEnableSelectAnimations)
+		if (bDev_DisplayPos)
 		{
-			*(int*)(*(int*)Mugen_ResourcesPointer + 0x80C) = animTable[frameEntry].group;
-			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810) = iFrameCounter_p1;
-			if (GetTickCount() - iTickCounter_p1 <= frameTime_p1) return;
-			iFrameCounter_p1++;
-			iTickCounter_p1 = GetTickCount();
-
-
-			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 4) = animTable[frameEntry_p2].group_p2;
-			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 8) = iFrameCounter_p2;
-			if (GetTickCount() - iTickCounter_p2 <= frameTime_p2) return;
-			iFrameCounter_p2++;
-			iTickCounter_p2 = GetTickCount();
-
-		}
-		else
-		{
-
-			if (!PlayeroneSelected)
-			{
-				*(int*)(*(int*)Mugen_ResourcesPointer + 0x80C) = animTable[frameEntry].group;
-				*(int*)(*(int*)Mugen_ResourcesPointer + 0x810) = iFrameCounter_p1;
-				if (GetTickCount() - iTickCounter_p1 <= frameTime_p1) return;
-				iFrameCounter_p1++;
-				iTickCounter_p1 = GetTickCount();
-				iWinFrameCounter_p1 = 0;
-			}
-			else
-			{
-				if (iWinFrameCounter_p1 > animTable[frameEntry].win_max_frames) iWinFrameCounter_p1 = animTable[frameEntry].win_max_frames;
-				*(int*)(*(int*)Mugen_ResourcesPointer + 0x80C) = animTable[frameEntry].win_group;
-				*(int*)(*(int*)Mugen_ResourcesPointer + 0x810) = iWinFrameCounter_p1;
-				if (GetTickCount() - iTickCounter_p1 <= animTable[frameEntry].win_frametime) return;
-				iWinFrameCounter_p1++;
-				iTickCounter_p1 = GetTickCount();
-			}
-
-			if (!PlayertwoSelected)
-			{
-				*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 4) = animTable[frameEntry_p2].group_p2;
-				*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 8) = iFrameCounter_p2;
-				if (GetTickCount() - iTickCounter_p2 <= frameTime_p2) return;
-				iFrameCounter_p2++;
-				iTickCounter_p2 = GetTickCount();
-				iWinFrameCounter_p2 = 0;
-			}
-			else
-			{
-				if (iWinFrameCounter_p2 > animTable[frameEntry_p2].win_max_frames) iWinFrameCounter_p2 = animTable[frameEntry_p2].win_max_frames;
-				*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 4) = animTable[frameEntry_p2].win_group_p2;
-				*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 8) = iWinFrameCounter_p2;
-				if (GetTickCount() - iTickCounter_p2 <= animTable[frameEntry_p2].win_frametime) return;
-				iWinFrameCounter_p2++;
-				iTickCounter_p2 = GetTickCount();
-			}
-
+			printf("Player 1: Row: %d   Column: %d     \r", player1_row, player1_column);
 		}
 
 	}
-}
 
+
+}
 int eHooks::CursorTabMan::FindSound(int row, int col)
 {
 	int iFind = 0;
@@ -337,7 +284,6 @@ int eHooks::CursorTabMan::FindSound(int row, int col)
 	}
 	return iFind;
 }
-
 void eHooks::CursorTabMan::AnimatedPortaits::ReadFile(const char * file)
 {
 	FILE* pFile = fopen(file, "rb");
@@ -368,7 +314,8 @@ void eHooks::CursorTabMan::AnimatedPortaits::ReadFile(const char * file)
 				int win_grp_p2 = 0;
 				int win_max = 0;
 				int win_frametime = 0;
-				sscanf(line, "%d %d %d %d %d %d %d %d %d %d", &row_id, &column_id, &group_id, &group_id2, &maxframes, &frametime, &win_grp, &win_grp_p2, &win_max, &win_frametime);
+				int flags = 0;
+				sscanf(line, "%d %d %d %d %d %d %d %d %d %d %d", &row_id, &column_id, &group_id, &group_id2, &maxframes, &frametime, &win_grp, &win_grp_p2, &win_max, &win_frametime, &flags);
 
 				// create thing
 				ePortraitEntry ent;
@@ -382,6 +329,7 @@ void eHooks::CursorTabMan::AnimatedPortaits::ReadFile(const char * file)
 				ent.win_group_p2 = win_grp_p2;
 				ent.win_max_frames = win_max;
 				ent.win_frametime = win_frametime;
+				ent.flags = flags;
 
 				animTable[lastAnim] = ent;
 				lastAnim++;
@@ -392,7 +340,6 @@ void eHooks::CursorTabMan::AnimatedPortaits::ReadFile(const char * file)
 		fclose(pFile);
 	}
 }
-
 void eHooks::CursorTabMan::AnimatedPortaits::ReadFrameFile(const char * file)
 {
 	FILE* pFile = fopen(file, "rb");
@@ -431,12 +378,16 @@ void eHooks::CursorTabMan::AnimatedPortaits::ReadFrameFile(const char * file)
 		fclose(pFile);
 	}
 }
-
 int eHooks::CursorTabMan::AnimatedPortaits::LoadSprites(int a1, int a2)
 {
 	return ((int(__cdecl*)(int, int))0x467B30)(a1, a2);
 }
+int eHooks::CursorTabMan::AnimatedPortaits::HookDisplaySprites(int a1, int a2, int a3, int a4, int a5, float a6, float a7)
+{
 
+	Process();
+	return  ((int(__cdecl*)(int, int, int, int, int, float, float))0x411C00)(a1, a2, a3, a4, a5, a6, a7);
+}
 int eHooks::CursorTabMan::AnimatedPortaits::FindFrame(int row, int col)
 {
 	int iFind = 0;
@@ -452,13 +403,11 @@ int eHooks::CursorTabMan::AnimatedPortaits::FindFrame(int row, int col)
 	}
 	return iFind;
 }
-
 void __declspec(naked) eHooks::CursorTabMan::AnimatedPortaits::HookLoadSprites()
 {
 
 	frameTablePtr = (int)frameTable.get();
 	_asm {
-		//lea ecx, eHooks::frameTable
 		push frameTablePtr
 		call 	eHooks::CursorTabMan::AnimatedPortaits::LoadSprites
 		pushad
@@ -466,6 +415,102 @@ void __declspec(naked) eHooks::CursorTabMan::AnimatedPortaits::HookLoadSprites()
 	_asm {
 		popad
 		jmp sprite_jmp
+	}
+
+}
+void eHooks::CursorTabMan::AnimatedPortaits::Process()
+{
+
+	// gets set to 1 if finished all selection
+	int PlayeroneSelected = (*(int*)(cursor_eax + 14592));
+	int PlayertwoSelected = (*(int*)(cursor_eax + 14592 + 4));
+
+	// how many times someone selected
+	int PlayeroneSelectedTurns = (*(int*)(cursor_eax + 14592 + 36));
+	int PlayertwoSelectedTurns = (*(int*)(cursor_eax + 14592 + 36 + 116));
+
+	// was selection made in training
+	int PlayerTraining = (*(int*)(cursor_eax + 14864 + 24));
+
+
+
+	int player1_row = (*(int*)(cursor_eax + 14864 + 4));
+	int player1_column = (*(int*)(cursor_eax + 14864));
+
+	int player2_row = (*(int*)(cursor_eax + 14864 + 0xC0 + 4));
+	int player2_column = (*(int*)(cursor_eax + 14864 + 0xC0));
+
+
+	int frameEntry = CursorTabMan::AnimatedPortaits::FindFrame(player1_row, player1_column);
+	int frameEntry_p2 = CursorTabMan::AnimatedPortaits::FindFrame(player2_row, player2_column);
+
+	int frameTime_p1 = animTable[frameEntry].frametime;
+	int frameTime_p2 = animTable[frameEntry_p2].frametime;
+
+
+
+	if (iFrameCounter_p2 > animTable[frameEntry_p2].max_frames) iFrameCounter_p2 = 0;
+
+
+	if (!bEnableSelectAnimations)
+	{
+		*(int*)(*(int*)Mugen_ResourcesPointer + 0x80C) = animTable[frameEntry].group;
+		*(int*)(*(int*)Mugen_ResourcesPointer + 0x810) = iFrameCounter_p1;
+		if (iFrameCounter_p1 > animTable[frameEntry].max_frames) iFrameCounter_p1 = 0;
+		if (GetTickCount() - iTickCounter_p1 <= frameTime_p1) return;
+		iFrameCounter_p1++;
+		iTickCounter_p1 = GetTickCount();
+
+
+		*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 4) = animTable[frameEntry_p2].group_p2;
+		*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 8) = iFrameCounter_p2;
+		if (GetTickCount() - iTickCounter_p2 <= frameTime_p2) return;
+		iFrameCounter_p2++;
+		iTickCounter_p2 = GetTickCount();
+	}
+	else
+	{
+
+		if (!PlayeroneSelected)
+		{
+			*(int*)(*(int*)Mugen_ResourcesPointer + 0x80C) = animTable[frameEntry].group;
+			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810) = iFrameCounter_p1;
+			if (GetTickCount() - iTickCounter_p1 <= frameTime_p1) return;
+			iFrameCounter_p1++;
+			iTickCounter_p1 = GetTickCount();
+			iWinFrameCounter_p1 = 0;
+		}
+		else
+		{
+			frameEntry = CursorTabMan::AnimatedPortaits::FindFrame(player1_row, player1_column);
+			if (iWinFrameCounter_p1 > animTable[frameEntry].win_max_frames) iWinFrameCounter_p1 = animTable[frameEntry].win_max_frames;
+			*(int*)(*(int*)Mugen_ResourcesPointer + 0x80C) = animTable[frameEntry].win_group;
+			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810) = iWinFrameCounter_p1;
+			if (GetTickCount() - iTickCounter_p1 <= animTable[frameEntry].win_frametime) return;
+			iWinFrameCounter_p1++;
+			iTickCounter_p1 = GetTickCount();
+		}
+
+		if (!PlayertwoSelected)
+		{
+			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 4) = animTable[frameEntry_p2].group_p2;
+			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 8) = iFrameCounter_p2;
+			if (GetTickCount() - iTickCounter_p2 <= frameTime_p2) return;
+			iFrameCounter_p2++;
+			iTickCounter_p2 = GetTickCount();
+			iWinFrameCounter_p2 = 0;
+		}
+		else
+		{
+			frameEntry_p2 = CursorTabMan::AnimatedPortaits::FindFrame(player2_row, player2_column);
+			if (iWinFrameCounter_p2 > animTable[frameEntry_p2].win_max_frames) iWinFrameCounter_p2 = animTable[frameEntry_p2].win_max_frames;
+			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 4) = animTable[frameEntry_p2].win_group_p2;
+			*(int*)(*(int*)Mugen_ResourcesPointer + 0x810 + 0xD0 + 8) = iWinFrameCounter_p2;
+			if (GetTickCount() - iTickCounter_p2 <= animTable[frameEntry_p2].win_frametime) return;
+			iWinFrameCounter_p2++;
+			iTickCounter_p2 = GetTickCount();
+		}
+
 	}
 
 }
