@@ -3,7 +3,7 @@ Add features to M.U.G.E.N engine.
 
 # Features
  - Customizable cursor select sounds based on character, in style of Mortal Kombat games
- - Animated portraits on screen with customizable frametime and frames per cell and animations upon selection
+ - Animated portraits on screen with AIR playback and animations upon selection
  - Change amounts of players in watch mode (AI only!)
  - Randomize stage selection confirm sound
  - Hide or show gamemodes
