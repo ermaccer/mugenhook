@@ -1,13 +1,13 @@
 // mugenhook
 // ermaccer
+#include "code\eMugenHook.h"
 
-#include "hooks.h"
 
 extern "C"
 {
 	__declspec(dllexport) void InitializeASI()
 	{
-		eHooks::Init();
+		Init();
 	}
 }
 
