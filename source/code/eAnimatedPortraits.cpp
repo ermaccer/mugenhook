@@ -231,7 +231,7 @@ void eAnimatedPortraits::ProcessSelectScreenP2()
 		if (bOnp1)
 		{
 			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 4) = alt_anim.vAnimData[iFrameCounter_p2].Group;
-			*(int*)(*(int*)eMugenManager::GetResourcesPthoughointer() + 0x810 + 0xD0 + 8) = alt_anim.vAnimData[iFrameCounter_p2].Index;
+			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 8) = alt_anim.vAnimData[iFrameCounter_p2].Index;
 		}
 		else {
 			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 4) = animation.vAnimData[iFrameCounter_p2].Group;
