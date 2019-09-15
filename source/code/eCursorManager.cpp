@@ -117,10 +117,11 @@ void eCursorManager::ProcessSelectScreen()
 	int Player1_Character = (Player1_Column + (Player1_Row * eMugenManager::GetRows()) + Player1_Row);
 	int Player2_Character = (Player2_Column + (Player2_Row * eMugenManager::GetRows()) + Player2_Row);
 
+	//printf("Character P1 %d ROW %d COL %d\n", Player1_Character, eCursorManager::GetPlayerRow(1),eCursorManager::GetPlayerColumn(1));
 
 	eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
 
-	if (Player2_Turns == 0 && (CharactersArray[Player2_Character].ID >= 0)) {
+	if (Player2_Turns == 0 && (CharactersArray[Player2_Character].ID >= -1)) {
 		*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x344) = CellTable[Player2_Cell].SoundGroupP2ID;
 		*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x34C) = CellTable[Player2_Cell].SoundIndexP2ID;
 	}
@@ -130,7 +131,7 @@ void eCursorManager::ProcessSelectScreen()
 	}
 
 
-	if (Player_Training == 1 && (CharactersArray[Player1_Character].ID >= 0)) {
+	if (Player_Training == 1 && (CharactersArray[Player1_Character].ID >= -1)) {
 		*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x340) = CellTable[Player1_Cell].SoundGroupID;
 		*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x348) = CellTable[Player1_Cell].SoundIndexID;
 	}

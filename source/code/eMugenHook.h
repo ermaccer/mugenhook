@@ -6,6 +6,7 @@
 #include "eAnimatedPortraits.h"
 #include "eCursorManager.h"
 #include "eMugen.h"
+#include "eSelectScreenManager.h"
 
 using namespace Memory::VP;
 
