@@ -8,6 +8,7 @@ Add features to M.U.G.E.N engine.
  - Randomize stage selection confirm sound
  - Hide or show gamemodes
  - Dump character info
+ - Hide numeration in stage select
  - Change hardcoded string values
  
 # Installation
@@ -18,11 +19,8 @@ Rename dinput8.dll to ddraw.dll and place the asi in the main mugen folder.
 
 Check out .ini to configure.
 
-# Extra Info
-Animated portraits are not finished, there's one bug involving the timer where P1 frametime might 
-interfere with P2 frametime slighty, be noticed.
 
-# Build
+# Build & Download
 
 Check for binaries in releases.
 
