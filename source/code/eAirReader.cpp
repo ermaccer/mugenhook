@@ -104,7 +104,7 @@ eAirEntry GlobalGetAnimation(int id)
 	return eAirEntry();
 }
 
-eAirReader GlobalGetAirEntryFromName(std::string name)
+eAirReader GetAIRFromName(std::string name)
 {
 	eAirReader temp;
 	for (int i = 0; i < eAirManager.size(); i++)

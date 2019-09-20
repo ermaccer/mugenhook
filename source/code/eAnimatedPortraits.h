@@ -26,8 +26,9 @@ namespace eAnimatedPortraits {
 	void ProcessSelectScreenP2();
 	void EnableDebug();
 	void EnableSelectAnimations();
+	void EnableAltAnims();
 	int  FindPortraitEntry(int row, int col);
-	std::string FindPortraitEntryName(int row, int col);
+	std::string GetCellFName(int row, int col);
 	int  GetFrameTablePointer();
 
 	// hooks

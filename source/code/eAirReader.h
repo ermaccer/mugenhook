@@ -33,5 +33,5 @@ public:
 
 extern std::vector<eAirReader> eAirManager;
 eAirEntry GlobalGetAnimation(int id);
-eAirReader GlobalGetAirEntryFromName(std::string name);
+eAirReader GetAIRFromName(std::string name);
 int GlobalGetAnimCount();

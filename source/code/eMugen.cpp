@@ -99,14 +99,31 @@ void PushDebugMessage(const char* message)
 	((void(__cdecl*)(const char*))0x40C4A0)(message);
 }
 
+void PlaySound(int a1, int a2, int a3, int a4, double a5)
+{
+	((void(__cdecl*)(int,int,int,int,double))0x444AA0)(a2,a2,a3,a4,a5);
+}
+
+int GetButtonID(int ptr)
+{
+
+	return ((int(__thiscall*)(int))0x478900)(ptr);
+}
+
 int HookDrawScreenMessage(const char * message, int a2, int a3, int a4, int a5, char r, char g, char b)
 {
-	std::string strMsg = message;
-	strMsg += " | MugenHook by ermaccer";
-	return DrawScreenMessage(strMsg.c_str(),a2,a3,a4,a5,r,g,b);
+	char temp[256];
+	sprintf(temp, "%s | MugenHook by ermaccer", message);
+	return DrawScreenMessage(temp,a2,a3,a4,a5,r,g,b);
 }
 
 void HookPushDebugMessage(const char * message)
 {
 	printf(message);
+}
+
+void HookSoundPlayback(int a1, int a2, int a3, int a4, double a5)
+{
+	printf("A1: %d A2: %d A3: %d A4: 0x%X A5: %f\n",a1,a2,a3,a4,a5);
+	//PlaySound(a1, a2, a3, a4, a5);
 }

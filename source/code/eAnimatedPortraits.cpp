@@ -2,6 +2,7 @@
 #include "eMugen.h"
 #include "eCursorManager.h"
 #include "eAirReader.h"
+#include "eMagicBoxes.h"
 #include <iostream>
 #include <vector>
 #include "..\stdafx.h"
@@ -16,6 +17,7 @@ int pFrameTablePointer;
 int iLoadSpritesJump = 0x404CEF;
 bool bEnableDebug;
 bool bEnableSelectAnims;
+bool bEnableAltAnims;
 
 void eAnimatedPortraits::Init()
 {
@@ -124,7 +126,7 @@ int eAnimatedPortraits::FindPortraitEntry(int row, int col)
 	return iFind;
 }
 
-std::string eAnimatedPortraits::FindPortraitEntryName(int row, int col)
+std::string eAnimatedPortraits::GetCellFName(int row, int col)
 {
 	std::string strFind;
 	for (int i = 0; i < AnimationTable.size(); i++)
@@ -156,48 +158,72 @@ int eAnimatedPortraits::GetFrameTablePointer()
 
 void eAnimatedPortraits::ProcessSelectScreen()
 {
-	eAirReader reader;
-	eAirEntry animation, alt_anim;
-	// get air struct
-	reader = GlobalGetAirEntryFromName(FindPortraitEntryName(eCursorManager::GetPlayerRow(1), eCursorManager::GetPlayerColumn(1)));
-	int AnimEntry_p1 = FindPortraitEntry(eCursorManager::GetPlayerRow(1), eCursorManager::GetPlayerColumn(1));
-	
-	// find current slot animation
-	animation = reader.GetAnimation(AnimationTable[AnimEntry_p1].SelectAnimationID);
-	alt_anim = reader.GetAnimation(AnimationTable[AnimEntry_p1].SelectAnimationAlternateID);
+	eAirReader AIR_Reader;
+	eAirEntry Animation;
+	int iAnimEntry;
+
 	if (!bEnableSelectAnims)
-	{
-		if (iFrameCounter_p1 >  animation.MaxFrames - 1) iFrameCounter_p1 = 0;
+	{	
+		// get anims
+		AIR_Reader = GetAIRFromName(GetCellFName(eCursorManager::GetPlayerRow(1), eCursorManager::GetPlayerColumn(1)));
+		iAnimEntry = FindPortraitEntry(eCursorManager::GetPlayerRow(1), eCursorManager::GetPlayerColumn(1));
+		Animation = AIR_Reader.GetAnimation(AnimationTable[iAnimEntry].SelectAnimationID);
 
-		*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x80C) = animation.vAnimData[iFrameCounter_p1].Group; // p1.face group
-		*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810) = animation.vAnimData[iFrameCounter_p1].Index; // p1.face index
+		// loop
+		if (iFrameCounter_p1 >  Animation.MaxFrames - 1) iFrameCounter_p1 = 0;
 
-		if (eMugenManager::GetTimer() - iTickCounter_p1 <= animation.vAnimData[iFrameCounter_p1].Frametime) return;
+		// set sprites
+		*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x80C) = Animation.vAnimData[iFrameCounter_p1].Group; // p1.face group
+		*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810) = Animation.vAnimData[iFrameCounter_p1].Index; // p1.face index
+
+		// perform animation
+		if (eMugenManager::GetTimer() - iTickCounter_p1 <= Animation.vAnimData[iFrameCounter_p1].Frametime) return;
 		iFrameCounter_p1++;
+
+		// reset timer
 		iTickCounter_p1 = eMugenManager::GetTimer();
 	}
 	else 
 	{
 		if (!eCursorManager::GetPlayerSelected(1)) {
-			if (iFrameCounter_p1 >  animation.MaxFrames - 1) iFrameCounter_p1 = 0;
+			// get anims
+			AIR_Reader = GetAIRFromName(GetCellFName(eCursorManager::GetPlayerRow(1), eCursorManager::GetPlayerColumn(1)));
+			iAnimEntry = FindPortraitEntry(eCursorManager::GetPlayerRow(1), eCursorManager::GetPlayerColumn(1));
+			Animation = AIR_Reader.GetAnimation(AnimationTable[iAnimEntry].SelectAnimationID);
 
-			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x80C) = animation.vAnimData[iFrameCounter_p1].Group; // p1.face group
-			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810) = animation.vAnimData[iFrameCounter_p1].Index; // p1.face index
+			// loop
+			if (iFrameCounter_p1 >  Animation.MaxFrames - 1) iFrameCounter_p1 = 0;
 
-			if (eMugenManager::GetTimer() - iTickCounter_p1 <= animation.vAnimData[iFrameCounter_p1].Frametime) return;
+			// set sprites
+			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x80C) = Animation.vAnimData[iFrameCounter_p1].Group; // p1.face group
+			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810) = Animation.vAnimData[iFrameCounter_p1].Index; // p1.face index
+
+
+			// perform animation
+			if (eMugenManager::GetTimer() - iTickCounter_p1 <= Animation.vAnimData[iFrameCounter_p1].Frametime) return;
 			iFrameCounter_p1++;
+
+			// reset timer
 			iTickCounter_p1 = eMugenManager::GetTimer();
+			
+			// fix bug where any character select animation would be stuck at last frame
 			iSelectCounter_p1 = 0;
+
 		}
 		else
 		{
-			animation = reader.GetAnimation(AnimationTable[AnimEntry_p1].WinAnimationID);
-			AnimEntry_p1 = FindPortraitEntry(eCursorManager::GetPlayerRow(1), eCursorManager::GetPlayerColumn(1));
-			if (iSelectCounter_p1 >animation.MaxFrames - 1) iSelectCounter_p1 = animation.MaxFrames - 1;
-			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x80C) = animation.vAnimData[iSelectCounter_p1].Group;
-			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810) = animation.vAnimData[iSelectCounter_p1].Index;
+			AIR_Reader = GetAIRFromName(GetCellFName(eCursorManager::GetPlayerRow(1), eCursorManager::GetPlayerColumn(1)));
+			iAnimEntry = FindPortraitEntry(eCursorManager::GetPlayerRow(1), eCursorManager::GetPlayerColumn(1));
+			Animation = AIR_Reader.GetAnimation(AnimationTable[iAnimEntry].WinAnimationID);
 
-			if (eMugenManager::GetTimer() - iTickCounter_p1 <= animation.vAnimData[iSelectCounter_p1].Frametime) return;
+			// freeze animation
+			if (iSelectCounter_p1 >Animation.MaxFrames - 1) iSelectCounter_p1 = Animation.MaxFrames - 1;
+
+			// set sprites
+			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x80C) = Animation.vAnimData[iSelectCounter_p1].Group;
+			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810) = Animation.vAnimData[iSelectCounter_p1].Index;
+
+			if (eMugenManager::GetTimer() - iTickCounter_p1 <= Animation.vAnimData[iSelectCounter_p1].Frametime) return;
 			iSelectCounter_p1++;
 			iTickCounter_p1 = eMugenManager::GetTimer();
 		}
@@ -215,20 +241,23 @@ void eAnimatedPortraits::ProcessSelectScreenP2()
 	eAirEntry animation, alt_anim;
 	bool bOnp1;
 	int  iMaxFrames;
-	reader = GlobalGetAirEntryFromName(FindPortraitEntryName(eCursorManager::GetPlayerRow(2), eCursorManager::GetPlayerColumn(2)));
-	int AnimEntry_p2 = FindPortraitEntry(eCursorManager::GetPlayerRow(2), eCursorManager::GetPlayerColumn(2));
-	animation = reader.GetAnimation(AnimationTable[AnimEntry_p2].SelectAnimationID);
-	alt_anim = reader.GetAnimation(AnimationTable[AnimEntry_p2].SelectAnimationAlternateID);
+	int AnimEntry_p2;
+
 	if (eCursorManager::GetPlayerRow(1) == eCursorManager::GetPlayerRow(2) && eCursorManager::GetPlayerColumn(1) == eCursorManager::GetPlayerColumn(2)) bOnp1 = true;
 
 	if (!bEnableSelectAnims)
 	{
-		if (bOnp1 == true) iMaxFrames = alt_anim.MaxFrames - 1;
+		reader = GetAIRFromName(GetCellFName(eCursorManager::GetPlayerRow(2), eCursorManager::GetPlayerColumn(2)));
+		AnimEntry_p2 = FindPortraitEntry(eCursorManager::GetPlayerRow(2), eCursorManager::GetPlayerColumn(2));
+		animation = reader.GetAnimation(AnimationTable[AnimEntry_p2].SelectAnimationID);
+		alt_anim = reader.GetAnimation(AnimationTable[AnimEntry_p2].SelectAnimationAlternateID);
+
+		if (bOnp1 && bEnableAltAnims) iMaxFrames = alt_anim.MaxFrames - 1;
 		else iMaxFrames = animation.MaxFrames - 1;
 
 		if (iFrameCounter_p2 >  iMaxFrames) iFrameCounter_p2 = 0;
 
-		if (bOnp1)
+		if (bOnp1 && bEnableAltAnims)
 		{
 			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 4) = alt_anim.vAnimData[iFrameCounter_p2].Group;
 			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 8) = alt_anim.vAnimData[iFrameCounter_p2].Index;
@@ -246,12 +275,16 @@ void eAnimatedPortraits::ProcessSelectScreenP2()
 	else {
 		if (!eCursorManager::GetPlayerSelected(2))
 		{
-			if (bOnp1 == true) iMaxFrames = alt_anim.MaxFrames - 1;
+			reader = GetAIRFromName(GetCellFName(eCursorManager::GetPlayerRow(2), eCursorManager::GetPlayerColumn(2)));
+			AnimEntry_p2 = FindPortraitEntry(eCursorManager::GetPlayerRow(2), eCursorManager::GetPlayerColumn(2));
+			animation = reader.GetAnimation(AnimationTable[AnimEntry_p2].SelectAnimationID);
+			alt_anim = reader.GetAnimation(AnimationTable[AnimEntry_p2].SelectAnimationAlternateID);
+			if (bOnp1 && bEnableAltAnims) iMaxFrames = alt_anim.MaxFrames - 1;
 			else iMaxFrames = animation.MaxFrames - 1;
 
 			if (iFrameCounter_p2 >  iMaxFrames) iFrameCounter_p2 = 0;
 
-			if (bOnp1)
+			if (bOnp1 && bEnableAltAnims)
 			{
 				*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 4) = alt_anim.vAnimData[iFrameCounter_p2].Group;
 				*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 8) = alt_anim.vAnimData[iFrameCounter_p2].Index;
@@ -269,11 +302,12 @@ void eAnimatedPortraits::ProcessSelectScreenP2()
 		}
 		else
 		{
-			AnimEntry_p2 = FindPortraitEntry(eCursorManager::GetPlayerRow(2), eCursorManager::GetPlayerColumn(2));
-			animation = reader.GetAnimation(AnimationTable[AnimEntry_p2].WinAnimationID);
-			alt_anim = reader.GetAnimation(AnimationTable[AnimEntry_p2].WinAnimationAlternateID);
+			reader = GetAIRFromName(GetCellFName(eCursorManager::GetPlayerRow(2), eCursorManager::GetPlayerColumn(2)));
+			AnimEntry_p2 = FindPortraitEntry(*(int*)(eCursorManager::GetCursorEax() + 14864 + 0xC0 + 16), *(int*)(eCursorManager::GetCursorEax() + 14864 + 0xC0));
+			animation = GetAIRFromName(GetCellFName(eCursorManager::GetPlayerRow(2), eCursorManager::GetPlayerColumn(2))).GetAnimation(AnimationTable[AnimEntry_p2].WinAnimationID);
+			alt_anim = GetAIRFromName(GetCellFName(eCursorManager::GetPlayerRow(2), eCursorManager::GetPlayerColumn(2))).GetAnimation(AnimationTable[AnimEntry_p2].WinAnimationAlternateID);
 			if (iSelectCounter_p2 >animation.MaxFrames - 1) iSelectCounter_p2 = animation.MaxFrames - 1;
-			if (bOnp1)
+			if (bOnp1 && bEnableAltAnims)
 			{
 				*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 4) = alt_anim.vAnimData[iSelectCounter_p2].Group;
 				*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 8) = alt_anim.vAnimData[iSelectCounter_p2].Index;
@@ -301,6 +335,11 @@ void eAnimatedPortraits::EnableDebug()
 void eAnimatedPortraits::EnableSelectAnimations()
 {
 	bEnableSelectAnims = true;
+}
+
+void eAnimatedPortraits::EnableAltAnims()
+{
+	bEnableAltAnims = true;
 }
 
 void __declspec(naked) eAnimatedPortraits::HookRequestSprites(int a1, int a2)

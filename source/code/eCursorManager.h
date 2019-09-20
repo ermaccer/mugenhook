@@ -9,7 +9,6 @@ struct eCellEntry {
 };
 
 
-
 namespace eCursorManager {
 	void ReadFile(const char* file);
 	void UpdateEax();
@@ -27,4 +26,5 @@ namespace eCursorManager {
 	int  GetPlayerTraining();
 	int  GetPlayerTurns(int player);
 	int  GetPlayerSelected(int player);
+	int  GetCursorEax();
 }
