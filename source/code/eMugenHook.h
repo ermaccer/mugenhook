@@ -113,7 +113,6 @@ void Init()
 		Patch<int>(0x406E51 + 1, (int)eCursorManager::HookCursorFunction - ((int)0x406E51 + 5));
 		if (bDev_DisplayPos) eCursorManager::EnablePositionDisplay();
 		if (bRandomStageConfirmSounds) eCursorManager::EnableRandomStages(iRandomStageGroup, iRandomStageRandomMax);
-		if (bEnableRandomSelectAnnouncers) eCursorManager::EnableRandomAnn();
 		if (bDumpCharacterInfo) eCursorManager::EnableDump();
 
 		if (bHookAnimatedPortraits)
