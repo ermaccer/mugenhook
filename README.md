@@ -1,4 +1,6 @@
-# mugenhook
+
+![](https://raw.githubusercontent.com/ermaccer/mugenhook/master/wiki/logo.png)
+
 Add features to M.U.G.E.N engine.
 
 # Features
