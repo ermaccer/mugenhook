@@ -16,10 +16,10 @@ Add features to M.U.G.E.N engine.
 # Installation
 MUGENHOOK WORKS ONLY WITH 1.1 VERSION OF M.U.G.E.N
 
-MugenHook requires https://github.com/ThirteenAG/Ultimate-ASI-Loader
-Rename dinput8.dll to ddraw.dll and place the asi in the main mugen folder.
+MugenHook requires https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases
+Rename the x86 dinput8.dll to ddraw.dll and place the asi in the main mugen folder.
 
-Check out .ini to configure.
+Check out wiki on how to configure.
 
 
 # Build & Download
