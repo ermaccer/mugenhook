@@ -1,6 +1,7 @@
 #include "eAirReader.h"
-#include <algorithm>
+#include "eLog.h"
 #include <string>
+#include <algorithm>
 std::vector<eAirReader> eAirManager;
 
 void eAirReader::Open(const char * name)
@@ -8,10 +9,13 @@ void eAirReader::Open(const char * name)
 	strName = name;
 	pFile = fopen(name, "rb");
 	if (!pFile)
-		printf("eAirReader::Open() | Failed! Cannot open %s!\n", name);
+	{
+		Log->PushMessage(false, "eAirReader::Open() | Failed! Cannot open %s!\n", name);
+		Log->PushError();
+	}
+
 
 }
-
 void eAirReader::ReadData()
 {
 		char szLine[1536];
@@ -24,6 +28,7 @@ void eAirReader::ReadData()
 			if (szLine[0] == '[')
 			{
 				i++;
+
 				if (sscanf(szLine, "[Begin Action %d]", &ID) == 1)
 				{
 					while (fgets(szLine, sizeof(szLine), pFile))
@@ -97,11 +102,6 @@ bool eAirReader::CheckName(std::string name)
 		return true;
 	else
 		return false;
-}
-
-eAirEntry GlobalGetAnimation(int id)
-{
-	return eAirEntry();
 }
 
 eAirReader GetAIRFromName(std::string name)

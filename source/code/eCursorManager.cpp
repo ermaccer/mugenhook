@@ -1,6 +1,8 @@
+#include "eSettingsManager.h"
 #include "eCursorManager.h"
 #include "eMugen.h"
 #include "eSelectScreenManager.h"
+#include "eLog.h"
 #include "..\stdafx.h"
 #include <vector>
 #include <fstream>
@@ -8,15 +10,9 @@
 std::vector<eCellEntry> CellTable;
 int pCursorEax;
 int pCursorJmp = 0x406E56;;
-int Player1_Row, Player1_Column;
-int Player2_Row, Player2_Column;
-int Player1_Selected, Player2_Selected;
-int Player1_Turns, Player2_Turns;
-int Player_Training;
-bool bEnablePos;
-bool bEnableStageRandom;
-bool bEnablePrint;
-int  iRGRP, iRMAX;
+
+
+eCursor* TheCursor = new eCursor();
 
 void eCursorManager::ReadFile(const char * file)
 {
@@ -24,12 +20,13 @@ void eCursorManager::ReadFile(const char * file)
 
 	if (!pFile)
 	{
-		printf("eCursorManager::ReadFile() | Failed! Tried to open: %s\n", file);
+		Log->PushMessage(false,"eCursorManager::ReadFile() | Failed! Tried to open: %s\n", file);
+		Log->PushError();
 	}
 
 	if (pFile)
 	{
-		printf("eCursorManager::ReadFile() | Success! Reading: %s\n", file);
+		Log->PushMessage(false,"eCursorManager::ReadFile() | Success! Reading: %s\n", file);
 
 		char szLine[2048];
 		while (fgets(szLine, sizeof(szLine), pFile))
@@ -54,99 +51,23 @@ void eCursorManager::ReadFile(const char * file)
 				CellTable.push_back(cell);
 			}
 		}
-		printf("eCursorManager::ReadFile() | Read %d entries\n", CellTable.size());
+		Log->PushMessage(false,"eCursorManager::ReadFile() | Read %d entries\n", CellTable.size());
 		fclose(pFile);
 	}
 }
 
-void eCursorManager::UpdateEax()
+void eCursorManager::Update()
 {
 
-	// update multi cursor
-	// TODO: this whole thing as a nice struct with some kind of 
-	// smaller struct array
+	if (SettingsMgr->bDev_DisplayPos) printf("Player 1: Row: %d   Column: %d     \r", TheCursor->Player1_Row, TheCursor->Player1_Column);
 
+	if (GetAsyncKeyState(VK_F5) && SettingsMgr->bDumpCharacterInfo) PrintCharacterNames();
 
-	Player1_Row = (*(int*)(pCursorEax + 14846 + 18 + 4));
-	Player1_Column = (*(int*)(pCursorEax + 14864));
-
-	if (*(int*)(pCursorEax + 14846 - 214) == 2) {
-		if (*(int*)((pCursorEax + 14846 + 42)) == 2) {
-			Player1_Row = (*(int*)(pCursorEax + 14846 + 48 + 18 + 4));
-			Player1_Column = (*(int*)(pCursorEax + 14864 + 48));
-		}
+	if (SettingsMgr->bRandomStageConfirmSounds)
+	{
+		*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x36C) = SettingsMgr->iRandomStageGroup;
+		*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x36C + 4) = rand() % SettingsMgr->iRandomStageRandomMax;
 	}
-	else if (*(int*)(pCursorEax + 14846 - 214) == 3) {
-		if (*(int*)((pCursorEax + 14846 + 42)) == 2) {
-			Player1_Row = (*(int*)(pCursorEax + 14846 + 48 + 18 + 4));
-			Player1_Column = (*(int*)(pCursorEax + 14864 + 48));
-			if (*(int*)((pCursorEax + 14846 + 48 + 42)) == 2) {
-				Player1_Row = (*(int*)(pCursorEax + 14846 + 48 + 48 + 18 + 4));
-				Player1_Column = (*(int*)(pCursorEax + 14864 + 48 + 48));
-			}
-		}
-	}
-	else if (*(int*)(pCursorEax + 14846 - 214) == 4) {
-		if (*(int*)((pCursorEax + 14846 + 42)) == 2) {
-			Player1_Row = (*(int*)(pCursorEax + 14846 + 48 + 18 + 4));
-			Player1_Column = (*(int*)(pCursorEax + 14864 + 48));
-			if (*(int*)((pCursorEax + 14846 + 48 + 42)) == 2) {
-				Player1_Row = (*(int*)(pCursorEax + 14846 + 48 + 48 + 18 + 4));
-				Player1_Column = (*(int*)(pCursorEax + 14864 + 48 + 48));
-				if (*(int*)((pCursorEax + 14846 + 48 + 48 + 42)) == 2) {
-					Player1_Row = (*(int*)(pCursorEax + 14846 + 48 + 48 + 48 + 18 + 4));
-					Player1_Column = (*(int*)(pCursorEax + 14864 + 48 + 48 + 48));
-				}
-			}
-
-		}
-	}
-
-
-	Player1_Selected = (*(int*)(pCursorEax + 14592));
-	Player1_Turns = (*(int*)(pCursorEax + 14592 + 36));
-	Player_Training = (*(int*)(pCursorEax + 14864 + 24));
-
-	Player2_Selected = (*(int*)(pCursorEax + 14592 + 4));
-	Player2_Turns = (*(int*)(pCursorEax + 14592 + 36 + 116));
-
-
-	Player2_Row = (*(int*)(pCursorEax + 14864 + 0xC0 + 4));
-	Player2_Column = (*(int*)(pCursorEax + 14864 + 0xC0));
-
-	if (*(int*)(pCursorEax + 14846 - 98) == 2) {
-		if (*(int*)((pCursorEax + 14846 + 0xC0 + 42)) == 2) {
-			Player2_Row = (*(int*)(pCursorEax + 14846 + 0xC0 + 48 + 18 + 4));
-			Player2_Column = (*(int*)(pCursorEax + 14864 + 0xC0 + 48));
-		}
-	}
-	else if (*(int*)(pCursorEax + 14846 - 98) == 3) {
-		if (*(int*)((pCursorEax + 14846 + 0xC0 + 42)) == 2) {
-			Player2_Row = (*(int*)(pCursorEax + 14846 + 0xC0 + 48 + 18 + 4));
-			Player2_Column = (*(int*)(pCursorEax + 14864 + 0xC0 + 48));
-			if (*(int*)((pCursorEax + 14846 + 0xC0 + 48 + 42)) == 2) {
-				Player2_Row = (*(int*)(pCursorEax + 14846 + 0xC0 + 48 + 48 + 18 + 4));
-				Player2_Column = (*(int*)(pCursorEax + 14864 + 0xC0 + 48 + 48));
-			}
-		}
-	}
-	else if (*(int*)(pCursorEax + 14846 - 98) == 4) {
-		if (*(int*)((pCursorEax + 14846 + 0xC0 + 42)) == 2) {
-			Player2_Row = (*(int*)(pCursorEax + 14846 + 0xC0 + 48 + 18 + 4));
-			Player2_Column = (*(int*)(pCursorEax + 14864 + 0xC0 + 48));
-			if (*(int*)((pCursorEax + 14846 + 0xC0 + 48 + 42)) == 2) {
-				Player2_Row = (*(int*)(pCursorEax + 14846 + 0xC0 + 48 + 48 + 18 + 4));
-				Player2_Column = (*(int*)(pCursorEax + 14864 + 0xC0 + 48 + 48));
-				if (*(int*)((pCursorEax + 14846 + 0xC0 + 48 + 48 + 42)) == 2) {
-					Player2_Row = (*(int*)(pCursorEax + 14846 + 0xC0 + 48 + 48 + 48 + 18 + 4));
-					Player2_Column = (*(int*)(pCursorEax + 14864 + 0xC0 + 48 + 48 + 48));
-				}
-			}
-		}
-
-	}
-
-
 
 }
 
@@ -166,8 +87,6 @@ int eCursorManager::FindCell(int row, int col)
 	return iFind;
 }
 
-
-
 void __declspec(naked) eCursorManager::HookCursorFunction()
 {
 	_asm
@@ -176,7 +95,9 @@ void __declspec(naked) eCursorManager::HookCursorFunction()
 		add eax, 14864
 		pushad
 	}
-	eCursorManager::ProcessSelectScreen();
+	TheCursor->Update();
+	Update();
+	if (SettingsMgr->bHookCursorTable)  eCursorManager::ProcessSelectScreen();
 	_asm 
 	{
 		popad
@@ -184,63 +105,69 @@ void __declspec(naked) eCursorManager::HookCursorFunction()
 	}
 }
 
-
 void eCursorManager::ProcessSelectScreen()
 {
-	UpdateEax();
+	Update();
 
-	int Player1_Cell = FindCell(Player1_Row, Player1_Column);
-	int Player2_Cell = FindCell(Player2_Row, Player2_Column);
-
-	int Player1_Character = *(int*)(pCursorEax + 14846 + 18 + 4 + 4);
-	int Player2_Character = *(int*)(pCursorEax + 14864 + 0xC0 + 4 + 4);
+	int Player1_Cell = FindCell(TheCursor->Player1_Row, TheCursor->Player1_Column);
+	int Player2_Cell = FindCell(TheCursor->Player2_Row, TheCursor->Player2_Column);
 
 	eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
 
-
-	if ((CharactersArray[Player2_Character].ID == -2)) {
-		*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x344) = eMugenManager::GetSoundDoneGroup(2);
-		*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x34C) = eMugenManager::GetSoundDoneIndex(2);
-	}
-	else {
-		*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x344) = CellTable[Player2_Cell].SoundGroupP2ID;
-		*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x34C) = CellTable[Player2_Cell].SoundIndexP2ID;
-	}
-
-
-	if (CharactersArray[Player1_Character].ID == -2) {
-		*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x340) = eMugenManager::GetSoundDoneGroup(1);
-		*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x348) = eMugenManager::GetSoundDoneIndex(1);
-	}
-	else {
-		*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x340) = CellTable[Player1_Cell].SoundGroupID;
-		*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x348) = CellTable[Player1_Cell].SoundIndexID;
-	}
-
-
-    if (bEnableStageRandom)
+	// p2 cursor is used for training selection
+	if (eMugenManager::GetGameplayMode() == MODE_TRAINING)
 	{
-		*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x36C) = iRGRP;
-		*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x36C + 4) = rand() % iRMAX;
+		if (TheCursor->Player1_Selected)
+		{
+			if (CharactersArray[TheCursor->Player2_Character].ID == -2) {
+				*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x340) = MugenSystem->iSoundP2DoneGroup;
+				*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x348) = MugenSystem->iSoundP2DoneIndex;
+			}
+			else {
+				*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x340) = CellTable[Player2_Cell].SoundGroupP2ID;
+				*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x348) = CellTable[Player2_Cell].SoundIndexP2ID;
+			}
+		}
+		else
+		{
+			if (CharactersArray[TheCursor->Player1_Character].ID == -2) {
+				*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x340) = MugenSystem->iSoundP1DoneGroup;
+				*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x348) = MugenSystem->iSoundP1DoneIndex;
+			}
+			else {
+				*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x340) = CellTable[Player1_Cell].SoundGroupID;
+				*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x348) = CellTable[Player1_Cell].SoundIndexID;
+
+			}
+		}
+
+	}
+	else
+	{
+		if (CharactersArray[TheCursor->Player2_Character].ID == -2) {
+			*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x344) = MugenSystem->iSoundP2DoneGroup;
+			*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x34C) = MugenSystem->iSoundP2DoneIndex;
+		}
+		else {
+			*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x344) = CellTable[Player2_Cell].SoundGroupP2ID;
+			*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x34C) = CellTable[Player2_Cell].SoundIndexP2ID;
+		}
+
+		// watch mode todo
+		if (CharactersArray[TheCursor->Player1_Character].ID == -2 ||  TheCursor->Player1_Selected && eMugenManager::GetGameplayMode() == MODE_WATCH) {
+			*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x340) = MugenSystem->iSoundP1DoneGroup;
+			*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x348) = MugenSystem->iSoundP1DoneIndex;
+		}
+		else {
+			*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x340) = CellTable[Player1_Cell].SoundGroupID;
+			*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x348) = CellTable[Player1_Cell].SoundIndexID;
+
+		}
 	}
 
-	if (bEnablePos) printf("Player 1: Row: %d   Column: %d     \r", Player1_Row, Player1_Column);
-	
-	if (GetAsyncKeyState(VK_F5) && bEnablePrint) PrintCharacterNames();
 
 }
 
-void eCursorManager::EnablePositionDisplay()
-{
-	bEnablePos = true;
-}
-
-void eCursorManager::EnableRandomStages(int group, int max)
-{
-	bEnableStageRandom = true;
-	iRGRP = group;
-	iRMAX = max;
-}
 
 void eCursorManager::PrintCharacterNames()
 {
@@ -249,7 +176,7 @@ void eCursorManager::PrintCharacterNames()
 
 	if (CharactersArray)
 	{
-		for (int i = 0; i < eMugenManager::GetRows() * eMugenManager::GetColumns(); i++)
+		for (int i = 0; i < MugenSystem->iRows * MugenSystem->iColumns; i++)
 		{
 			std::string strName(CharactersArray[i].Name, strlen(CharactersArray[i].Name));
 			oFile << "Character: " << strName << " ID:" << std::to_string(CharactersArray[i].ID) << "\n Folder: " << CharactersArray[i].FolderName << std::endl;
@@ -258,49 +185,105 @@ void eCursorManager::PrintCharacterNames()
 	}
 }
 
-void eCursorManager::EnableDump()
-{
-	bEnablePrint = true;
-}
-
-int eCursorManager::GetPlayerRow(int player)
-{
-	if (player == 2)
-		return Player2_Row;
-	else
-		return Player1_Row;
-}
-
-int eCursorManager::GetPlayerColumn(int player)
-{
-	if (player == 2)
-		return Player2_Column;
-	else
-		return Player1_Column;
-}
-
-int eCursorManager::GetPlayerTraining()
-{
-	return Player_Training;
-}
-
-int eCursorManager::GetPlayerTurns(int player)
-{
-	if (player == 2)
-		return Player2_Turns;
-	else
-		return Player1_Turns;
-}
-
-int eCursorManager::GetPlayerSelected(int player)
-{
-	if (player == 2)
-		return Player2_Selected;
-	else
-		return Player1_Selected;
-}
 
 int eCursorManager::GetCursorEax()
 {
 	return pCursorEax;
+}
+
+void eCursor::Update()
+{
+	// update multi cursor
+	Player1_Character = *(int*)(pCursorEax + 14846 + 18 + 4 + 4);
+	Player1_Row = (*(int*)(pCursorEax + 14846 + 18 + 4));
+	Player1_Column = (*(int*)(pCursorEax + 14864));
+
+	if (*(int*)(pCursorEax + 14846 - 214) == 2) {
+		if (*(int*)((pCursorEax + 14846 + 42)) == 2) {
+			Player1_Row = (*(int*)(pCursorEax + 14846 + 48 + 18 + 4));
+			Player1_Character = (*(int*)(pCursorEax + 14846 + 48 + 18 + 4 + 4));
+			Player1_Column = (*(int*)(pCursorEax + 14864 + 48));
+		}
+	}
+	else if (*(int*)(pCursorEax + 14846 - 214) == 3) {
+		if (*(int*)((pCursorEax + 14846 + 42)) == 2) {
+			Player1_Row = (*(int*)(pCursorEax + 14846 + 48 + 18 + 4));
+			Player1_Character = (*(int*)(pCursorEax + 14846 + 48 + 18 + 4 + 4));
+			Player1_Column = (*(int*)(pCursorEax + 14864 + 48));
+			if (*(int*)((pCursorEax + 14846 + 48 + 42)) == 2) {
+				Player1_Row = (*(int*)(pCursorEax + 14846 + 48 + 48 + 18 + 4));
+				Player1_Character = (*(int*)(pCursorEax + 14846 + 48 + 48 + 18 + 4 + 4));
+				Player1_Column = (*(int*)(pCursorEax + 14864 + 48 + 48));
+			}
+		}
+	}
+	else if (*(int*)(pCursorEax + 14846 - 214) == 4) {
+		if (*(int*)((pCursorEax + 14846 + 42)) == 2) {
+			Player1_Row = (*(int*)(pCursorEax + 14846 + 48 + 18 + 4));
+			Player1_Character = (*(int*)(pCursorEax + 14846 + 48 + 18 + 4 + 4));
+			Player1_Column = (*(int*)(pCursorEax + 14864 + 48));
+			if (*(int*)((pCursorEax + 14846 + 48 + 42)) == 2) {
+				Player1_Row = (*(int*)(pCursorEax + 14846 + 48 + 48 + 18 + 4));
+				Player1_Character = (*(int*)(pCursorEax + 14846 + 48 + 48 + 18 + 4 + 4));
+				Player1_Column = (*(int*)(pCursorEax + 14864 + 48 + 48));
+				if (*(int*)((pCursorEax + 14846 + 48 + 48 + 42)) == 2) {
+					Player1_Row = (*(int*)(pCursorEax + 14846 + 48 + 48 + 48 + 18 + 4));
+					Player1_Character = (*(int*)(pCursorEax + 14846 + 48 + 48 + 48 + 18 + 4 + 4));
+					Player1_Column = (*(int*)(pCursorEax + 14864 + 48 + 48 + 48));
+				}
+			}
+
+		}
+	}
+
+
+	Player1_Selected = (*(int*)(pCursorEax + 14592));
+	Player1_Turns = (*(int*)(pCursorEax + 14592 + 36));
+	Player_Training = (*(int*)(pCursorEax + 14864 + 24));
+
+	Player2_Selected = (*(int*)(pCursorEax + 14592 + 4));
+	Player2_Turns = (*(int*)(pCursorEax + 14592 + 36 + 116));
+
+
+	Player2_Row = (*(int*)(pCursorEax + 14864 + 0xC0 + 4));
+	Player2_Character = *(int*)(pCursorEax + 14864 + 0xC0 + 4 + 4);
+	Player2_Column = (*(int*)(pCursorEax + 14864 + 0xC0));
+
+	if (*(int*)(pCursorEax + 14846 - 98) == 2) {
+		if (*(int*)((pCursorEax + 14846 + 0xC0 + 42)) == 2) {
+			Player2_Row = (*(int*)(pCursorEax + 14846 + 0xC0 + 48 + 18 + 4));
+			Player2_Character = (*(int*)(pCursorEax + 14846 + 0xC0 + 48 + 18 + 4 + 4));
+			Player2_Column = (*(int*)(pCursorEax + 14864 + 0xC0 + 48));
+		}
+	}
+	else if (*(int*)(pCursorEax + 14846 - 98) == 3) {
+		if (*(int*)((pCursorEax + 14846 + 0xC0 + 42)) == 2) {
+			Player2_Row = (*(int*)(pCursorEax + 14846 + 0xC0 + 48 + 18 + 4));
+			Player2_Character  = (*(int*)(pCursorEax + 14846 + 0xC0 + 48 + 18 + 4 + 4));
+			Player2_Column = (*(int*)(pCursorEax + 14864 + 0xC0 + 48));
+			if (*(int*)((pCursorEax + 14846 + 0xC0 + 48 + 42)) == 2) {
+				Player2_Row = (*(int*)(pCursorEax + 14846 + 0xC0 + 48 + 48 + 18 + 4));
+				Player2_Character = (*(int*)(pCursorEax + 14846 + 0xC0 + 48 + 48 + 18 + 4 + 4));
+				Player2_Column = (*(int*)(pCursorEax + 14864 + 0xC0 + 48 + 48));
+			}
+		}
+	}
+	else if (*(int*)(pCursorEax + 14846 - 98) == 4) {
+		if (*(int*)((pCursorEax + 14846 + 0xC0 + 42)) == 2) {
+			Player2_Row = (*(int*)(pCursorEax + 14846 + 0xC0 + 48 + 18 + 4));
+			Player2_Character = (*(int*)(pCursorEax + 14846 + 0xC0 + 48 + 18 + 4 + 4));
+			Player2_Column = (*(int*)(pCursorEax + 14864 + 0xC0 + 48));
+			if (*(int*)((pCursorEax + 14846 + 0xC0 + 48 + 42)) == 2) {
+				Player2_Row = (*(int*)(pCursorEax + 14846 + 0xC0 + 48 + 48 + 18 + 4));
+				Player2_Character = (*(int*)(pCursorEax + 14846 + 0xC0 + 48 + 48 + 18 + 4 + 4));
+				Player2_Column = (*(int*)(pCursorEax + 14864 + 0xC0 + 48 + 48));
+				if (*(int*)((pCursorEax + 14846 + 0xC0 + 48 + 48 + 42)) == 2) {
+					Player2_Row = (*(int*)(pCursorEax + 14846 + 0xC0 + 48 + 48 + 48 + 18 + 4));
+					Player2_Character = (*(int*)(pCursorEax + 14846 + 0xC0 + 48 + 48 + 48 + 18 + 4 + 4));
+					Player2_Column = (*(int*)(pCursorEax + 14864 + 0xC0 + 48 + 48 + 48));
+				}
+			}
+		}
+
+	}
 }

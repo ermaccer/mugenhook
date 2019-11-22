@@ -1,4 +1,5 @@
 #pragma once
+
 struct eCellEntry {
 	int       RowID;
 	int       ColumnID;
@@ -9,22 +10,28 @@ struct eCellEntry {
 };
 
 
+class eCursor {
+public:
+	void Update();
+
+	// vars
+	int Player1_Row, Player1_Column;
+	int Player2_Row, Player2_Column;
+	int Player1_Selected, Player2_Selected;
+	int Player1_Character, Player2_Character;
+	int Player1_Turns, Player2_Turns;
+	int Player_Training;
+};
+
 namespace eCursorManager {
 	void ReadFile(const char* file);
-	void UpdateEax();
+	void Update();
 	int  FindCell(int row, int col);
 	void HookCursorFunction();
 	void ProcessSelectScreen();
-	void EnablePositionDisplay();
-	void EnableRandomStages(int group, int max);
 	void PrintCharacterNames();
-	void EnableDump();
 
-	// manager stuff
-	int  GetPlayerRow(int player);
-	int  GetPlayerColumn(int player);
-	int  GetPlayerTraining();
-	int  GetPlayerTurns(int player);
-	int  GetPlayerSelected(int player);
 	int  GetCursorEax();
 }
+
+extern eCursor* TheCursor;

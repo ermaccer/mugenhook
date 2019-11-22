@@ -1,27 +1,27 @@
+#include "eSettingsManager.h"
+#include "eCursorManager.h"
 #include "eAnimatedPortraits.h"
 #include "eMugen.h"
-#include "eCursorManager.h"
+#include "eLog.h"
 #include "eAirReader.h"
-#include "eMagicBoxes.h"
 #include <iostream>
 #include <vector>
+#include "eSlidePorts.h"
 #include "..\stdafx.h"
+
 
 std::vector<ePortraitEntry> AnimationTable;
 std::vector<eFrameEntry> FrameTable;
 int iFrameCounter_p1, iSelectCounter_p1;
 int iFrameCounter_p2, iSelectCounter_p2;
-static int iTickCounter_p1 = eMugenManager::GetTimer();
-static int iTickCounter_p2 = eMugenManager::GetTimer();
+static int iTickCounter_p1 = *(int*)(*(int*)0x5040E8 + 0x11E98);
+static int iTickCounter_p2 = *(int*)(*(int*)0x5040E8 + 0x11E98);
 int pFrameTablePointer;
 int iLoadSpritesJump = 0x404CEF;
-bool bEnableDebug;
-bool bEnableSelectAnims;
-bool bEnableAltAnims;
 
 void eAnimatedPortraits::Init()
 {
-	printf("eAnimatedPortraits::Init() | Initialize\n");
+	Log->PushMessage(false,"eAnimatedPortraits::Init() | Initialize\n");
 }
 
 void eAnimatedPortraits::ReadFile(const char * file)
@@ -29,11 +29,15 @@ void eAnimatedPortraits::ReadFile(const char * file)
 	FILE* pFile = fopen(file, "rb");
 
 	if (!pFile)
-		printf("eAnimatedPortraits::ReadFile() | Failed! Tried to open: %s\n", file);
+	{
+		Log->PushMessage(false, "eAnimatedPortraits::ReadFile() | Failed! Tried to open: %s\n", file);
+		Log->PushError();
+	}
+	
 
 	if (pFile)
 	{
-		printf("eAnimatedPortraits::ReadFile() | Success! Reading: %s\n", file);
+		Log->PushMessage(false,"eAnimatedPortraits::ReadFile() | Success! Reading: %s\n", file);
 
 		char szLine[2048];
 		while (fgets(szLine, sizeof(szLine), pFile))
@@ -46,27 +50,29 @@ void eAnimatedPortraits::ReadFile(const char * file)
 			if (sscanf(szLine, "%d", &iRowID) == 1)
 			{
 				char airPath[512];
-				int iColumnID, iGroupID, iGroupP2ID, iMaxFrames, iFrameTime, iSelectGroupID,
-					iSelectGroupP2ID, iSelectMaxFrames, iSelectFrametime, iAlternateGroup;
+				int iColumnID, iGroupID, iGroupP2ID, iSelectGroupID, iSelectGroupP2ID;
 
-				sscanf(szLine, "%d %d %d %d %d %d %s", &iRowID, &iColumnID, &iGroupID, &iGroupP2ID, &iSelectGroupID, &iSelectGroupP2ID, &airPath);
+				float fSpriteScaleX,fSpriteScaleY;
+
+				sscanf(szLine, "%d %d %d %d %d %d %s %f %f", &iRowID, &iColumnID, &iGroupID, &iGroupP2ID, &iSelectGroupID, &iSelectGroupP2ID, &airPath, &fSpriteScaleX,&fSpriteScaleY);
 
 				std::string strAirName(airPath, strlen(airPath));
 				// create entry
 
 				ePortraitEntry entry = { iRowID, iColumnID, iGroupID, iGroupP2ID, iSelectGroupID, 
-					iSelectGroupP2ID, strAirName };
+					iSelectGroupP2ID, strAirName,fSpriteScaleX,fSpriteScaleY };
 
 				AnimationTable.push_back(entry);
 
 				eAirReader reader;
 				reader.Open(strAirName.c_str());
 				reader.ReadData();
+				Log->PushMessage(false, "eAirReader::ReadData() | Reading %s\n", strAirName.c_str());
 				eAirManager.push_back(reader);
 
 			}
 		}
-		printf("eAnimatedPortraits::ReadFile() | Read %d entries\n", AnimationTable.size());
+		Log->PushMessage(false,"eAnimatedPortraits::ReadFile() | Read %d entries\n", AnimationTable.size());
 		fclose(pFile);
 	}
 }
@@ -77,12 +83,13 @@ void eAnimatedPortraits::ReadFramesFile(const char * file)
 
 	if (!pFile)
 	{
-		printf("eAnimatedPortraits::ReadFramesFile() | Failed! Tried to open: %s\n", file);
+		Log->PushMessage(false,"eAnimatedPortraits::ReadFramesFile() | Failed! Tried to open: %s\n", file);
+		Log->PushError();
 	}
 
 	if (pFile)
 	{
-		printf("eAnimatedPortraits::ReadFramesFile() | Success! Reading: %s\n", file);
+		Log->PushMessage(false,"eAnimatedPortraits::ReadFramesFile() | Success! Reading: %s\n", file);
 
 		char szLine[2048];
 		while (fgets(szLine, sizeof(szLine), pFile))
@@ -105,7 +112,7 @@ void eAnimatedPortraits::ReadFramesFile(const char * file)
 			}
 		}
 		pFrameTablePointer = (int)&FrameTable[0];
-		printf("eAnimatedPortraits::ReadFramesFile() | Read %d entries\n", FrameTable.size());
+		Log->PushMessage(false,"eAnimatedPortraits::ReadFramesFile() | Read %d entries\n", FrameTable.size());
 		fclose(pFile);
 	}
 }
@@ -113,7 +120,7 @@ void eAnimatedPortraits::ReadFramesFile(const char * file)
 int eAnimatedPortraits::FindPortraitEntry(int row, int col)
 {
 	int iFind = 0;
-	for (int i = 0; i < AnimationTable.size(); i++)
+	for (unsigned int i = 0; i < AnimationTable.size(); i++)
 	{
 		if (AnimationTable[i].RowID == row) {
 			if (AnimationTable[i].ColumnID == col)
@@ -129,7 +136,7 @@ int eAnimatedPortraits::FindPortraitEntry(int row, int col)
 std::string eAnimatedPortraits::GetCellFName(int row, int col)
 {
 	std::string strFind;
-	for (int i = 0; i < AnimationTable.size(); i++)
+	for (unsigned int i = 0; i < AnimationTable.size(); i++)
 	{
 		if (AnimationTable[i].RowID == row) {
 			if (AnimationTable[i].ColumnID == col)
@@ -144,8 +151,18 @@ std::string eAnimatedPortraits::GetCellFName(int row, int col)
 
 int eAnimatedPortraits::HookDisplaySprites(int a1, int a2, int a3, int a4, int a5, float a6, float a7)
 {
-	ProcessSelectScreen();
-	ProcessSelectScreenP2();
+	if (SettingsMgr->bHookAnimatedPortraits)
+	{
+		ProcessSelectScreen();
+		ProcessSelectScreenP2();
+	}
+
+	if (SettingsMgr->bEnableSlidePortraits)
+	{
+		eSlidePorts::UpdateP2();
+		eSlidePorts::Update();
+	}
+
 	return  DrawSprites(a1, a2, a3, a4, a5, a6, a7);
 }
 
@@ -162,41 +179,57 @@ void eAnimatedPortraits::ProcessSelectScreen()
 	eAirEntry Animation;
 	int iAnimEntry;
 
-	if (!bEnableSelectAnims)
+	if (!SettingsMgr->bEnableSelectAnimations)
 	{	
 		// get anims
-		AIR_Reader = GetAIRFromName(GetCellFName(eCursorManager::GetPlayerRow(1), eCursorManager::GetPlayerColumn(1)));
-		iAnimEntry = FindPortraitEntry(eCursorManager::GetPlayerRow(1), eCursorManager::GetPlayerColumn(1));
+		AIR_Reader = GetAIRFromName(GetCellFName(TheCursor->Player1_Row, TheCursor->Player1_Column));
+		iAnimEntry = FindPortraitEntry(TheCursor->Player1_Row, TheCursor->Player1_Column);
 		Animation = AIR_Reader.GetAnimation(AnimationTable[iAnimEntry].SelectAnimationID);
+
+		// set scale
+		if (SettingsMgr->bEnableAnimationScale) {
+			*(float*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x808 + 0x40) = AnimationTable[iAnimEntry].SpritesScaleX; // p1.face.scale
+			*(float*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x808 + 0x44) = AnimationTable[iAnimEntry].SpritesScaleY; // p1.face.scale
+		}
+
 
 		// loop
 		if (iFrameCounter_p1 >  Animation.MaxFrames - 1) iFrameCounter_p1 = 0;
 
 		// set sprites
-		*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x80C) = Animation.vAnimData[iFrameCounter_p1].Group; // p1.face group
-		*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810) = Animation.vAnimData[iFrameCounter_p1].Index; // p1.face index
+		*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x80C) = Animation.vAnimData[iFrameCounter_p1].Group; // p1.face group
+		*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x810) = Animation.vAnimData[iFrameCounter_p1].Index; // p1.face index
 
 		// perform animation
 		if (eMugenManager::GetTimer() - iTickCounter_p1 <= Animation.vAnimData[iFrameCounter_p1].Frametime) return;
 		iFrameCounter_p1++;
 
 		// reset timer
-		iTickCounter_p1 = eMugenManager::GetTimer();
+	    iTickCounter_p1 = eMugenManager::GetTimer();
 	}
+	
 	else 
 	{
-		if (!eCursorManager::GetPlayerSelected(1)) {
+		if (!TheCursor->Player1_Selected) {
+
 			// get anims
-			AIR_Reader = GetAIRFromName(GetCellFName(eCursorManager::GetPlayerRow(1), eCursorManager::GetPlayerColumn(1)));
-			iAnimEntry = FindPortraitEntry(eCursorManager::GetPlayerRow(1), eCursorManager::GetPlayerColumn(1));
+			AIR_Reader = GetAIRFromName(GetCellFName(TheCursor->Player1_Row, TheCursor->Player1_Column));
+			iAnimEntry = FindPortraitEntry(TheCursor->Player1_Row, TheCursor->Player1_Column);
 			Animation = AIR_Reader.GetAnimation(AnimationTable[iAnimEntry].SelectAnimationID);
+
+			// set scale
+			if (SettingsMgr->bEnableAnimationScale) {
+				*(float*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x808 + 0x40) = AnimationTable[iAnimEntry].SpritesScaleX; // p1.face.scale
+				*(float*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x808 + 0x44) = AnimationTable[iAnimEntry].SpritesScaleY; // p1.face.scale
+			}
+
 
 			// loop
 			if (iFrameCounter_p1 >  Animation.MaxFrames - 1) iFrameCounter_p1 = 0;
 
 			// set sprites
-			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x80C) = Animation.vAnimData[iFrameCounter_p1].Group; // p1.face group
-			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810) = Animation.vAnimData[iFrameCounter_p1].Index; // p1.face index
+			*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x80C) = Animation.vAnimData[iFrameCounter_p1].Group; // p1.face group
+			*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x810) = Animation.vAnimData[iFrameCounter_p1].Index; // p1.face index
 
 
 			// perform animation
@@ -212,16 +245,23 @@ void eAnimatedPortraits::ProcessSelectScreen()
 		}
 		else
 		{
-			AIR_Reader = GetAIRFromName(GetCellFName(eCursorManager::GetPlayerRow(1), eCursorManager::GetPlayerColumn(1)));
-			iAnimEntry = FindPortraitEntry(eCursorManager::GetPlayerRow(1), eCursorManager::GetPlayerColumn(1));
+			AIR_Reader = GetAIRFromName(GetCellFName(TheCursor->Player1_Row, TheCursor->Player1_Column));
+			iAnimEntry = FindPortraitEntry(TheCursor->Player1_Row, TheCursor->Player1_Column);
 			Animation = AIR_Reader.GetAnimation(AnimationTable[iAnimEntry].WinAnimationID);
+
+			// set scale
+			if (SettingsMgr->bEnableAnimationScale) {
+				*(float*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x808 + 0x40) = AnimationTable[iAnimEntry].SpritesScaleX; // p1.face.scale
+				*(float*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x808 + 0x44) = AnimationTable[iAnimEntry].SpritesScaleY; // p1.face.scale
+			}
+
 
 			// freeze animation
 			if (iSelectCounter_p1 >Animation.MaxFrames - 1) iSelectCounter_p1 = Animation.MaxFrames - 1;
 
 			// set sprites
-			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x80C) = Animation.vAnimData[iSelectCounter_p1].Group;
-			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810) = Animation.vAnimData[iSelectCounter_p1].Index;
+			*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x80C) = Animation.vAnimData[iSelectCounter_p1].Group;
+			*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x810) = Animation.vAnimData[iSelectCounter_p1].Index;
 
 			if (eMugenManager::GetTimer() - iTickCounter_p1 <= Animation.vAnimData[iSelectCounter_p1].Frametime) return;
 			iSelectCounter_p1++;
@@ -229,8 +269,6 @@ void eAnimatedPortraits::ProcessSelectScreen()
 		}
 	}
 
-	
-	
 
 
 }
@@ -241,30 +279,36 @@ void eAnimatedPortraits::ProcessSelectScreenP2()
 	eAirEntry animation, alt_anim;
 	bool bOnp1;
 	int  iMaxFrames;
-	int AnimEntry_p2;
+	int iAnimEntry;
 
-	if (eCursorManager::GetPlayerRow(1) == eCursorManager::GetPlayerRow(2) && eCursorManager::GetPlayerColumn(1) == eCursorManager::GetPlayerColumn(2)) bOnp1 = true;
+	if (TheCursor->Player1_Row == TheCursor->Player2_Row  && TheCursor->Player1_Column == TheCursor->Player2_Column) bOnp1 = true;
 
-	if (!bEnableSelectAnims)
+	if (!SettingsMgr->bEnableSelectAnimations)
 	{
-		reader = GetAIRFromName(GetCellFName(eCursorManager::GetPlayerRow(2), eCursorManager::GetPlayerColumn(2)));
-		AnimEntry_p2 = FindPortraitEntry(eCursorManager::GetPlayerRow(2), eCursorManager::GetPlayerColumn(2));
-		animation = reader.GetAnimation(AnimationTable[AnimEntry_p2].SelectAnimationID);
-		alt_anim = reader.GetAnimation(AnimationTable[AnimEntry_p2].SelectAnimationAlternateID);
+		reader = GetAIRFromName(GetCellFName(TheCursor->Player2_Row,TheCursor->Player2_Column));
+		iAnimEntry = FindPortraitEntry(TheCursor->Player2_Row, TheCursor->Player2_Column);
+		animation = reader.GetAnimation(AnimationTable[iAnimEntry].SelectAnimationID);
+		alt_anim = reader.GetAnimation(AnimationTable[iAnimEntry].SelectAnimationAlternateID);
 
-		if (bOnp1 && bEnableAltAnims) iMaxFrames = alt_anim.MaxFrames - 1;
+		if (bOnp1 && SettingsMgr->bEnableAlternateAnims) iMaxFrames = alt_anim.MaxFrames - 1;
 		else iMaxFrames = animation.MaxFrames - 1;
+
+		if (SettingsMgr->bEnableAnimationScale)
+		{
+			*(float*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x808 + 0x40 + 0xD4 + 4) = AnimationTable[iAnimEntry].SpritesScaleX; // p2.face.scale
+			*(float*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x808 + 0x40 + 0xD4 + 8) = AnimationTable[iAnimEntry].SpritesScaleY; // p2.face.scale
+		}
 
 		if (iFrameCounter_p2 >  iMaxFrames) iFrameCounter_p2 = 0;
 
-		if (bOnp1 && bEnableAltAnims)
+		if (bOnp1 && SettingsMgr->bEnableAlternateAnims)
 		{
-			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 4) = alt_anim.vAnimData[iFrameCounter_p2].Group;
-			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 8) = alt_anim.vAnimData[iFrameCounter_p2].Index;
+			*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x810 + 0xD0 + 4) = alt_anim.vAnimData[iFrameCounter_p2].Group;
+			*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x810 + 0xD0 + 8) = alt_anim.vAnimData[iFrameCounter_p2].Index;
 		}
 		else {
-			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 4) = animation.vAnimData[iFrameCounter_p2].Group;
-			*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 8) = animation.vAnimData[iFrameCounter_p2].Index;
+			*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x810 + 0xD0 + 4) = animation.vAnimData[iFrameCounter_p2].Group;
+			*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x810 + 0xD0 + 8) = animation.vAnimData[iFrameCounter_p2].Index;
 		}
 
 
@@ -273,25 +317,32 @@ void eAnimatedPortraits::ProcessSelectScreenP2()
 		iTickCounter_p2 = eMugenManager::GetTimer();
 	}
 	else {
-		if (!eCursorManager::GetPlayerSelected(2))
+		if (!TheCursor->Player2_Selected)
 		{
-			reader = GetAIRFromName(GetCellFName(eCursorManager::GetPlayerRow(2), eCursorManager::GetPlayerColumn(2)));
-			AnimEntry_p2 = FindPortraitEntry(eCursorManager::GetPlayerRow(2), eCursorManager::GetPlayerColumn(2));
-			animation = reader.GetAnimation(AnimationTable[AnimEntry_p2].SelectAnimationID);
-			alt_anim = reader.GetAnimation(AnimationTable[AnimEntry_p2].SelectAnimationAlternateID);
-			if (bOnp1 && bEnableAltAnims) iMaxFrames = alt_anim.MaxFrames - 1;
+			reader = GetAIRFromName(GetCellFName(TheCursor->Player2_Row, TheCursor->Player2_Column));
+			iAnimEntry = FindPortraitEntry(TheCursor->Player2_Row, TheCursor->Player2_Column);
+			animation = reader.GetAnimation(AnimationTable[iAnimEntry].SelectAnimationID);
+			alt_anim = reader.GetAnimation(AnimationTable[iAnimEntry].SelectAnimationAlternateID);
+			if (bOnp1 && SettingsMgr->bEnableAlternateAnims) iMaxFrames = alt_anim.MaxFrames - 1;
 			else iMaxFrames = animation.MaxFrames - 1;
+
+			if (SettingsMgr->bEnableAnimationScale)
+			{ 
+				*(float*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x808 + 0x40 + 0xD4 + 4) = AnimationTable[iAnimEntry].SpritesScaleX; // p2.face.scale
+				*(float*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x808 + 0x40 + 0xD4 + 8) = AnimationTable[iAnimEntry].SpritesScaleY; // p2.face.scale
+			}
+
 
 			if (iFrameCounter_p2 >  iMaxFrames) iFrameCounter_p2 = 0;
 
-			if (bOnp1 && bEnableAltAnims)
+			if (bOnp1 && SettingsMgr->bEnableAlternateAnims)
 			{
-				*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 4) = alt_anim.vAnimData[iFrameCounter_p2].Group;
-				*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 8) = alt_anim.vAnimData[iFrameCounter_p2].Index;
+				*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x810 + 0xD0 + 4) = alt_anim.vAnimData[iFrameCounter_p2].Group;
+				*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x810 + 0xD0 + 8) = alt_anim.vAnimData[iFrameCounter_p2].Index;
 			}
 			else {
-				*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 4) = animation.vAnimData[iFrameCounter_p2].Group;
-				*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 8) = animation.vAnimData[iFrameCounter_p2].Index;
+				*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x810 + 0xD0 + 4) = animation.vAnimData[iFrameCounter_p2].Group;
+				*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x810 + 0xD0 + 8) = animation.vAnimData[iFrameCounter_p2].Index;
 			}
 
 
@@ -302,20 +353,27 @@ void eAnimatedPortraits::ProcessSelectScreenP2()
 		}
 		else
 		{
-			reader = GetAIRFromName(GetCellFName(eCursorManager::GetPlayerRow(2), eCursorManager::GetPlayerColumn(2)));
-			AnimEntry_p2 = FindPortraitEntry(*(int*)(eCursorManager::GetCursorEax() + 14864 + 0xC0 + 16), *(int*)(eCursorManager::GetCursorEax() + 14864 + 0xC0));
-			animation = GetAIRFromName(GetCellFName(eCursorManager::GetPlayerRow(2), eCursorManager::GetPlayerColumn(2))).GetAnimation(AnimationTable[AnimEntry_p2].WinAnimationID);
-			alt_anim = GetAIRFromName(GetCellFName(eCursorManager::GetPlayerRow(2), eCursorManager::GetPlayerColumn(2))).GetAnimation(AnimationTable[AnimEntry_p2].WinAnimationAlternateID);
+			reader = GetAIRFromName(GetCellFName(TheCursor->Player2_Row, TheCursor->Player2_Column));
+			iAnimEntry = FindPortraitEntry(TheCursor->Player2_Row, TheCursor->Player2_Column);
+			animation = GetAIRFromName(GetCellFName(TheCursor->Player2_Row, TheCursor->Player2_Column)).GetAnimation(AnimationTable[iAnimEntry].WinAnimationID);
+			alt_anim = GetAIRFromName(GetCellFName(TheCursor->Player2_Row, TheCursor->Player2_Column)).GetAnimation(AnimationTable[iAnimEntry].WinAnimationAlternateID);
 			if (iSelectCounter_p2 >animation.MaxFrames - 1) iSelectCounter_p2 = animation.MaxFrames - 1;
-			if (bOnp1 && bEnableAltAnims)
+
+			if (SettingsMgr->bEnableAnimationScale)
 			{
-				*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 4) = alt_anim.vAnimData[iSelectCounter_p2].Group;
-				*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 8) = alt_anim.vAnimData[iSelectCounter_p2].Index;
+				*(float*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x808 + 0x40 + 0xD4 + 4) = AnimationTable[iAnimEntry].SpritesScaleX; // p2.face.scale
+				*(float*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x808 + 0x40 + 0xD4 + 8) = AnimationTable[iAnimEntry].SpritesScaleY; // p2.face.scale
+			}
+
+			if (bOnp1 && SettingsMgr->bEnableAlternateAnims)
+			{
+				*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x810 + 0xD0 + 4) = alt_anim.vAnimData[iSelectCounter_p2].Group;
+				*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x810 + 0xD0 + 8) = alt_anim.vAnimData[iSelectCounter_p2].Index;
 			}
 			else
 			{
-				*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 4) = animation.vAnimData[iSelectCounter_p2].Group;
-				*(int*)(*(int*)eMugenManager::GetResourcesPointer() + 0x810 + 0xD0 + 8) = animation.vAnimData[iSelectCounter_p2].Index;
+				*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x810 + 0xD0 + 4) = animation.vAnimData[iSelectCounter_p2].Group;
+				*(int*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x810 + 0xD0 + 8) = animation.vAnimData[iSelectCounter_p2].Index;
 			}
 
 
@@ -324,22 +382,6 @@ void eAnimatedPortraits::ProcessSelectScreenP2()
 			iTickCounter_p2 = eMugenManager::GetTimer();
 		}
 	}
-
-}
-
-void eAnimatedPortraits::EnableDebug()
-{
-	bEnableDebug = true;
-}
-
-void eAnimatedPortraits::EnableSelectAnimations()
-{
-	bEnableSelectAnims = true;
-}
-
-void eAnimatedPortraits::EnableAltAnims()
-{
-	bEnableAltAnims = true;
 }
 
 void __declspec(naked) eAnimatedPortraits::HookRequestSprites(int a1, int a2)

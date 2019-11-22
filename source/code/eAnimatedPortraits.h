@@ -10,6 +10,8 @@ struct ePortraitEntry {
 	int       WinAnimationID;
 	int       WinAnimationAlternateID;
 	std::string AirFileName;
+	float     SpritesScaleY;
+	float     SpritesScaleX;
 };
 
 
@@ -24,9 +26,6 @@ namespace eAnimatedPortraits {
 	void ReadFramesFile(const char* file);
 	void ProcessSelectScreen();
 	void ProcessSelectScreenP2();
-	void EnableDebug();
-	void EnableSelectAnimations();
-	void EnableAltAnims();
 	int  FindPortraitEntry(int row, int col);
 	std::string GetCellFName(int row, int col);
 	int  GetFrameTablePointer();
@@ -35,3 +34,5 @@ namespace eAnimatedPortraits {
 	void HookRequestSprites(int a1, int a2);
 	int  HookDisplaySprites(int a1, int a2, int a3, int a4, int a5, float a6, float a7);
 }
+
+
