@@ -90,7 +90,7 @@ int GetButtonID(int ptr)
 int HookDrawScreenMessage(const char * message, int a2, int a3, int a4, int a5, char r, char g, char b)
 {
 	char temp[256];
-	sprintf(temp, "%s | MugenHook %d.%d.%d by ermaccer", message, 0, 4, 3);
+	sprintf(temp, "%s | MugenHook (BETA) %d.%d.%d by ermaccer", message, 0, 5, 0);
 	return DrawScreenMessage(temp, a2, a3, a4, a5, r, g, b);
 }
 

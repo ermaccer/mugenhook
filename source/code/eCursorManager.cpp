@@ -7,7 +7,10 @@
 #include <vector>
 #include <fstream>
 #include <string>
-std::vector<eCellEntry> CellTable;
+#include <memory>
+//std::vector<eCellEntry> CellTable;
+std::unique_ptr<eCellEntry[]> CellTable;
+int iLastCellEntry = 0;
 int pCursorEax;
 int pCursorJmp = 0x406E56;;
 
@@ -17,6 +20,8 @@ eCursor* TheCursor = new eCursor();
 void eCursorManager::ReadFile(const char * file)
 {
 	FILE* pFile = fopen(file, "rb");
+	CellTable = std::make_unique<eCellEntry[]>(MugenSystem->iColumns * MugenSystem->iRows + 20);
+	Log->PushMessage(false, "eCursorManager::ReadFile() | Allocated %.2f KB for cursor entries!\n", (float)((sizeof(eCellEntry) * (MugenSystem->iColumns * MugenSystem->iRows) + 20 / 1024)));
 
 	if (!pFile)
 	{
@@ -48,17 +53,17 @@ void eCursorManager::ReadFile(const char * file)
 				// create entry
 				eCellEntry cell = { iGroupID, iIndex, iSoundGRP, iSoundIND, iSoundGRP2, iSoundIND2 };
 
-				CellTable.push_back(cell);
+				CellTable[iLastCellEntry] = cell;
+				iLastCellEntry++;
 			}
 		}
-		Log->PushMessage(false,"eCursorManager::ReadFile() | Read %d entries\n", CellTable.size());
+		Log->PushMessage(false,"eCursorManager::ReadFile() | Read %d entries\n", iLastCellEntry);
 		fclose(pFile);
 	}
 }
 
 void eCursorManager::Update()
 {
-
 	if (SettingsMgr->bDev_DisplayPos) printf("Player 1: Row: %d   Column: %d     \r", TheCursor->Player1_Row, TheCursor->Player1_Column);
 
 	if (GetAsyncKeyState(VK_F5) && SettingsMgr->bDumpCharacterInfo) PrintCharacterNames();
@@ -74,7 +79,7 @@ void eCursorManager::Update()
 int eCursorManager::FindCell(int row, int col)
 {
 	int iFind = 0;
-	for (int i = 0; i < CellTable.size(); i++)
+	for (int i = 0; i < iLastCellEntry; i++)
 	{
 		if (CellTable[i].RowID == row) {
 			if (CellTable[i].ColumnID == col)
@@ -89,6 +94,7 @@ int eCursorManager::FindCell(int row, int col)
 
 void __declspec(naked) eCursorManager::HookCursorFunction()
 {
+
 	_asm
 	{
 		mov pCursorEax, eax
@@ -97,7 +103,10 @@ void __declspec(naked) eCursorManager::HookCursorFunction()
 	}
 	TheCursor->Update();
 	Update();
-	if (SettingsMgr->bHookCursorTable)  eCursorManager::ProcessSelectScreen();
+	if (SettingsMgr->bHookCursorTable)
+	{
+		eCursorManager::ProcessSelectScreen();
+	}
 	_asm 
 	{
 		popad
@@ -107,7 +116,6 @@ void __declspec(naked) eCursorManager::HookCursorFunction()
 
 void eCursorManager::ProcessSelectScreen()
 {
-	Update();
 
 	int Player1_Cell = FindCell(TheCursor->Player1_Row, TheCursor->Player1_Column);
 	int Player2_Cell = FindCell(TheCursor->Player2_Row, TheCursor->Player2_Column);

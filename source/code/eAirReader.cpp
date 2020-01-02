@@ -29,7 +29,11 @@ void eAirReader::ReadData()
 			{
 				i++;
 
-				if (sscanf(szLine, "[Begin Action %d]", &ID) == 1)
+				for (int i = 0; szLine[i]; i++) {
+					szLine[i] = tolower(szLine[i]);
+				}
+
+				if (sscanf(szLine, "[begin action %d]", &ID) == 1)
 				{
 					while (fgets(szLine, sizeof(szLine), pFile))
 					{
@@ -67,7 +71,7 @@ void eAirReader::ReadData()
 eAirEntry eAirReader::GetAnimation(int id)
 {
 	eAirEntry air;
-	for (int i = 0; i < vAnimations.size(); i++)
+ 	for (int i = 0; i < vAnimations.size(); i++)
 	{
 		if (vAnimations[i].AnimID == id) {
 			air = vAnimations[i];

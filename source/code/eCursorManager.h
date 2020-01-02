@@ -31,6 +31,9 @@ namespace eCursorManager {
 	void ProcessSelectScreen();
 	void PrintCharacterNames();
 
+	// fix
+	void CursorWrapper();
+
 	int  GetCursorEax();
 }
 

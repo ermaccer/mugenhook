@@ -39,6 +39,10 @@ public:
 	int  iSelectableFighters;
 	int  iRandomStageGroup;
 	int  iRandomStageRandomMax;
+
+	/* Fight Logger*/
+	bool        bUseFightLog;
+	const char* szFightLogFile;
 };
 
 extern eSettingsManager* SettingsMgr;

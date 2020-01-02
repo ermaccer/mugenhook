@@ -36,4 +36,6 @@ void eSettingsManager::Init()
 	bEnableSelectAnimations = ini->ReadBoolean("Settings", "bEnableSelectAnimations", 0);
 	bEnableAnimationScale = ini->ReadBoolean("Settings", "bEnableAnimationScale", 0);
 
+	bUseFightLog = ini->ReadBoolean("Settings", "bUseFightLog", 0);
+	szFightLogFile = ini->ReadString("Settings", "szFightLogFile", 0);
 }

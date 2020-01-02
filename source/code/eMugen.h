@@ -42,6 +42,19 @@ enum eGameplayModes {
 	MODE_WATCH
 };
 
+
+enum eGameFlowType {
+	FLOW_INTRO = 3,
+	FLOW_MENU,
+	FLOW_OPTIONS,
+	FLOW_RESET_VARS,
+	FLOW_SELECT_SCREEN,
+	FLOW_8,
+	FLOW_9,
+	FLOW_VERSUS,
+	FLOW_IN_GAME
+};
+
 namespace eMugenManager {
 	void Init();
 	int  GetTimer();

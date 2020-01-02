@@ -121,3 +121,8 @@ int eSlidePorts::HookMenuCase()
 
 	return ((int(__cdecl*)())0x429C20)();;
 }
+
+int eSlidePorts::HookGameLoop()
+{
+	return  ((int(__cdecl*)())0x412FA0)();
+}
