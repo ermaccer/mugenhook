@@ -13,13 +13,16 @@
 #include "code\eInputManager.h"
 #include "code\eSlidePorts.h"
 #include "code\eSettingsManager.h"
+#include "code\eFightLogger.h"
 
 using namespace Memory::VP;
 
+void NullFunc() {}
 
 void Init()
 {
 	SettingsMgr->Init();
+
 
 	if (!SettingsMgr->bMugenhookFirstRun)
 	{
@@ -28,6 +31,12 @@ void Init()
 	}
 
 	if (SettingsMgr->bUseLog) Log->Open("mugenhook_log.txt");
+
+	if (SettingsMgr->bUseFightLog)
+	{
+		eFightLogger::Init(SettingsMgr->szFightLogFile);
+		InjectHook(0x412CCF, eFightLogger::HookLogMatchData, PATCH_CALL);
+	}
 
 
 	if (SettingsMgr->bDevMode)
@@ -49,15 +58,15 @@ void Init()
 		Patch<int>(0x4125B5 + 1, (int)eSlidePorts::HookSelectCase - ((int)0x4125B5 + 5));
 	}
 
+
 	if (SettingsMgr->iSelectableFighters)
 		Patch<int>(0x4063F0, SettingsMgr->iSelectableFighters);
 
 	if (SettingsMgr->bDisableNumerationInStageSelect)
 	{
-		Patch<char>(0x407E79, 0xE8);
 		Nop(0x407E79 + 5, 1);
 		Patch<char>(0x407E4F + 2, 8);
-		Patch<int>(0x407E79 + 1, (int)eSelectScreenManager::HookStageNumeration - ((int)0x407E79 + 5));
+		InjectHook(0x407E79, eSelectScreenManager::HookStageNumeration, PATCH_CALL);
 	}
 
 	if (SettingsMgr->bChangeStrings)
@@ -83,7 +92,11 @@ void Init()
 	if (SettingsMgr->bGameModeSingleHide) Patch<char>(0x40ADC2, 4);
 	if (SettingsMgr->bGameModeTurnsHide)  Patch<char>(0x40AE3C, 4);
 
-	Patch<int>(0x429B14 + 1, (int)HookDrawScreenMessage - ((int)0x429B14 + 5));
+
+	InjectHook(0x429B14, HookDrawScreenMessage, PATCH_CALL);
+
+	// cursor placement
+	InjectHook(0x406E51, eCursorManager::HookCursorFunction, PATCH_JUMP);
 
 	if (SettingsMgr->bHookCursorTable)
 		eCursorManager::ReadFile("cfg\\soundAnn.dat");
@@ -91,21 +104,27 @@ void Init()
 	if (SettingsMgr->bHookAnimatedPortraits)
 	{
 		eAnimatedPortraits::ReadFile("cfg\\animatedPortraits.dat");
-		eAnimatedPortraits::ReadFramesFile("cfg\\frameLoader.dat");
-		Patch<char>(0x404CE2, 0xE9);
-		Patch<int>(0x404CE2 + 1, (int)eAnimatedPortraits::HookRequestSprites - ((int)0x404CE2 + 5));
 		Log->PushMessage(false, "eAirReader::Info() | Loaded %d animations!\n", GlobalGetAnimCount());
 	}
 
-	Patch<int>(0x406FF3 + 1, (int)eAnimatedPortraits::HookDisplaySprites - ((int)0x406FF3 + 5));
-	Patch<char>(0x406E51, 0xE9);
-	Patch<int>(0x406E51 + 1, (int)eCursorManager::HookCursorFunction - ((int)0x406E51 + 5));
+
+
+	// frame loader
+	eAnimatedPortraits::ReadFramesFile("cfg\\frameLoader.dat");
+	InjectHook(0x404CE2, eAnimatedPortraits::HookRequestSprites, PATCH_JUMP);
+
+	// process select screen sprites
+	InjectHook(0x406FF3, eAnimatedPortraits::HookDisplaySprites, PATCH_CALL);
+
+	// version info
+	InjectHook(0x429B14, HookDrawScreenMessage, PATCH_CALL);
+
 
 	PushDebugMessage("MugenHook loaded!\n");
 }
 
 
-
+#ifndef _XP_SUPPORT
 extern "C"
 {
 	__declspec(dllexport) void InitializeASI()
@@ -117,4 +136,27 @@ extern "C"
 
 	}
 }
+#endif
+
+#ifdef _XP_SUPPORT
+BOOL APIENTRY DllMain(HMODULE hModule,
+	DWORD  ul_reason_for_call,
+	LPVOID lpReserved
+	)
+{
+	switch (ul_reason_for_call)
+	{
+	case DLL_PROCESS_ATTACH:
+		if (*(char*)0x40B97B == 0 && *(char*)0x40B97D == 1 && *(char*)0x40B97F == 1)
+			Init();
+		else
+			MessageBoxA(0, "Invalid M.U.G.E.N version! Only 1.1.0 supported!", "MugenHook", MB_ICONERROR);
+	case DLL_THREAD_ATTACH:
+	case DLL_THREAD_DETACH:
+	case DLL_PROCESS_DETACH:
+		break;
+	}
+	return TRUE;
+}
+#endif
 
