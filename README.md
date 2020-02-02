@@ -5,13 +5,18 @@ Add features to M.U.G.E.N engine.
 
 # Features
  - Customizable cursor select sounds based on character, in style of Mortal Kombat games
- - Animated portraits on screen with AIR playback and animations upon selection
- - Change amounts of players in watch mode (AI only!)
- - Randomize stage selection confirm sound
+	- Magic boxes, aka timed cells which allow you do time based character seleciton
+	- Variations allowing you to add up to 255 chars on one box
+	- Animated portraits on screen with AIR playback and animations upon selection
+ - Use left/right to control menu
+ - Fixed tag gamemode
+	- Sliding portraits
  - Hide or show gamemodes
- - Dump character info
- - Hide numeration in stage select
  - Change hardcoded string values
+	- Change amounts of players in watch mode (AI only!)
+ - Randomize stage selection confirm sound
+	- Hide numeration in stage select box
+	- Dump character info
  
 # Installation
 MUGENHOOK WORKS ONLY WITH 1.1 VERSION OF M.U.G.E.N
