@@ -14,6 +14,9 @@
 #include "code\eSlidePorts.h"
 #include "code\eSettingsManager.h"
 #include "code\eFightLogger.h"
+#include "code\eMagicBoxes.h"
+#include "code\eTagFix.h"
+#include "code\eVariationsManager.h"
 
 using namespace Memory::VP;
 
@@ -23,6 +26,7 @@ void Init()
 {
 	SettingsMgr->Init();
 
+	InjectHook(0x406046, eInputManager::HookInputManager, PATCH_JUMP);
 
 	if (!SettingsMgr->bMugenhookFirstRun)
 	{
@@ -39,6 +43,8 @@ void Init()
 	}
 
 
+	InjectHook(0x404029, eSelectScreenManager::HookSelectIDs, PATCH_JUMP);
+
 	if (SettingsMgr->bDevMode)
 	{
 		AllocConsole();
@@ -49,7 +55,25 @@ void Init()
 			InjectHook(0x40C4A0, HookPushDebugMessage, PATCH_JUMP);
 	}
 
+	if (SettingsMgr->bUseLeftRightInMenu)
+	{
+		Patch<char>(0x428E40 + 3, INPUT_ACTION_LEFT);
+		Patch<char>(0x428E89 + 3, INPUT_ACTION_RIGHT);
+	}
+
+	if (SettingsMgr->bHookVariations)
+	eVariationsManager::ReadFile("cfg\\variations.dat");
+
 	eMugenManager::Init();
+
+	if (SettingsMgr->bEnableTagFix)
+	{
+		Patch<int>(0x406DA0 + 8, (int)eTagFix::Hook);
+		InjectHook(0x455961, eTagFix::HookGameModeCommand, PATCH_JUMP);
+	}
+
+	if (SettingsMgr->bHookMagicBoxes)
+	eMagicBoxes::ReadFile("cfg\\magicBoxes.dat");
 
 	if (SettingsMgr->bEnableSlidePortraits)
 	{
@@ -57,6 +81,7 @@ void Init()
 		Patch<int>(0x412591 + 1, (int)eSlidePorts::HookMenuCase - ((int)0x412591 + 5));
 		Patch<int>(0x4125B5 + 1, (int)eSlidePorts::HookSelectCase - ((int)0x4125B5 + 5));
 	}
+
 
 
 	if (SettingsMgr->iSelectableFighters)
@@ -97,6 +122,8 @@ void Init()
 
 	// cursor placement
 	InjectHook(0x406E51, eCursorManager::HookCursorFunction, PATCH_JUMP);
+
+
 
 	if (SettingsMgr->bHookCursorTable)
 		eCursorManager::ReadFile("cfg\\soundAnn.dat");
