@@ -4,6 +4,7 @@
 #include <filesystem>
 #include "..\IniReader.h"
 #include "eCursorManager.h"
+#include "eMagicBoxes.h"
 #include "eLog.h"
 
 static int iTimer = *(int*)(*(int*)0x5040E8 + 0x11E98);

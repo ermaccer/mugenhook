@@ -22,7 +22,12 @@ void eSettingsManager::Init()
 	bDisableNumerationInStageSelect = ini->ReadBoolean("Settings", "bDisableNumerationInStageSelect", 0);
 	bHookCursorTable = ini->ReadBoolean("Settings", "bHookCursorTable", 0);
 	bEnableSlidePortraits = ini->ReadBoolean("Settings", "bEnableSlidePortraits", 0);
-	//iPlaybackWaitTime = ini->ReadInteger("Settings", "iPlaybackWaitTime", 0);
+	bEnableTagFix = ini->ReadBoolean("Settings", "bEnableTagFix", false);
+	bHookVariations = ini->ReadBoolean("Settings", "bHookVariations", false);
+	bHideVariationCharacters = ini->ReadBoolean("Settings", "bHideVariationCharacters", false);
+	bHookMagicBoxes = ini->ReadBoolean("Settings", "bHookMagicBoxes", false);
+	bUseLeftRightInMenu = ini->ReadBoolean("Settings", "bUseLeftRightInMenu", false);
+	iTagSelectableFighters = ini->ReadBoolean("Settings", "iTagSelectableFighters", 2);
 
 	// dev mode
 	bDevMode = ini->ReadBoolean("Settings", "bDevMode", 0);

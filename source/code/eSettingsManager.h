@@ -39,6 +39,18 @@ public:
 	int  iSelectableFighters;
 	int  iRandomStageGroup;
 	int  iRandomStageRandomMax;
+	bool bUseLeftRightInMenu;
+
+	/* Tag Stuff */
+	bool bEnableTagFix;
+	int  iTagSelectableFighters;
+
+	/* Variations */
+	bool bHookVariations;
+	bool bHideVariationCharacters;
+
+	/* Magic Boxes */
+	bool bHookMagicBoxes;
 
 	/* Fight Logger*/
 	bool        bUseFightLog;

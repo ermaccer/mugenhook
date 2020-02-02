@@ -1,25 +1,45 @@
 #include "eInputManager.h"
 #include "eMugen.h"
 #include <iostream>
-int pInputManagerPtr;
-int pInputManagerEcx;
-int jInputManagerJmp_false = 0x478B29;
-int jInputManagerJmp_true = 0x478AAF;
+int pInputManagerPtr = 0;
+int pInputManagerPtr_P2 = 0;
 
 void __declspec(naked) eInputManager::HookInputManager()
 {
+	static int jmpJumpPoint = 0x40604C;
 	_asm {
-		mov pInputManagerEcx, esi
-	}
-	printf("Pressing %d               \r", *(int*)(pInputManagerEcx + 1616 - 2608));
-	_asm {
-		test ecx, 4095
-		jz s_false
-		push 0x478AAF
-		retn
-
-		s_false:
-		push 0x478B29
-		retn
+		mov ecx, [ebp + 8]
+		mov esi, [ecx + 88]
+		mov eax, [ecx + 96]
+		mov pInputManagerPtr, eax
+		mov eax, [ecx + 100]
+		mov pInputManagerPtr_P2, eax
+		pushad
+		popad
+		jmp jmpJumpPoint
 	}
 }
+
+int eInputManager::GrabCurrentAction()
+{
+	   return pInputManagerPtr;
+}
+
+
+bool eInputManager::GetKeyAction(int keyAction)
+{
+	if (pInputManagerPtr & keyAction)
+		return true;
+	else
+		return false;
+
+}
+
+bool eInputManager::CheckLastPlayer()
+{
+	if (pInputManagerPtr_P2 == 1)
+		return true;
+	else
+    	return false;
+}
+

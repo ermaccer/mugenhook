@@ -4,13 +4,16 @@
 
 struct eMugenCharacter {
 	int   ID;
-	int   pad;
+	char  VariationStatus;
+	char  CurrentVariation;
+	char  Reserved[2];
 	char  Name[48];
 	char  FileName[512];
 	char  FolderName[512];
 	int   SpritePointer;
 	float Scale;
 };
+
 
 struct eMugenData {
 	char  pad[512];
@@ -42,6 +45,13 @@ enum eGameplayModes {
 	MODE_WATCH
 };
 
+enum eGameModes {
+	MODE_SINGLE,
+	MODE_SIMUL,
+	MODE_TAG,
+	MODE_TURNS
+};
+
 
 enum eGameFlowType {
 	FLOW_INTRO = 3,
@@ -70,6 +80,7 @@ int DrawScreenMessage(const char* message, int a2, int a3, int a4, int a5, char 
 void PushDebugMessage(const char* message);
 void PlaySound(int sound, int unk, int id, int unk2, double unkd);
 int  GetButtonID(int ptr);
+void DrawTextFont(const char* text, int x, int y, int unk);
 
 
 // hooks

@@ -1,29 +1,33 @@
 #include "eMagicBoxes.h"
 #include "eCursorManager.h"
 #include "eMugen.h"
+#include "eLog.h"
 
 #include <iostream>
+#include <vector>
 
-std::vector<eBoxEntry> BoxesTable;
-int iTickCounter = eMugenManager::GetTimer();
-int Player1_Character;
-int GlobalI;
-int pLinkSpritePointer;
-static int pOgSpritePointer;
+
+std::vector<int> vMagicBoxes;
+std::vector<eBoxEntry> vMagicBoxesData;
+int iMagicBoxID;
+bool isScanRequired = true;
+
+static int iTickCounter_p1 = *(int*)(*(int*)0x5040E8 + 0x11E98);
 
 void eMagicBoxes::ReadFile(const char * file)
 {
-
 	FILE* pFile = fopen(file, "rb");
 
 	if (!pFile)
 	{
-		printf("eMagicBoxes::ReadFile() | Failed! Tried to open: %s\n", file);
+		Log->PushMessage(false, "eMagicBoxes::ReadFile() | Failed! Tried to open: %s\n", file);
+		Log->PushError();
 	}
+
 
 	if (pFile)
 	{
-		printf("eMagicBoxes::ReadFile() | Success! Reading: %s\n", file);
+		Log->PushMessage(false, "eMagicBoxes::ReadFile() | Success! Reading: %s\n", file);
 
 		char szLine[2048];
 		while (fgets(szLine, sizeof(szLine), pFile))
@@ -32,94 +36,87 @@ void eMagicBoxes::ReadFile(const char * file)
 			if (szLine[0] == ';' || szLine[0] == '#' || szLine[0] == '\n')
 				continue;
 
-			int iRow = 0;
-			if (sscanf(szLine, "%d", &iRow) == 1)
+			int iCharacter = 0;
+			if (sscanf(szLine, "%d", &iCharacter) == 1)
 			{
-				int iColumn, iLinkChar, iOGChar, iTurnTime, iAccTime;
-				sscanf(szLine, "%d %d %d %d %d %d", &iRow,&iColumn,&iLinkChar,&iOGChar,&iTurnTime,&iAccTime);
+				int iTime;
+
+				sscanf(szLine, "%d %d", &iCharacter, &iTime);
 
 				// create entry
-				eBoxEntry box = { iRow, iColumn, iLinkChar, iOGChar, iTurnTime, iAccTime };
+				eBoxEntry entry = { iCharacter, iTime,0 };
+				
 
-				BoxesTable.push_back(box);
+				vMagicBoxesData.push_back(entry);
+
 			}
 		}
-		printf("eMagicBoxes:::ReadFile() | Read %d entries\n", BoxesTable.size());
+		Log->PushMessage(false, "eMagicBoxes::ReadFile() | Read %d entries\n", vMagicBoxesData.size());
 		fclose(pFile);
 	}
 }
 
-int eMagicBoxes::FindBoxEntry(int row, int col)
+void eMagicBoxes::GetBox()
 {
-	int iFind = 0;
-	for (int i = 0; i < BoxesTable.size(); i++)
+	eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
+
+	if (isScanRequired)
 	{
-		if (BoxesTable[i].Row == row) {
-			if (BoxesTable[i].Column == col)
+		for (int i = 0; i < MugenSystem->iColumns * MugenSystem->iRows; i++)
+		{
+			if (CharactersArray[i].ID == -3)
 			{
-				iFind = i;
-				break;
+				iMagicBoxID = i;
+				CharactersArray[iMagicBoxID].ID = -1;
+				vMagicBoxes.push_back(iMagicBoxID);
+
 			}
 		}
 	}
-	return iFind;
-}
 
-int eMagicBoxes::FindCharacter(int id)
-{
-	int iFind = 0;
-	eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
-	for (int i = 0; i < eMugenManager::GetRows() * eMugenManager::GetColumns(); i++)
-	{
-		if (CharactersArray[i].ID == id) {
-			iFind = i;
-			break;
-		}
-	}
-	return iFind;
-}
+	isScanRequired = false;
 
-void eMagicBoxes::UpdateBox()
-{
-	SwapToLink();
-
-}
-
-void eMagicBoxes::SwapToLink()
-{
-	bool bLocked, bOpen;
-	eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
-
-	// close box
-	if (eMugenManager::GetTimer() - iTickCounter <= BoxesTable[GlobalI].TurnTime)	return;
-	printf("LNK: Swapping to %d from %d\n", BoxesTable[GlobalI].LinkCharacter, CharactersArray[Player1_Character].ID);
-	CharactersArray[Player1_Character].ID = BoxesTable[GlobalI].LinkCharacter;
-	pLinkSpritePointer = CharactersArray[FindCharacter(BoxesTable[GlobalI].LinkCharacter)].SpritePointer;
-	CharactersArray[Player1_Character].SpritePointer = pLinkSpritePointer;
-	iTickCounter = eMugenManager::GetTimer();
-	SwapToOG();
-
-}
-
-void eMagicBoxes::SwapToOG()
-{
-	eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
-
-	if (eMugenManager::GetTimer() - iTickCounter <= BoxesTable[GlobalI].AccessTime) return;
-	printf("Swapping to %d from %d\n", BoxesTable[GlobalI].OGCharacter, CharactersArray[Player1_Character].ID);
-	CharactersArray[Player1_Character].ID = BoxesTable[GlobalI].OGCharacter;
-	CharactersArray[Player1_Character].SpritePointer = CharactersArray[FindCharacter(BoxesTable[GlobalI].OGCharacter)].SpritePointer;
-	iTickCounter = eMugenManager::GetTimer();
 }
 
 void eMagicBoxes::UpdateMagicBoxes()
 {
-	for (int i = 0; i < BoxesTable.size(); i++) {
-		eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
-		Player1_Character = BoxesTable[i].Column + (BoxesTable[i].Row * eMugenManager::GetRows()) + (BoxesTable[i].Row * eMugenManager::GetRows() - BoxesTable[i].Row);
-		UpdateBox();
-		GlobalI = i;
+	eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
 
-
+	// TODO:: make a better timer solution
+	for (int i = 0; i < vMagicBoxes.size(); i++)
+	{
+		if (eMugenManager::GetTimer() - iTickCounter_p1 <= vMagicBoxesData[i].iWaitTime)  return;
+		vMagicBoxesData[i].iSwitch ^= 1;
 	}
+
+
+	for (int i = 0; i < vMagicBoxes.size(); i++)
+	{
+		//i = 1;
+
+		if (vMagicBoxesData[i].iSwitch )
+		{
+			CharactersArray[vMagicBoxes[i]].ID = CharactersArray[vMagicBoxesData[i].iCharacter].ID;
+			sprintf(CharactersArray[vMagicBoxes[i]].Name, "%s", CharactersArray[vMagicBoxesData[i].iCharacter].Name);
+			CharactersArray[vMagicBoxes[i]].SpritePointer = CharactersArray[vMagicBoxesData[i].iCharacter].SpritePointer;
+			CharactersArray[vMagicBoxes[i]].Scale = CharactersArray[vMagicBoxesData[i].iCharacter].Scale;
+
+		}
+		else
+		{
+			if (!(TheCursor->Player1_Character == vMagicBoxes[i] || TheCursor->Player2_Character == vMagicBoxes[i]))
+			{
+				CharactersArray[vMagicBoxes[i]].ID = -1;
+				CharactersArray[vMagicBoxes[i]].SpritePointer = 0;
+				sprintf(CharactersArray[vMagicBoxes[i]].Name, "%s", "");
+			}
+
+		}
+		iTickCounter_p1 = eMugenManager::GetTimer();
+	}
+
+
+
+
+
 }

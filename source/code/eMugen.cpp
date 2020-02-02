@@ -87,10 +87,15 @@ int GetButtonID(int ptr)
 	return ((int(__thiscall*)(int))0x478900)(ptr);
 }
 
+void DrawTextFont(const char * text, int x, int y, int unk)
+{
+	((void(__cdecl*)(const char*,int,int,int))0x45FD00)("FONT DRAW TEST",x,y,unk);
+}
+
 int HookDrawScreenMessage(const char * message, int a2, int a3, int a4, int a5, char r, char g, char b)
 {
 	char temp[256];
-	sprintf(temp, "%s | MugenHook (BETA) %d.%d.%d by ermaccer", message, 0, 5, 0);
+	sprintf(temp, "%s | MugenHook %d.%d.%d by ermaccer", message, 0, 5, 1);
 	return DrawScreenMessage(temp, a2, a3, a4, a5, r, g, b);
 }
 

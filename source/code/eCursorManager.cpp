@@ -2,7 +2,9 @@
 #include "eCursorManager.h"
 #include "eMugen.h"
 #include "eSelectScreenManager.h"
+#include "eInputManager.h"
 #include "eLog.h"
+#include "eVariationsManager.h"
 #include "..\stdafx.h"
 #include <vector>
 #include <fstream>
@@ -12,7 +14,8 @@
 std::unique_ptr<eCellEntry[]> CellTable;
 int iLastCellEntry = 0;
 int pCursorEax;
-int pCursorJmp = 0x406E56;;
+int pCursorJmp = 0x406E56;
+int iStartButtonCounter = 0;
 
 
 eCursor* TheCursor = new eCursor();
@@ -64,7 +67,8 @@ void eCursorManager::ReadFile(const char * file)
 
 void eCursorManager::Update()
 {
-	if (SettingsMgr->bDev_DisplayPos) printf("Player 1: Row: %d   Column: %d     \r", TheCursor->Player1_Row, TheCursor->Player1_Column);
+
+	if (SettingsMgr->bDev_DisplayPos) printf("Player 1: Row: %d   Column: %d    ID: %d    \r", TheCursor->Player1_Row, TheCursor->Player1_Column, TheCursor->Player1_Character);
 
 	if (GetAsyncKeyState(VK_F5) && SettingsMgr->bDumpCharacterInfo) PrintCharacterNames();
 
@@ -103,6 +107,13 @@ void __declspec(naked) eCursorManager::HookCursorFunction()
 	}
 	TheCursor->Update();
 	Update();
+	if (SettingsMgr->bHookVariations)
+	{
+		eVariationsManager::HideVariationCharacters();
+		eVariationsManager::UpdateCharactersP1();
+		eVariationsManager::UpdateCharactersP2();
+		eVariationsManager::ProcessInactivity();
+	}
 	if (SettingsMgr->bHookCursorTable)
 	{
 		eCursorManager::ProcessSelectScreen();
@@ -114,6 +125,8 @@ void __declspec(naked) eCursorManager::HookCursorFunction()
 	}
 }
 
+
+
 void eCursorManager::ProcessSelectScreen()
 {
 
@@ -121,6 +134,7 @@ void eCursorManager::ProcessSelectScreen()
 	int Player2_Cell = FindCell(TheCursor->Player2_Row, TheCursor->Player2_Column);
 
 	eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
+
 
 	// p2 cursor is used for training selection
 	if (eMugenManager::GetGameplayMode() == MODE_TRAINING)
@@ -184,10 +198,12 @@ void eCursorManager::PrintCharacterNames()
 
 	if (CharactersArray)
 	{
+		oFile << "ID \t File" << std::endl;
 		for (int i = 0; i < MugenSystem->iRows * MugenSystem->iColumns; i++)
 		{
-			std::string strName(CharactersArray[i].Name, strlen(CharactersArray[i].Name));
-			oFile << "Character: " << strName << " ID:" << std::to_string(CharactersArray[i].ID) << "\n Folder: " << CharactersArray[i].FolderName << std::endl;
+			// don't print if random/magic/none
+			if (!(CharactersArray[i].ID == -1 || CharactersArray[i].ID == -2 || CharactersArray[i].ID == -3))
+			oFile << "" << CharactersArray[i].ID << "\t " << CharactersArray[i].FolderName + (std::string)CharactersArray[i].FileName << std::endl;
 		}
 		oFile.close();
 	}

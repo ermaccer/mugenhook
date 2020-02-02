@@ -7,6 +7,8 @@
 #include <iostream>
 #include <vector>
 #include "eSlidePorts.h"
+#include "eMagicBoxes.h"
+#include "eVariationsManager.h"
 #include "..\stdafx.h"
 
 
@@ -163,6 +165,13 @@ int eAnimatedPortraits::HookDisplaySprites(int a1, int a2, int a3, int a4, int a
 		eSlidePorts::Update();
 	}
 
+	if (SettingsMgr->bHookMagicBoxes)
+	{
+		eMagicBoxes::GetBox();
+		eMagicBoxes::UpdateMagicBoxes();
+	}
+
+
 	return  DrawSprites(a1, a2, a3, a4, a5, a6, a7);
 }
 
@@ -171,6 +180,14 @@ int eAnimatedPortraits::GetFrameTablePointer()
 {
 	printf("%x", (int)&FrameTable[0]);
 	return (int)&FrameTable[0];
+}
+
+void eAnimatedPortraits::HookAnnouncerSFXPlayback(int sound, int unk, int id, int unk2, double unkd)
+{
+	//printf("%d %d %d %d %d\n", sound, unk, id, unk2, unkd);
+	PlaySound(sound, unk, id, unk2, unkd);
+	if (iFrameCounter_p1 > 3)
+	PlaySound(sound, 33, id, unk2, unkd);
 }
 
 void eAnimatedPortraits::ProcessSelectScreen()
@@ -399,4 +416,3 @@ void __declspec(naked) eAnimatedPortraits::HookRequestSprites(int a1, int a2)
 		jmp iLoadSpritesJump
 	}
 }
-
