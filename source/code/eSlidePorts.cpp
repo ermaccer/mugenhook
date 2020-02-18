@@ -4,6 +4,7 @@
 #include <filesystem>
 #include "..\IniReader.h"
 #include "eCursorManager.h"
+#include "eSettingsManager.h"
 #include "eMagicBoxes.h"
 #include "eLog.h"
 
@@ -110,20 +111,31 @@ int eSlidePorts::HookSelectCase()
 
 int eSlidePorts::HookMenuCase()
 {
-	bInSelectScreen = false;
-	bStopSliding = false;
-	bStopSlidingP2 = false;
-	// reset pos
-	*(float*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x808 + 0x24) = p1_face_offset[0];
-	*(float*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x808 + 0x24 + 4) = p1_face_offset[1];
 
-	*(float*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x808 + 0xD4 + 0x24 + 4) = p2_face_offset[0];
-	*(float*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x808 + 0xD4 + 0x24 + 4 + 4) = p2_face_offset[1];
+	if (SettingsMgr->bHookMagicBoxes)
+	{
+		eMagicBoxes::GetBox();
+	}
+
+	if (SettingsMgr->bEnableSlidePortraits)
+	{
+		bInSelectScreen = false;
+		bStopSliding = false;
+		bStopSlidingP2 = false;
+		// reset pos
+		*(float*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x808 + 0x24) = p1_face_offset[0];
+		*(float*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x808 + 0x24 + 4) = p1_face_offset[1];
+
+		*(float*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x808 + 0xD4 + 0x24 + 4) = p2_face_offset[0];
+		*(float*)(*(int*)MugenSystem->pMugenResourcesPointer + 0x808 + 0xD4 + 0x24 + 4 + 4) = p2_face_offset[1];
+	}
+
 
 	return ((int(__cdecl*)())0x429C20)();;
 }
 
 int eSlidePorts::HookGameLoop()
 {
+
 	return  ((int(__cdecl*)())0x412FA0)();
 }

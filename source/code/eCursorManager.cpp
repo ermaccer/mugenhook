@@ -68,9 +68,10 @@ void eCursorManager::ReadFile(const char * file)
 void eCursorManager::Update()
 {
 
-	if (SettingsMgr->bDev_DisplayPos) printf("Player 1: Row: %d   Column: %d    ID: %d    \r", TheCursor->Player1_Row, TheCursor->Player1_Column, TheCursor->Player1_Character);
+	if (SettingsMgr->bDev_DisplayPos) printf("Player 1: Row: %d   Column: %d   \r", TheCursor->Player1_Row, TheCursor->Player1_Column);
 
 	if (GetAsyncKeyState(VK_F5) && SettingsMgr->bDumpCharacterInfo) PrintCharacterNames();
+     
 
 	if (SettingsMgr->bRandomStageConfirmSounds)
 	{
@@ -198,12 +199,20 @@ void eCursorManager::PrintCharacterNames()
 
 	if (CharactersArray)
 	{
-		oFile << "ID \t File" << std::endl;
+		oFile << "ID \t Flags \t File" << std::endl;
 		for (int i = 0; i < MugenSystem->iRows * MugenSystem->iColumns; i++)
 		{
-			// don't print if random/magic/none
-			if (!(CharactersArray[i].ID == -1 || CharactersArray[i].ID == -2 || CharactersArray[i].ID == -3))
-			oFile << "" << CharactersArray[i].ID << "\t " << CharactersArray[i].FolderName + (std::string)CharactersArray[i].FileName << std::endl;
+
+			oFile << "" << CharactersArray[i].ID << "\t ";
+			if (CharactersArray[i].CharacterFlag & CHAR_FLAG_HIDDEN)
+				oFile << "H";
+			if (CharactersArray[i].CharacterFlag & CHAR_FLAG_VARIATIONS)
+				oFile << "V";
+			if (CharactersArray[i].CharacterFlag & CHAR_FLAG_BONUS)
+				oFile << "B";
+            oFile << "\t " << CharactersArray[i].FolderName + (std::string)CharactersArray[i].FileName;
+
+			oFile << std::endl;
 		}
 		oFile.close();
 	}

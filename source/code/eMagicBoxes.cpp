@@ -8,6 +8,7 @@
 
 
 std::vector<int> vMagicBoxes;
+std::vector<eMugenCharacter> vMagicBoxesCharacters;
 std::vector<eBoxEntry> vMagicBoxesData;
 int iMagicBoxID;
 bool isScanRequired = true;
@@ -64,6 +65,16 @@ void eMagicBoxes::GetBox()
 	{
 		for (int i = 0; i < MugenSystem->iColumns * MugenSystem->iRows; i++)
 		{
+
+		   for (int a = 0; a < vMagicBoxesData.size(); a++)
+			   if (CharactersArray[i].ID == vMagicBoxesData[a].iCharacter)
+			   {
+				   vMagicBoxesCharacters.push_back(CharactersArray[i]);
+				   CharactersArray[i].ID = -1;
+				   CharactersArray[i].CharacterFlag |= CHAR_FLAG_HIDDEN;
+			   }
+
+
 			if (CharactersArray[i].ID == -3)
 			{
 				iMagicBoxID = i;
@@ -72,6 +83,9 @@ void eMagicBoxes::GetBox()
 
 			}
 		}
+		// hide required chars
+
+
 	}
 
 	isScanRequired = false;
@@ -96,10 +110,8 @@ void eMagicBoxes::UpdateMagicBoxes()
 
 		if (vMagicBoxesData[i].iSwitch )
 		{
-			CharactersArray[vMagicBoxes[i]].ID = CharactersArray[vMagicBoxesData[i].iCharacter].ID;
-			sprintf(CharactersArray[vMagicBoxes[i]].Name, "%s", CharactersArray[vMagicBoxesData[i].iCharacter].Name);
-			CharactersArray[vMagicBoxes[i]].SpritePointer = CharactersArray[vMagicBoxesData[i].iCharacter].SpritePointer;
-			CharactersArray[vMagicBoxes[i]].Scale = CharactersArray[vMagicBoxesData[i].iCharacter].Scale;
+
+			CharactersArray[vMagicBoxes[i]] = vMagicBoxesCharacters[i];
 
 		}
 		else

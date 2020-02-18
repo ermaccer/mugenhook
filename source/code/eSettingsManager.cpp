@@ -27,7 +27,7 @@ void eSettingsManager::Init()
 	bHideVariationCharacters = ini->ReadBoolean("Settings", "bHideVariationCharacters", false);
 	bHookMagicBoxes = ini->ReadBoolean("Settings", "bHookMagicBoxes", false);
 	bUseLeftRightInMenu = ini->ReadBoolean("Settings", "bUseLeftRightInMenu", false);
-	iTagSelectableFighters = ini->ReadBoolean("Settings", "iTagSelectableFighters", 2);
+	iTagSelectableFighters = ini->ReadInteger("Settings", "iTagSelectableFighters", 2);
 
 	// dev mode
 	bDevMode = ini->ReadBoolean("Settings", "bDevMode", 0);

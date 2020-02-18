@@ -3,6 +3,7 @@
 #include "..\IniReader.h"
 #include <iostream>
 #include "..\MemoryMgr.h"
+#include "eCursorManager.h"
 #include <filesystem>
 
 eMugenSystem* MugenSystem = new eMugenSystem();
@@ -26,6 +27,7 @@ void eMugenManager::Init()
 			MugenSystem->iColumns = system.ReadInteger("Select Info", "columns", 0);
 			sscanf(system.ReadString("Select Info", "p1.cursor.done.snd", 0), "%d,%d", &MugenSystem->iSoundP1DoneGroup, &MugenSystem->iSoundP1DoneIndex);
 			sscanf(system.ReadString("Select Info", "p2.cursor.done.snd", 0), "%d,%d", &MugenSystem->iSoundP2DoneGroup, &MugenSystem->iSoundP2DoneIndex);
+			//MugenSystem->UseHorizontalCursorMovement = system.ReadBoolean("Info","")
 			Log->PushMessage(false,"eMugenManager::Init() | Success! Done reading motif data\n");
 		}
 	}
@@ -52,9 +54,15 @@ int eMugenManager::GetGameplayMode()
 	return *(int*)(*(int*)MugenSystem->pMugenDataPointer + 0x5094);
 }
 
-int RequestSprites(int param, int sprite_indexes)
+int eMugenManager::GetChars()
 {
-	return ((int(__cdecl*)(int, int))0x467B30)(param, sprite_indexes);
+	return MugenSystem->iColumns * MugenSystem->iRows;
+}
+
+
+int RequestSprites(FILE* sff, int* indexes)
+{
+	return ((int(__cdecl*)(FILE*, int*))0x467B30)(sff, indexes);
 }
 
 int DrawSprites(int a1, int a2, int a3, int a4, int a5, float a6, float a7)
@@ -87,15 +95,15 @@ int GetButtonID(int ptr)
 	return ((int(__thiscall*)(int))0x478900)(ptr);
 }
 
-void DrawTextFont(const char * text, int x, int y, int unk)
+void DrawTextFont(int text, int x, int y)
 {
-	((void(__cdecl*)(const char*,int,int,int))0x45FD00)("FONT DRAW TEST",x,y,unk);
+	((void(__cdecl*)(int,int,int))0x45FD00)(text,x,y);
 }
 
 int HookDrawScreenMessage(const char * message, int a2, int a3, int a4, int a5, char r, char g, char b)
 {
 	char temp[256];
-	sprintf(temp, "%s | MugenHook %d.%d.%d by ermaccer", message, 0, 5, 1);
+	sprintf(temp, "%s | MugenHook %d.%d.%d by ermaccer", message, 0, 5, 2);
 	return DrawScreenMessage(temp, a2, a3, a4, a5, r, g, b);
 }
 

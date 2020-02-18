@@ -1,5 +1,6 @@
 #include "eTagFix.h"
 #include "eSettingsManager.h"
+#include "eLog.h"
 #include <iostream>
 int commandName = 0;
 int fighters = 0;
@@ -16,7 +17,7 @@ void __declspec(naked) eTagFix::Hook()
 		mov[eax + 12], 2
 		jmp jumpP
 	}
-
+ 
 }
 
 void __declspec(naked) eTagFix::HookGameModeCommand()

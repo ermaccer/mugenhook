@@ -29,11 +29,13 @@ namespace eAnimatedPortraits {
 	int  FindPortraitEntry(int row, int col);
 	std::string GetCellFName(int row, int col);
 	int  GetFrameTablePointer();
-	void HookAnnouncerSFXPlayback(int sound, int unk, int id, int unk2, double unkd);
+
 
 	// hooks
 	void HookRequestSprites(int a1, int a2);
 	int  HookDisplaySprites(int a1, int a2, int a3, int a4, int a5, float a6, float a7);
+	int  HookCharSpritePriority(int a1, int a2, int a3, int a4, int a5, float a6, float a7);
+	void  HookCharSpritePrioritySecond(int a1, float a2, float a3);
 }
 
 

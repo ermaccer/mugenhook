@@ -1,10 +1,21 @@
 #pragma once
+#include <iostream>
 
+// mugenhook char flags
+
+#define CHAR_FLAG_HIDDEN 1
+#define CHAR_FLAG_VARIATIONS 2
+#define CHAR_FLAG_BONUS 4
 // mugen data
+
+struct eMugenCharacterExtraData {
+	char CharacterFlag;
+	char CurrentVariation;
+};
 
 struct eMugenCharacter {
 	int   ID;
-	char  VariationStatus;
+	char  CharacterFlag;
 	char  CurrentVariation;
 	char  Reserved[2];
 	char  Name[48];
@@ -24,6 +35,9 @@ struct eMugenData {
 };
 
 struct eMugenSystem {
+	/* MugenHook*/
+	bool UseHorizontalCursorMovement;
+	/* Mugen*/
 	int iRows, iColumns;
 	int iSoundP1DoneGroup, iSoundP1DoneIndex;
 	int iSoundP2DoneGroup, iSoundP2DoneIndex;
@@ -70,17 +84,18 @@ namespace eMugenManager {
 	int  GetTimer();
 	int  GetGameFlow();
 	int  GetGameplayMode();
+	int  GetChars();
 }
 
 // mugen functions
-int RequestSprites(int param, int sprite_indexes);
+int RequestSprites(FILE* sff, int* sprites);
 int DrawSprites(int a1, int a2, int a3, int a4, int a5, float a6, float a7);
 void ScaleSprites(int ptr, float a1, float a2);
 int DrawScreenMessage(const char* message, int a2, int a3, int a4, int a5, char r, char g, char b);
 void PushDebugMessage(const char* message);
 void PlaySound(int sound, int unk, int id, int unk2, double unkd);
 int  GetButtonID(int ptr);
-void DrawTextFont(const char* text, int x, int y, int unk);
+void DrawTextFont(int text, int x, int y);
 
 
 // hooks

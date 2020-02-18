@@ -14,6 +14,7 @@ int jmpSelScreen = 0x407E37;
 
 std::string lastSelectEntry;
 eMugenCharacter* Character;
+
 int eSelectScreenManager::HookStageNumeration(char* dest, char* format, int dummy, char* name)
 {
 	return sprintf(dest,format,name);
@@ -73,4 +74,8 @@ void __declspec(naked) eSelectScreenManager::HookSelectIDs()
     }
 
 
+}
+
+void __declspec(naked) eSelectScreenManager::HookCharacterInit()
+{
 }

@@ -120,12 +120,18 @@ void eVariationsManager::HideVariationCharacters()
 						vVariations[i].vVariationChars.push_back(CharactersArray[a]);
 						
 						if (b == 0)
+						{
+							CharactersArray[a].CharacterFlag |= CHAR_FLAG_VARIATIONS;
+							CharactersArray[a].CurrentVariation = 1;
 							vVariations[i].iPlace = a;
+						}
+
 
 						if (b > 0 && SettingsMgr->bHideVariationCharacters)
 						{
 							CharactersArray[a].ID = -1;
-							CharactersArray[a].SpritePointer = 0;
+							CharactersArray[a].CharacterFlag |= CHAR_FLAG_VARIATIONS | CHAR_FLAG_HIDDEN;
+							//CharactersArray[a].SpritePointer = 0;
 						}
 
 					}
@@ -161,14 +167,20 @@ void eVariationsManager::UpdateCharactersP1()
 				{
 				
 					int CharID = vVariations[VariationID].iPlace;
+
+
 					if (CharactersArray[CharID].CurrentVariation > vVariations[VariationID].iVariations - 1)
 						CharactersArray[CharID].CurrentVariation = 0;
 
 					char cVariations = CharactersArray[CharID].CurrentVariation;
 					CharactersArray[CharID] = vVariations[VariationID].vVariationChars[cVariations];
 					CharactersArray[CharID].CurrentVariation = cVariations;
+					if (eInputManager::CheckLastPlayer() == false)
+					{
+						CharactersArray[CharID].CurrentVariation++;
 
-					CharactersArray[CharID].CurrentVariation++;
+					}
+
 				}
 				iStartCounter_p1 = 0;
 			}

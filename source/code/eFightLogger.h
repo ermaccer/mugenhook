@@ -1,7 +1,9 @@
 #pragma once
-
+#include <iostream>
 namespace eFightLogger {
 	void Init(const char* name);
-	void HookLogMatchData();
-	void LogMatchData();
+	void SaveInitialMatchData();
+	void SaveMatchData();
+	void HookSaveMatchDataOne();
+	void HookSaveMatchDataTwo();
 }
