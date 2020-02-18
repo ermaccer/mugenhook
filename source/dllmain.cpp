@@ -3,6 +3,7 @@
 
 #include "IniReader.h"
 #include "MemoryMgr.h"
+#include "resource.h"
 
 #include "code\eLog.h"
 #include "code\eAirReader.h"
@@ -17,15 +18,17 @@
 #include "code\eMagicBoxes.h"
 #include "code\eTagFix.h"
 #include "code\eVariationsManager.h"
+#include "code\eCharFlagsManager.h"
 
 using namespace Memory::VP;
 
 void NullFunc() {}
 
+
+
 void Init()
 {
 	SettingsMgr->Init();
-
 	InjectHook(0x406046, eInputManager::HookInputManager, PATCH_JUMP);
 
 	if (!SettingsMgr->bMugenhookFirstRun)
@@ -39,7 +42,11 @@ void Init()
 	if (SettingsMgr->bUseFightLog)
 	{
 		eFightLogger::Init(SettingsMgr->szFightLogFile);
-		InjectHook(0x412CCF, eFightLogger::HookLogMatchData, PATCH_CALL);
+	//	InjectHook(0x4153A1, eFightLogger::HookSaveMatchDataOne, PATCH_JUMP);
+	//	InjectHook(0x40C90A, eFightLogger::HookSaveMatchDataTwo, PATCH_CALL);
+		InjectHook(0x421E99, eFightLogger::SaveInitialMatchData, PATCH_CALL);
+	
+		//InjectHook(0x412CCF, eFightLogger::HookLogMatchData, PATCH_CALL);
 	}
 
 
@@ -78,10 +85,10 @@ void Init()
 	if (SettingsMgr->bEnableSlidePortraits)
 	{
 		eSlidePorts::ReadSettings();
-		Patch<int>(0x412591 + 1, (int)eSlidePorts::HookMenuCase - ((int)0x412591 + 5));
 		Patch<int>(0x4125B5 + 1, (int)eSlidePorts::HookSelectCase - ((int)0x4125B5 + 5));
 	}
 
+	Patch<int>(0x412591 + 1, (int)eSlidePorts::HookMenuCase - ((int)0x412591 + 5));
 
 
 	if (SettingsMgr->iSelectableFighters)
@@ -141,7 +148,12 @@ void Init()
 	InjectHook(0x404CE2, eAnimatedPortraits::HookRequestSprites, PATCH_JUMP);
 
 	// process select screen sprites
+
+	//InjectHook(0x407BB0, eAnimatedPortraits::HookCharSpritePriority, PATCH_CALL);
+	//InjectHook(0x407BDE, ScaleSprites, PATCH_CALL);
+
 	InjectHook(0x406FF3, eAnimatedPortraits::HookDisplaySprites, PATCH_CALL);
+	InjectHook(0x407453, eCharFlagsManager::ProcessHiddenCharacters, PATCH_CALL);
 
 	// version info
 	InjectHook(0x429B14, HookDrawScreenMessage, PATCH_CALL);
