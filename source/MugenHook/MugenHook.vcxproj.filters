@@ -1,0 +1,182 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\code">
+      <UniqueIdentifier>{086def07-2c39-450e-bac2-115066fa7291}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\code\core">
+      <UniqueIdentifier>{6ed9b471-87b4-4b27-9a96-3db0b3c5e576}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\code\mugenhook">
+      <UniqueIdentifier>{b551c964-fbac-495a-a5cc-da33f273bcad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\code\mugen">
+      <UniqueIdentifier>{c86fd7b9-4d10-4189-acef-33a654bf9642}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\core\eAirReader.h">
+      <Filter>Header Files\code\core</Filter>
+    </ClInclude>
+    <ClInclude Include="code\core\eLog.h">
+      <Filter>Header Files\code\core</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugenhook\base.h">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugen\Sprite.h">
+      <Filter>Header Files\code\mugen</Filter>
+    </ClInclude>
+    <ClInclude Include="code\core\eCursor.h">
+      <Filter>Header Files\code\core</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugenhook\eCustomCursorManager.h">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugenhook\eCommonHooks.h">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugen\System.h">
+      <Filter>Header Files\code\mugen</Filter>
+    </ClInclude>
+    <ClInclude Include="IniReader.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugenhook\eMugenConfig.h">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClInclude>
+    <ClInclude Include="code\core\eSettingsManager.h">
+      <Filter>Header Files\code\core</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugenhook\eSelectScreenManager.h">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugenhook\eAnimatedPortraits.h">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugen\Common.h">
+      <Filter>Header Files\code\mugen</Filter>
+    </ClInclude>
+    <ClInclude Include="code\core\eInputManager.h">
+      <Filter>Header Files\code\core</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugenhook\eSlidingPortraits.h">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugenhook\eMenuManager.h">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugen\Draw.h">
+      <Filter>Header Files\code\mugen</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugenhook\eMagicBoxes.h">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugenhook\eVariationsManager.h">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugenhook\eAnimatedIcons.h">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugenhook\eTagFix.h">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\core\eAirReader.cpp">
+      <Filter>Header Files\code\core</Filter>
+    </ClCompile>
+    <ClCompile Include="code\core\eLog.cpp">
+      <Filter>Header Files\code\core</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugen\Sprite.cpp">
+      <Filter>Header Files\code\mugen</Filter>
+    </ClCompile>
+    <ClCompile Include="code\core\eCursor.cpp">
+      <Filter>Header Files\code\core</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugenhook\eCustomCursorManager.cpp">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugenhook\eCommonHooks.cpp">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugen\System.cpp">
+      <Filter>Header Files\code\mugen</Filter>
+    </ClCompile>
+    <ClCompile Include="IniReader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugenhook\eMugenConfig.cpp">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClCompile>
+    <ClCompile Include="code\core\eSettingsManager.cpp">
+      <Filter>Header Files\code\core</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugenhook\eSelectScreenManager.cpp">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugenhook\eAnimatedPortraits.cpp">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugen\Common.cpp">
+      <Filter>Header Files\code\mugen</Filter>
+    </ClCompile>
+    <ClCompile Include="code\core\eInputManager.cpp">
+      <Filter>Header Files\code\core</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugenhook\eSlidingPortraits.cpp">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugenhook\eMenuManager.cpp">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugen\Draw.cpp">
+      <Filter>Header Files\code\mugen</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugenhook\eMagicBoxes.cpp">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugenhook\eVariationsManager.cpp">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugenhook\eAnimatedIcons.cpp">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugenhook\eTagFix.cpp">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MugenHook.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

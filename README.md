@@ -8,6 +8,7 @@ Add features to M.U.G.E.N engine.
 - Magic boxes, aka timed cells which allow you do time based character seleciton
 - Variations allowing you to add up to 255 chars on one box
 - Animated portraits on screen with AIR playback and animations upon selection
+- Animated icons
  - Use left/right to control menu
  - Fixed tag gamemode
  - Sliding portraits
@@ -31,4 +32,4 @@ Check out wiki on how to configure.
 
 Check for binaries in releases.
 
-Tested & compiled using Visual Studio 2015.
+Tested & compiled using Visual Studio 2017.

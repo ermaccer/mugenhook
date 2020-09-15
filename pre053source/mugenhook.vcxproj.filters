@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\code">
+      <UniqueIdentifier>{c66dca54-ebea-4576-b11c-90d78b92db03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\code\core">
+      <UniqueIdentifier>{bcc93abe-8a57-43c1-92be-ead62b0ef9e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\code\features">
+      <UniqueIdentifier>{567aea7b-07d6-48c7-9d9c-7eb65c94ed59}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IniReader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\eCursorManager.h">
+      <Filter>Header Files\code\core</Filter>
+    </ClInclude>
+    <ClInclude Include="code\eSelectScreenManager.h">
+      <Filter>Header Files\code\core</Filter>
+    </ClInclude>
+    <ClInclude Include="code\eMugen.h">
+      <Filter>Header Files\code\core</Filter>
+    </ClInclude>
+    <ClInclude Include="code\eAirReader.h">
+      <Filter>Header Files\code\core</Filter>
+    </ClInclude>
+    <ClInclude Include="code\eAnimatedPortraits.h">
+      <Filter>Header Files\code\features</Filter>
+    </ClInclude>
+    <ClInclude Include="code\eInputManager.h">
+      <Filter>Header Files\code\core</Filter>
+    </ClInclude>
+    <ClInclude Include="code\eSlidePorts.h">
+      <Filter>Header Files\code\features</Filter>
+    </ClInclude>
+    <ClInclude Include="code\eLog.h">
+      <Filter>Header Files\code\core</Filter>
+    </ClInclude>
+    <ClInclude Include="code\eSettingsManager.h">
+      <Filter>Header Files\code\core</Filter>
+    </ClInclude>
+    <ClInclude Include="code\eFightLogger.h">
+      <Filter>Header Files\code\features</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IniReader.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Header Files\code</Filter>
+    </ClCompile>
+    <ClCompile Include="code\eMugen.cpp">
+      <Filter>Header Files\code\core</Filter>
+    </ClCompile>
+    <ClCompile Include="code\eSelectScreenManager.cpp">
+      <Filter>Header Files\code\core</Filter>
+    </ClCompile>
+    <ClCompile Include="code\eAirReader.cpp">
+      <Filter>Header Files\code\core</Filter>
+    </ClCompile>
+    <ClCompile Include="code\eAnimatedPortraits.cpp">
+      <Filter>Header Files\code\features</Filter>
+    </ClCompile>
+    <ClCompile Include="code\eCursorManager.cpp">
+      <Filter>Header Files\code\core</Filter>
+    </ClCompile>
+    <ClCompile Include="code\eInputManager.cpp">
+      <Filter>Header Files\code\core</Filter>
+    </ClCompile>
+    <ClCompile Include="code\eSlidePorts.cpp">
+      <Filter>Header Files\code\features</Filter>
+    </ClCompile>
+    <ClCompile Include="code\eLog.cpp">
+      <Filter>Header Files\code\core</Filter>
+    </ClCompile>
+    <ClCompile Include="code\eSettingsManager.cpp">
+      <Filter>Header Files\code\core</Filter>
+    </ClCompile>
+    <ClCompile Include="code\eFightLogger.cpp">
+      <Filter>Header Files\code\features</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="mugenhook.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+</Project>
