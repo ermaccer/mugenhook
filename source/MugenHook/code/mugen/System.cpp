@@ -81,10 +81,16 @@ int eSystem::GetGameFlow()
 
 int eSystem::GetGameplayMode()
 {
-	return *(int*)(*(int*)pMugenDataPointer + 0x5094);
+	if (*(int*)pMugenDataPointer)
+		return *(int*)(*(int*)pMugenDataPointer + 0x5094);
+	else
+		return 0;
 }
 
 int eSystem::GetTimer()
 {
-	return *(int*)(*(int*)pMugenDataPointer + 0x11E98);
+	if (*(int*)pMugenDataPointer)
+		return *(int*)(*(int*)pMugenDataPointer + 0x11E98);
+	else
+		return 0;
 }
