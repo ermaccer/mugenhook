@@ -21,7 +21,7 @@ void eVariationsManager::Init()
 	m_nStartCounter = 0;
 	m_nStartCounterP2 = 0;
 	m_bVariationsScanRequired = true;
-	m_tTickCounterVariations = eSystem::GetTimer();
+	m_tTickCounterVariations = 0;
 
 	if (eSettingsManager::bHookVariations)
 		ReadFile("cfg\\variations.dat");
@@ -109,7 +109,7 @@ int eVariationsManager::FindVariationData(int row, int column)
 
 void eVariationsManager::HideVariationCharacters()
 {
-	eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
+	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
 
 
@@ -117,7 +117,7 @@ void eVariationsManager::HideVariationCharacters()
 
 	if (m_bVariationsScanRequired)
 	{
-		eMugenCharacter emptyChar;
+		eMugenCharacterInfo emptyChar;
 		emptyChar.ID = -1;
 		emptyChar.SpritePointer = 0;
 
@@ -158,7 +158,7 @@ void eVariationsManager::HideVariationCharacters()
 void eVariationsManager::UpdateCharactersP1()
 {
 
-	eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
+	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
 	// only update with available cursor
 	if (eCursor::Player1_Character > -1 && !eCursor::Player1_Selected)
@@ -210,7 +210,7 @@ void eVariationsManager::UpdateCharactersP1()
 
 void eVariationsManager::UpdateCharactersP2()
 {
-	eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
+	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
 	// only update with available cursor
 	if (eCursor::Player2_Character > -1 && !eCursor::Player2_Selected)
@@ -269,7 +269,7 @@ void eVariationsManager::ProcessInactivity()
 void eVariationsManager::ResetVariationStatus()
 {
 
-	eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
+	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
 	for (int i = 0; i < eSystem::iColumns * eSystem::iRows; i++)
 	{

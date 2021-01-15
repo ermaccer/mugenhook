@@ -38,7 +38,7 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -100,6 +100,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <TargetExt>.asi</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -120,13 +121,14 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;MUGENHOOK_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;MUGENHOOK_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -162,6 +164,7 @@
       <ConformanceMode>false</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -249,12 +252,15 @@
     <ClInclude Include="code\mugenhook\eMugenConfig.h" />
     <ClInclude Include="code\mugenhook\eSelectScreenManager.h" />
     <ClInclude Include="code\mugenhook\eSlidingPortraits.h" />
+    <ClInclude Include="code\mugenhook\eStageAnnouncer.h" />
     <ClInclude Include="code\mugenhook\eTagFix.h" />
     <ClInclude Include="code\mugenhook\eVariationsManager.h" />
+    <ClInclude Include="code\mugen\Character.h" />
     <ClInclude Include="code\mugen\Common.h" />
     <ClInclude Include="code\mugen\Draw.h" />
     <ClInclude Include="code\mugen\Sprite.h" />
     <ClInclude Include="code\mugen\System.h" />
+    <ClInclude Include="code\mugen\Variables.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="IniReader.h" />
     <ClInclude Include="pch.h" />
@@ -275,6 +281,7 @@
     <ClCompile Include="code\mugenhook\eMugenConfig.cpp" />
     <ClCompile Include="code\mugenhook\eSelectScreenManager.cpp" />
     <ClCompile Include="code\mugenhook\eSlidingPortraits.cpp" />
+    <ClCompile Include="code\mugenhook\eStageAnnouncer.cpp" />
     <ClCompile Include="code\mugenhook\eTagFix.cpp" />
     <ClCompile Include="code\mugenhook\eVariationsManager.cpp" />
     <ClCompile Include="code\mugen\Common.cpp" />

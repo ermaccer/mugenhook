@@ -18,7 +18,7 @@ public:
 	static int  m_pSelectScreenStringPointer;
 
 	static std::string  m_pSelectScreenLastString;
-	static eMugenCharacter* m_pCharacter;
+	static eMugenCharacterInfo* m_pCharacter;
 	static void Init();
 	static void Process();
 	static void HookWaitAtCharacterSelect();

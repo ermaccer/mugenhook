@@ -38,6 +38,7 @@ bool eSettingsManager::bHookVariations;
 bool eSettingsManager::bHideVariationCharacters;
 bool eSettingsManager::bHookMagicBoxes;
 bool  eSettingsManager::bUseFightLog;
+bool  eSettingsManager::bHookStageAnnouncer;
 char* eSettingsManager::szFightLogFile;
 bool eSettingsManager::bHookAnimatedIcons;
 void eSettingsManager::Init()
@@ -89,4 +90,6 @@ void eSettingsManager::Init()
 
 	bUseFightLog = ini->ReadBoolean("Settings", "bUseFightLog", 0);
 	szFightLogFile = ini->ReadString("Settings", "szFightLogFile", 0);
+
+	bHookStageAnnouncer = ini->ReadBoolean("Settings", "bHookStageAnnouncer", 0);
 }

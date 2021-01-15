@@ -17,6 +17,7 @@
 #include "code/mugenhook/eVariationsManager.h"
 #include "code/mugenhook/eAnimatedIcons.h"
 #include "code/mugenhook/eTagFix.h"
+#include "code/mugenhook/eStageAnnouncer.h"
 
 
 void Init()
@@ -45,13 +46,14 @@ void Init()
 			InjectHook(0x40C4A0, eCommonHooks::HookPushDebugMessage, PATCH_JUMP);
 	}
 
+
+
 	eSystem::Init();
 	eCursor::Init();
 	eCommonHooks::Init();
-
+	eCustomCursorManager::Init();
 	if (eSettingsManager::bHookCursorTable)
 		eCustomCursorManager::ReadFile("cfg\\soundAnn.dat");
-
 	eSelectScreenManager::Init();
 	eAnimatedPortraits::Init();
 	eSlidingPortraits::Init();
@@ -59,7 +61,6 @@ void Init()
 	eVariationsManager::Init();
 	eAnimatedIcons::Init();
 	eTagFix::Init();
-
 
 	if (eSettingsManager::bUseLeftRightInMenu)
 	{
@@ -102,13 +103,12 @@ void Init()
 	if (eSettingsManager::bGameModeSingleHide) Patch<char>(0x40ADC2, 4);
 	if (eSettingsManager::bGameModeTurnsHide)  Patch<char>(0x40AE3C, 4);
 
-
-
-
+	eStageAnnouncer::Init();
 
 	PushDebugMessage("MugenHook loaded!\n");
 
 }
+
 
 
 #ifndef _XP_SUPPORT
@@ -124,7 +124,6 @@ extern "C"
 	}
 }
 #endif
-
 #ifdef _XP_SUPPORT
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,

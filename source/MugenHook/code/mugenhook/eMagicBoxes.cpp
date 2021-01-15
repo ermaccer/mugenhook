@@ -7,7 +7,7 @@
 #include <iostream>
 
 std::vector<int> eMagicBoxes::m_vMagicBoxes;
-std::vector<eMugenCharacter> eMagicBoxes::m_vMagicBoxesCharacters;
+std::vector<eMugenCharacterInfo> eMagicBoxes::m_vMagicBoxesCharacters;
 std::vector<eBoxEntry> eMagicBoxes::m_vMagicBoxesData;
 int eMagicBoxes::m_nMagicBoxID;
 bool eMagicBoxes::m_bScanRequired;
@@ -19,7 +19,7 @@ void eMagicBoxes::Init()
 {
 	m_nMagicBoxID = 0;
 	m_bScanRequired = true;
-	m_nMagicBoxTickCounter = eSystem::GetTimer();
+	m_nMagicBoxTickCounter = 0;
 
 	if (eSettingsManager::bHookMagicBoxes)
 		ReadFile("cfg\\magicBoxes.dat");
@@ -71,7 +71,7 @@ void eMagicBoxes::ReadFile(const char * file)
 
 void eMagicBoxes::GetBox()
 {
-	eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
+	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
 	if (m_bScanRequired)
 	{
@@ -106,7 +106,7 @@ void eMagicBoxes::GetBox()
 
 void eMagicBoxes::Process()
 {
-	eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
+	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
 	// TODO:: make a better timer solution
 	for (unsigned int i = 0; i < m_vMagicBoxes.size(); i++)
@@ -146,7 +146,7 @@ void eMagicBoxes::Process()
 void eMagicBoxes::ResetBoxesStatus()
 {
 
-	eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
+	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
 	for (unsigned int i = 0; i < m_vMagicBoxes.size(); i++)
 	{

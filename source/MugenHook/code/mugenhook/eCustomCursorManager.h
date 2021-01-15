@@ -23,7 +23,7 @@ struct eCellEntry {
 class eCustomCursorManager {
 public:
 	static std::vector<eCellEntry> CellTable;
-
+	static void Init();
 	static void ReadFile(const char* file);
 	static int  FindCell(int row, int col);
 	static int  FindCellBasedOnID(int id);

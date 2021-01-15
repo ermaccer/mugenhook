@@ -9,6 +9,9 @@
 #include "eAnimatedIcons.h"
 #include <iostream>
 #include <fstream>
+#include "eMenuManager.h"
+#include "eStageAnnouncer.h"
+
 
 int eSelectScreenManager::m_bPlayer1HasFinishedWaiting;
 int eSelectScreenManager::m_bPlayer2HasFinishedWaiting;
@@ -23,7 +26,7 @@ int eSelectScreenManager::m_pSelectScreenProcessPointer;
 int eSelectScreenManager::m_pSelectScreenStringPointer;
 std::string eSelectScreenManager::m_pSelectScreenLastString;
 
-eMugenCharacter* eSelectScreenManager::m_pCharacter;
+eMugenCharacterInfo* eSelectScreenManager::m_pCharacter;
 
 void eSelectScreenManager::Init()
 {
@@ -33,8 +36,8 @@ void eSelectScreenManager::Init()
 	m_pSelectScreenStringPointer = 0;
 	m_pSelectScreenLastString = "";
 	m_pCharacter = nullptr;
-	m_tSelectTickCounter = eSystem::GetTimer();
-	m_tSelectTickCounterP2 = eSystem::GetTimer();
+	m_tSelectTickCounter = 0;
+	m_tSelectTickCounterP2 = 0;
 
 	eLog::PushMessage(__FUNCTION__, "Initialize\n");
 
@@ -62,10 +65,23 @@ void eSelectScreenManager::Process()
 	if (GetAsyncKeyState(VK_F5) && eSettingsManager::bDumpCharacterInfo) PrintCharacterData();
 
 
-	if (eSettingsManager::bRandomStageConfirmSounds)
+	if (eSettingsManager::bRandomStageConfirmSounds && !eSettingsManager::bHookStageAnnouncer)
 	{
 		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x36C) = eSettingsManager::iRandomStageGroup;
 		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x36C + 4) = rand() % eSettingsManager::iRandomStageRandomMax;
+	}
+
+	if (eSettingsManager::bHookStageAnnouncer)
+	{
+		if (eMenuManager::m_pSelectScreenDataPointer)
+		{
+			int stageSelection = *(int*)(eMenuManager::m_pSelectScreenDataPointer + 0x3908);
+			eStageAnnouncerEntry sound = eStageAnnouncer::m_vStageEntries[eStageAnnouncer::FindStageData(stageSelection)];
+
+			*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x36C) = sound.Group;
+			*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x36C + 4) = sound.Index;
+		}
+
 	}
 
 }
@@ -133,7 +149,7 @@ void eSelectScreenManager::HookSelectScreenProcess(int a1, int a2)
 
 void eSelectScreenManager::PrintCharacterData()
 {
-	eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
+	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 	std::ofstream oFile("characters.txt", std::ofstream::binary);
 
 	if (CharactersArray)
@@ -165,7 +181,7 @@ void eSelectScreenManager::PrintCharacterData()
 
 int eSelectScreenManager::ProcessDrawingCharacterFace(int * a1, int a2, int a3, int a4, int a5, int a6, int a7)
 {
-	eMugenCharacter* character;
+	eMugenCharacterInfo* character;
 	_asm mov character, ecx
 
 	if (eSettingsManager::bHookAnimatedIcons)

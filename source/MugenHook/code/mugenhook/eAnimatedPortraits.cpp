@@ -24,7 +24,7 @@ int eAnimatedPortraits::iTickCounter_p2;
 
 int eAnimatedPortraits::pFrameTablePointer;
 
-
+bool eAnimatedPortraits::bReadyToDrawSprite;
 
 
 
@@ -40,6 +40,8 @@ void eAnimatedPortraits::Init()
 	iTickCounter_p2 = eSystem::GetTimer();
 
 	pFrameTablePointer = 0;
+
+	bReadyToDrawSprite = false;
 
 	eLog::PushMessage(__FUNCTION__, "Initialize\n");
 
@@ -156,7 +158,7 @@ void eAnimatedPortraits::Process()
 
 	if (!eSettingsManager::bEnableSelectAnimations)
 	{
-		eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
+		eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
 		// get anims
 		AIR_Reader = GetAIRFromName(GetCellFName(eCursor::Player1_Row, eCursor::Player1_Column));
@@ -203,7 +205,7 @@ void eAnimatedPortraits::Process()
 	{
 		if (!eCursor::Player1_Selected) {
 
-			eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
+			eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
 			// get anims
 			AIR_Reader = GetAIRFromName(GetCellFName(eCursor::Player1_Row, eCursor::Player1_Column));
@@ -254,7 +256,7 @@ void eAnimatedPortraits::Process()
 		}
 		else
 		{
-			eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
+			eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
 			AIR_Reader = GetAIRFromName(GetCellFName(eCursor::Player1_Row, eCursor::Player1_Column));
 			iAnimEntry = FindPortraitEntry(eCursor::Player1_Row, eCursor::Player1_Column);
@@ -311,7 +313,7 @@ void eAnimatedPortraits::ProcessP2()
 	{
 		reader = GetAIRFromName(GetCellFName(eCursor::Player2_Row, eCursor::Player2_Column));
 		iAnimEntry = FindPortraitEntry(eCursor::Player2_Row, eCursor::Player2_Column);
-		eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
+		eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
 		int multipiler = 0;
 		if ((CharactersArray[eCursor::Player2_Character].CharacterFlag & CHAR_FLAG_VARIATIONS))
@@ -370,7 +372,7 @@ void eAnimatedPortraits::ProcessP2()
 		{
 			reader = GetAIRFromName(GetCellFName(eCursor::Player2_Row, eCursor::Player2_Column));
 			iAnimEntry = FindPortraitEntry(eCursor::Player2_Row, eCursor::Player2_Column);
-			eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
+			eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
 			int multipiler = 0;
 			if ((CharactersArray[eCursor::Player2_Character].CharacterFlag & CHAR_FLAG_VARIATIONS))
@@ -431,7 +433,7 @@ void eAnimatedPortraits::ProcessP2()
 			reader = GetAIRFromName(GetCellFName(eCursor::Player2_Row, eCursor::Player2_Column));
 			iAnimEntry = FindPortraitEntry(eCursor::Player2_Row, eCursor::Player2_Column);
 
-			eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
+			eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
 			int multipiler = 0;
 			if ((CharactersArray[eCursor::Player2_Character].CharacterFlag & CHAR_FLAG_VARIATIONS))
@@ -552,6 +554,7 @@ int eAnimatedPortraits::HookDisplaySprites(int a1, int a2, int a3, int a4, int a
 	}
 
 	eCommonHooks::ProcessCharacterSpriteEvent();
+
 
 	return  DrawSprites(a1, a2, a3, a4, a5, a6, 0);
 }

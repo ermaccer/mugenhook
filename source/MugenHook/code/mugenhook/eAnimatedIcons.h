@@ -28,6 +28,6 @@ public:
 	static void   ReadFile(const char* file);
 	static void   FlagCharacters();
 	static int    FindIconEntry(int charID);
-	static void   Animate(eMugenCharacter* character);
+	static void   Animate(eMugenCharacterInfo* character);
 	static void   RefreshAnimationCounters();
 };

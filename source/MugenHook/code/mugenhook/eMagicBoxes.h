@@ -10,7 +10,7 @@ struct eBoxEntry {
 class eMagicBoxes {
 public:
 	static std::vector<int> m_vMagicBoxes;
-	static std::vector<eMugenCharacter> m_vMagicBoxesCharacters;
+	static std::vector<eMugenCharacterInfo> m_vMagicBoxesCharacters;
 	static std::vector<eBoxEntry> m_vMagicBoxesData;
 	static int m_nMagicBoxID;
 	static bool m_bScanRequired;

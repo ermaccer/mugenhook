@@ -38,6 +38,8 @@ public:
 
 	static int pFrameTablePointer;
 
+	static bool bReadyToDrawSprite;
+
 	static void Init();
 	static void ReadFile(const char* file);
 	static void ReadFramesFile(const char* file);

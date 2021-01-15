@@ -21,8 +21,8 @@ bool  eSlidingPortraits::m_bStopSlidingP2;
 
 void eSlidingPortraits::Init()
 {
-	m_tTimer = eSystem::GetTimer();
-	m_tTimerP2 = eSystem::GetTimer();
+	m_tTimer = 0;
+	m_tTimerP2 = 0;
 	p1_portrait_slide_speed = 0;
 	p2_portrait_slide_speed = 0;
 	p1_portrait_slide_max_dist = 0;

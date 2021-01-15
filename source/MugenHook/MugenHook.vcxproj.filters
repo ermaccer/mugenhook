@@ -102,6 +102,15 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="code\mugen\Variables.h">
+      <Filter>Header Files\code\mugen</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugen\Character.h">
+      <Filter>Header Files\code\mugen</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugenhook\eStageAnnouncer.h">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -171,6 +180,9 @@
       <Filter>Header Files\code\mugenhook</Filter>
     </ClCompile>
     <ClCompile Include="code\mugenhook\eTagFix.cpp">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugenhook\eStageAnnouncer.cpp">
       <Filter>Header Files\code\mugenhook</Filter>
     </ClCompile>
   </ItemGroup>

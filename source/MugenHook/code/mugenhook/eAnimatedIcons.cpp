@@ -13,7 +13,7 @@ int eAnimatedIcons::m_nIconcounter;
 void eAnimatedIcons::Init()
 {
 	m_bScanRequiredForAIcons = true;
-	m_nIconcounter = eSystem::GetTimer();
+	m_nIconcounter = 0;
 	if (eSettingsManager::bHookAnimatedIcons)
 	     ReadFile("cfg\\animIcons.dat");
 	
@@ -73,7 +73,7 @@ void eAnimatedIcons::ReadFile(const char * file)
 
 void eAnimatedIcons::FlagCharacters()
 {
-	eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
+	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
 	if (m_bScanRequiredForAIcons)
 	{
@@ -107,7 +107,7 @@ int eAnimatedIcons::FindIconEntry(int charID)
 	return iFind;
 }
 
-void eAnimatedIcons::Animate(eMugenCharacter* character)
+void eAnimatedIcons::Animate(eMugenCharacterInfo* character)
 {
 	int iIcon = FindIconEntry(character->ID);
 
@@ -160,7 +160,7 @@ void eAnimatedIcons::Animate(eMugenCharacter* character)
 
 void eAnimatedIcons::RefreshAnimationCounters()
 {
-	eMugenCharacter* CharactersArray = *(eMugenCharacter**)0x503394;
+	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
 
 	eAirReader AIR_Reader;

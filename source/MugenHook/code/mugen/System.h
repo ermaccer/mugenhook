@@ -34,7 +34,7 @@ enum eGameFlowType {
 
 
 
-struct eMugenCharacter {
+struct eMugenCharacterInfo {
 	int   ID;
 	char  CharacterFlag;
 	char  CurrentVariation;
@@ -45,6 +45,23 @@ struct eMugenCharacter {
 	char  FolderName[512];
 	int   SpritePointer;
 	float Scale;
+};
+
+struct eMugenStage {
+	char FileName[512];
+	char StageName[84];
+};
+
+struct eMugenCharacterData{
+	int ID;
+	int Unknown[2];
+	char pad[512];
+	char FileName[512];
+	char FilePath[1536];
+	char _pad[84]; // most likely pal assoc?
+	char IntroFile[512];
+	char EndingFile[512];
+	char __pad[528];
 };
 
 

@@ -10,7 +10,7 @@ struct eVariationCharacter {
 	int iVariations;
 	int iPlace;
 	std::vector<int> vVariationIDs;
-	std::vector<eMugenCharacter> vVariationChars;
+	std::vector<eMugenCharacterInfo> vVariationChars;
 };
 
 class eVariationsManager {
