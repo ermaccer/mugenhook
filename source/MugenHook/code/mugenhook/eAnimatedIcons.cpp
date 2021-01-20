@@ -3,6 +3,7 @@
 #include "..\core\eSettingsManager.h"
 #include "..\core\eAirReader.h"
 #include "..\core\eLog.h"
+#include "eMenuManager.h"
 
 std::vector<eAnimIconEntry> eAnimatedIcons::m_vAnimatedIcons;
 std::vector<int> eAnimatedIcons::m_vUsedCharacters;
@@ -118,19 +119,21 @@ void eAnimatedIcons::Animate(eMugenCharacterInfo* character)
 
 	Animation = AIR_Reader.GetAnimation(m_vAnimatedIcons[iIcon].AnimationID);
 
-	if (character->ExtraFlags & EXTRA_FLAG_VAR_SPECIAL_CONTROLLER)
+
+	if (character->ExtraFlags & EXTRA_FLAG_VAR_SPECIAL_CONTROLLER && character->CharacterFlag & CHAR_FLAG_VARIATIONS)
 	{
+
 		if (character->CurrentIconIndex > Animation.MaxFrames - 1)
 			character->CurrentIconIndex = Animation.MaxFrames - 1;
 
 		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x230 + 4) = Animation.vAnimData[character->CurrentIconIndex].Group;
 		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x230 + 8) = Animation.vAnimData[character->CurrentIconIndex].Index;
 
-		if (eSystem::GetTimer() - m_nIconcounter <= Animation.vAnimData[character->CurrentIconIndex].Frametime) return;
+		if (eSystem::GetTimer() - character->IconTimer <= Animation.vAnimData[character->CurrentIconIndex].Frametime) return;
 		character->CurrentIconIndex++;
 
 		// reset timer
-		m_nIconcounter = eSystem::GetTimer();
+		character->IconTimer = eSystem::GetTimer();
 	}
 	else
 	{
@@ -149,11 +152,11 @@ void eAnimatedIcons::Animate(eMugenCharacterInfo* character)
 		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x230 + 4) = Animation.vAnimData[character->CurrentIconIndex].Group;
 		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x230 + 8) = Animation.vAnimData[character->CurrentIconIndex].Index;
 
-		if (eSystem::GetTimer() - m_nIconcounter <= Animation.vAnimData[character->CurrentIconIndex].Frametime) return;
+		if (eSystem::GetTimer() - character->IconTimer <= Animation.vAnimData[character->CurrentIconIndex].Frametime) return;
 		character->CurrentIconIndex++;
 
 		// reset timer
-		m_nIconcounter = eSystem::GetTimer();
+		character->IconTimer = eSystem::GetTimer();
 	}
 	
 }
@@ -184,4 +187,9 @@ void eAnimatedIcons::RefreshAnimationCounters()
 
 			}
 		}
+}
+
+void eAnimatedIcons::ResetTimer()
+{
+
 }

@@ -258,6 +258,7 @@
     <ClInclude Include="code\mugen\Character.h" />
     <ClInclude Include="code\mugen\Common.h" />
     <ClInclude Include="code\mugen\Draw.h" />
+    <ClInclude Include="code\mugen\Sound.h" />
     <ClInclude Include="code\mugen\Sprite.h" />
     <ClInclude Include="code\mugen\System.h" />
     <ClInclude Include="code\mugen\Variables.h" />
@@ -286,6 +287,7 @@
     <ClCompile Include="code\mugenhook\eVariationsManager.cpp" />
     <ClCompile Include="code\mugen\Common.cpp" />
     <ClCompile Include="code\mugen\Draw.cpp" />
+    <ClCompile Include="code\mugen\Sound.cpp" />
     <ClCompile Include="code\mugen\Sprite.cpp" />
     <ClCompile Include="code\mugen\System.cpp" />
     <ClCompile Include="dllmain.cpp" />

@@ -44,6 +44,7 @@ public:
 	static int  iRandomStageRandomMax;
 	static bool bUseLeftRightInMenu;
 	static bool bHookStageAnnouncer;
+	static bool bDisableStageSelection;
 
 	/* Tag Stuff */
 	static bool bEnableTagFix;

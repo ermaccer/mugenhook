@@ -11,6 +11,7 @@
 #include <fstream>
 #include "eMenuManager.h"
 #include "eStageAnnouncer.h"
+#include "..\mugen\Sound.h"
 
 
 int eSelectScreenManager::m_bPlayer1HasFinishedWaiting;
@@ -59,6 +60,7 @@ void eSelectScreenManager::Process()
 			ProcessWaitPlayer2();
 		}
 	}
+
 
 	if (eSettingsManager::bDev_DisplayPos) printf("Player 1: Row: %d   Column: %d  Character: %d \r", eCursor::Player1_Row, eCursor::Player1_Column, eCursor::Player1_RandomCharacter);
 
@@ -187,7 +189,10 @@ int eSelectScreenManager::ProcessDrawingCharacterFace(int * a1, int a2, int a3, 
 	if (eSettingsManager::bHookAnimatedIcons)
 	{
 		if (character->CharacterFlag & CHAR_FLAG_ANIM_ICON)
+		{
 			eAnimatedIcons::Animate(character);
+		}
+
 		else
 		{
 			*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x230 + 4) = eSystem::iPortraitGroup;

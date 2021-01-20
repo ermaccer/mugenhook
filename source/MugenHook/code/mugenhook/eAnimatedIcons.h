@@ -30,4 +30,5 @@ public:
 	static int    FindIconEntry(int charID);
 	static void   Animate(eMugenCharacterInfo* character);
 	static void   RefreshAnimationCounters();
+	static void   ResetTimer();
 };

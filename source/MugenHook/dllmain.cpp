@@ -19,6 +19,10 @@
 #include "code/mugenhook/eTagFix.h"
 #include "code/mugenhook/eStageAnnouncer.h"
 
+int  GenericTrueReturn() { return 1; }
+int  GenericFalseReturn() { return 0; }
+void GenericDummy() { }
+
 
 void Init()
 {
@@ -72,11 +76,19 @@ void Init()
 	if (eSettingsManager::iSelectableFighters)
 		Patch<int>(0x4063F0, eSettingsManager::iSelectableFighters);
 
-	if (eSettingsManager::bDisableNumerationInStageSelect)
+	if (eSettingsManager::bDisableNumerationInStageSelect && !eSettingsManager::bDisableStageSelection)
 	{
 		Nop(0x407E79 + 5, 1);
 		Patch<char>(0x407E4F + 2, 8);
 		InjectHook(0x407E79, eSelectScreenManager::HookStageNumeration, PATCH_CALL);
+	}
+
+	if (eSettingsManager::bDisableStageSelection)
+	{
+		InjectHook(0x406BA5, GenericTrueReturn, PATCH_CALL);
+		Nop(0x407EE7, 5);
+		Nop(0x406C3D, 5);
+
 	}
 
 

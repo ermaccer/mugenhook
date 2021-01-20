@@ -42,7 +42,8 @@ struct eMugenCharacterInfo {
 	char  ExtraFlags;
 	char  Name[48];
 	char  FileName[512];
-	char  FolderName[512];
+	char  FolderName[508]; // originally 512, but we need data for timer, don't think it'll exceed 260 anyway
+	int   IconTimer;       // set with 0 anyway
 	int   SpritePointer;
 	float Scale;
 };
