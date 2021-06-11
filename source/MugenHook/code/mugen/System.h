@@ -1,4 +1,5 @@
 #pragma once
+#include "Sound.h"
 
 enum eGameplayModes {
 	MODE_ARCADE,
@@ -98,8 +99,9 @@ public:
 
 	static void Init();
 
-
+	static Sound* GetSystemSND();
 	static int GetGameFlow();
 	static int GetGameplayMode();
 	static int GetTimer();
+	static int GetCharactersAmount();
 };

@@ -10,6 +10,8 @@
 
 class eSelectScreenManager {
 public:
+	static bool m_bCachedSoundData;
+
 	static int  m_bPlayer1HasFinishedWaiting;
 	static int  m_bPlayer2HasFinishedWaiting;
 	static int  m_tSelectTickCounter;
@@ -29,4 +31,8 @@ public:
 	static int  ProcessDrawingCharacterFace(int* a1, int a2, int a3, int a4, int a5, int a6, int a7);
 	static int  HookStageNumeration(char* dest, char* format, int dummy, char* name);
 	static void HookSelectIDs();
+
+	static void HookLoadCharacterData(char* file);
+	static void HookCacheSoundData();
+	static void THREAD_CacheSoundData();
 };

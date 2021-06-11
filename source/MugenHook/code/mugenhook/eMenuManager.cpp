@@ -24,8 +24,10 @@ void eMenuManager::Init()
 	InjectHook(0x4125B5, HookSelectScreenMenu, PATCH_CALL);
     InjectHook(0x412591, HookMainMenu,         PATCH_CALL);
 	InjectHook(0x407CC6, HookSelectScreenProcess, PATCH_JUMP);
-	//InjectHook(0x4126B5, HookGameLoop,         PATCH_CALL);
+	InjectHook(0x4126B5, HookGameLoop,         PATCH_CALL);
+	InjectHook(0x4125C1, HookBeginMatch, PATCH_CALL);
 }
+
 
 int eMenuManager::HookMainMenu()
 {
@@ -33,7 +35,7 @@ int eMenuManager::HookMainMenu()
 	m_bIsInSelectScreen = false;
 
 	if (eSettingsManager::bEnableSlidePortraits)
-	    eSlidingPortraits::Reset();
+		eSlidingPortraits::Reset();
 
 	if (eSettingsManager::bHookMagicBoxes)
 	{
@@ -63,6 +65,13 @@ int eMenuManager::HookSelectScreenMenu()
 int eMenuManager::HookGameLoop()
 {
 	return CallAndReturn<int, 0x412FA0>();
+}
+
+int eMenuManager::HookBeginMatch()
+{
+	if (eSettingsManager::bEnableSlidePortraits)
+		eSlidingPortraits::Reset();
+	return CallAndReturn<int, 0x4227D0>();
 }
 
 void __declspec(naked) eMenuManager::HookSelectScreenProcess()

@@ -42,6 +42,14 @@ bool  eSettingsManager::bHookStageAnnouncer;
 bool  eSettingsManager::bDisableStageSelection;
 char* eSettingsManager::szFightLogFile;
 bool eSettingsManager::bHookAnimatedIcons;
+
+int  eSettingsManager::iVariationChangeGroup;
+int  eSettingsManager::iVariationChangeIndex;
+
+int  eSettingsManager::iCursorDefaultGroup;
+int  eSettingsManager::iCursorDefaultIndex;
+bool eSettingsManager::bUseThreadForLoading;
+
 void eSettingsManager::Init()
 {
 	ini = new CIniReader("mugenhook.ini");
@@ -94,4 +102,11 @@ void eSettingsManager::Init()
 
 	bHookStageAnnouncer = ini->ReadBoolean("Settings", "bHookStageAnnouncer", 0);
 	bDisableStageSelection = ini->ReadBoolean("Settings", "bDisableStageSelection ", 0);
+
+	iVariationChangeGroup = ini->ReadInteger("Settings", "iVariationChangeGroup", -1);
+	iVariationChangeIndex = ini->ReadInteger("Settings", "iVariationChangeIndex", -1);
+
+	iCursorDefaultGroup = ini->ReadInteger("Settings", "iCursorDefaultGroup", 6);
+	iCursorDefaultIndex = ini->ReadInteger("Settings", "iCursorDefaultIndex", 1);
+	bUseThreadForLoading = ini->ReadBoolean("Settings", "bUseThreadForLoading", false);
 }

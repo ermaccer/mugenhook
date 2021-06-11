@@ -20,6 +20,7 @@ public:
 	static int   portrait_slide_reset_on_move;
 	static bool m_bStopSliding;
 	static bool	m_bStopSlidingP2;
+	static bool m_bRequireRefresh;
 
 	static void Init();
 	static void Process();

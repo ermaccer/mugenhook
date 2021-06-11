@@ -18,6 +18,7 @@
 #include "code/mugenhook/eAnimatedIcons.h"
 #include "code/mugenhook/eTagFix.h"
 #include "code/mugenhook/eStageAnnouncer.h"
+#include "code/mugen/Sound.h"
 
 int  GenericTrueReturn() { return 1; }
 int  GenericFalseReturn() { return 0; }

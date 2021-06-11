@@ -1,4 +1,5 @@
 #include "eSelectScreenManager.h"
+#include "eCustomCursorManager.h"
 #include "..\mugen\System.h"
 #include "..\core\eCursor.h"
 #include "..\core\eLog.h"
@@ -12,7 +13,7 @@
 #include "eMenuManager.h"
 #include "eStageAnnouncer.h"
 #include "..\mugen\Sound.h"
-
+#include "..\mugen\Common.h"
 
 int eSelectScreenManager::m_bPlayer1HasFinishedWaiting;
 int eSelectScreenManager::m_bPlayer2HasFinishedWaiting;
@@ -27,6 +28,8 @@ int eSelectScreenManager::m_pSelectScreenProcessPointer;
 int eSelectScreenManager::m_pSelectScreenStringPointer;
 std::string eSelectScreenManager::m_pSelectScreenLastString;
 
+bool eSelectScreenManager::m_bCachedSoundData;
+
 eMugenCharacterInfo* eSelectScreenManager::m_pCharacter;
 
 void eSelectScreenManager::Init()
@@ -39,7 +42,7 @@ void eSelectScreenManager::Init()
 	m_pCharacter = nullptr;
 	m_tSelectTickCounter = 0;
 	m_tSelectTickCounterP2 = 0;
-
+	m_bCachedSoundData = false;
 	eLog::PushMessage(__FUNCTION__, "Initialize\n");
 
 	if (eSettingsManager::bEnableAfterSelectionPause)
@@ -48,6 +51,7 @@ void eSelectScreenManager::Init()
 	Patch<int>(0x408A5F + 6, (int)HookSelectScreenProcess);
 	InjectHook(0x407453, ProcessDrawingCharacterFace, PATCH_CALL);
 	InjectHook(0x404029, HookSelectIDs, PATCH_JUMP);
+	InjectHook(0x40380D, HookLoadCharacterData, PATCH_CALL);
 }
 
 void eSelectScreenManager::Process()
@@ -60,7 +64,6 @@ void eSelectScreenManager::Process()
 			ProcessWaitPlayer2();
 		}
 	}
-
 
 	if (eSettingsManager::bDev_DisplayPos) printf("Player 1: Row: %d   Column: %d  Character: %d \r", eCursor::Player1_Row, eCursor::Player1_Column, eCursor::Player1_RandomCharacter);
 
@@ -157,7 +160,7 @@ void eSelectScreenManager::PrintCharacterData()
 	if (CharactersArray)
 	{
 		oFile << "ID \t Flags \t File" << std::endl;
-		for (int i = 0; i < eSystem::iRows * eSystem::iColumns; i++)
+		for (int i = 0; i < eSystem::GetCharactersAmount(); i++)
 		{
 
 			oFile << "" << CharactersArray[i].ID << "\t ";
@@ -192,7 +195,6 @@ int eSelectScreenManager::ProcessDrawingCharacterFace(int * a1, int a2, int a3, 
 		{
 			eAnimatedIcons::Animate(character);
 		}
-
 		else
 		{
 			*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x230 + 4) = eSystem::iPortraitGroup;
@@ -255,4 +257,76 @@ void __declspec(naked) eSelectScreenManager::HookSelectIDs()
 		}
 	}
 
+}
+
+void eSelectScreenManager::HookLoadCharacterData(char * file)
+{
+	PushDebugMessage(file);
+
+	for (int i = 0; i < eSystem::GetCharactersAmount(); i++)
+	{
+		eSoundEntry snd;
+		snd.IsCached = false;
+		eCustomCursorManager::SoundCellTable.push_back(snd);
+	}
+
+	if (eSettingsManager::iCursorTableOperationType == MODE_CHAR_FILE)
+	{
+		if (eSettingsManager::bUseThreadForLoading)
+			CreateThread(nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(THREAD_CacheSoundData), nullptr, 0, nullptr);
+		else
+			HookCacheSoundData();
+
+	}
+
+
+}
+
+void eSelectScreenManager::THREAD_CacheSoundData()
+{
+	while (!m_bCachedSoundData)
+		HookCacheSoundData();
+}
+
+void eSelectScreenManager::HookCacheSoundData()
+{
+	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
+
+	for (int i = 0; i < eCustomCursorManager::SoundCellTable.size(); i++)
+	{
+		eCustomCursorManager::SoundCellTable[i].CharID = CharactersArray[i].ID;
+
+		std::string ini_path = CharactersArray[i].FolderName;
+		ini_path += CharactersArray[i].FileName;;
+
+		CIniReader ini((char*)ini_path.c_str());
+
+		std::string path = CharactersArray[i].FolderName;
+
+		eLog::PushMessage(__FUNCTION__, "Processing %d/%d\n", i + 1, eSystem::GetCharactersAmount());
+
+		if (path.length() > 0)
+		{
+			path += ini.ReadString("Files", "sound", 0);
+
+			std::size_t found = path.find_last_of(".");
+			path = path.substr(0, found + strlen("snd") + 1);
+
+			Sound* sound = LoadSNDFile(path.c_str());
+
+			if (sound)
+			{
+				eLog::PushMessage(__FUNCTION__, "Loaded sound data for %s\n", CharactersArray[i].FileName);
+				eCustomCursorManager::SoundCellTable[i].SoundData = sound;
+				eCustomCursorManager::SoundCellTable[i].IsCached = true;
+			}
+			else
+			{
+				eLog::PushMessage(__FUNCTION__, "Failed to load sound data for %s!\n", CharactersArray[i].FileName);
+				eLog::PushError();
+			}
+		}
+		m_bCachedSoundData = true;
+	}
+	eLog::PushMessage(__FUNCTION__, "Character sounds cached!\n");
 }

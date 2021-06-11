@@ -6,6 +6,7 @@
 #include "..\core\eSettingsManager.h"
 #include "..\core\eCursor.h"
 #include "eAnimatedPortraits.h"
+#include "..\mugen\Sound.h"
 
 std::vector<eVariationCharacter> eVariationsManager::m_vVariations;
 
@@ -177,6 +178,12 @@ void eVariationsManager::UpdateCharactersP1()
 				if (VariationID >= 0)
 				{
 
+					if (eSettingsManager::iVariationChangeGroup >= 0 && eSettingsManager::iVariationChangeIndex >= 0)
+					{
+						Sound* snd = eSystem::GetSystemSND();
+						PlaySound(snd, eSettingsManager::iVariationChangeGroup, eSettingsManager::iVariationChangeIndex, 0, 3.390625f);
+					}
+
 					int CharID = m_vVariations[VariationID].iPlace;
 
 
@@ -227,6 +234,12 @@ void eVariationsManager::UpdateCharactersP2()
 
 				if (VariationID >= 0)
 				{
+					if (eSettingsManager::iVariationChangeGroup >= 0 && eSettingsManager::iVariationChangeIndex >= 0)
+					{
+						Sound* snd = eSystem::GetSystemSND();
+						PlaySound(snd, eSettingsManager::iVariationChangeGroup, eSettingsManager::iVariationChangeIndex, 0, 3.390625f);
+					}
+
 					int CharID = m_vVariations[VariationID].iPlace;
 
 

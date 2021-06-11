@@ -3,17 +3,25 @@
 #include "..\mugen\System.h"
 #include "..\core\eCursor.h"
 #include "eMugenConfig.h"
+#include "..\mugen\Sound.h"
 #include "..\core\eSettingsManager.h"
+#include "..\core\eInputManager.h"
 
 std::vector<eCellEntry> eCustomCursorManager::CellTable;
-
+std::vector<eSoundEntry> eCustomCursorManager::SoundCellTable;
 void eCustomCursorManager::Init()
 {
 	CellTable.clear();
+	SoundCellTable.clear();
+	if (eSettingsManager::iCursorTableOperationType == MODE_CHAR_FILE)
+		InjectHook(0x40686A, HookSelectSoundPlayer, PATCH_CALL);
 }
 
 void eCustomCursorManager::ReadFile(const char * file)
 {
+	if (eSettingsManager::iCursorTableOperationType == MODE_CHAR_FILE)
+		return;
+
 	FILE* pFile = fopen(file, "rb");
 
 	if (!pFile)
@@ -88,8 +96,89 @@ int eCustomCursorManager::FindCellBasedOnID(int id)
 	return iFind;
 }
 
+void eCustomCursorManager::HookSelectSoundPlayer()
+{
+	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
+	int player = eInputManager::CheckLastPlayer();
+
+	if (!player)
+	{
+		if (eSystem::GetGameplayMode() == MODE_TRAINING)
+		{
+			if (eCursor::Player1_Selected)
+			{
+				if (CharactersArray[eCursor::Player2_Character].ID == -2) {
+					PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP2DoneGroup, eSystem::iSoundP2DoneIndex, 5, 100.0f);
+				}
+				else {
+					PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP2DoneGroup, eSystem::iSoundP2DoneIndex, 5, 100.0f);
+					while (!SoundCellTable[eCursor::Player2_Character].IsCached)
+						Sleep(1);
+					PlaySound(SoundCellTable[eCursor::Player2_Character].SoundData, eSettingsManager::iCursorDefaultGroup, eSettingsManager::iCursorDefaultIndex, 10, 3.390625f);
+				}
+			}
+			else
+			{
+				if (CharactersArray[eCursor::Player1_Character].ID == -2) {
+					PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP1DoneGroup, eSystem::iSoundP1DoneIndex, 5, 100.0f);
+				}
+				else {
+					PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP1DoneGroup, eSystem::iSoundP1DoneIndex, 5, 100.0f);
+					while (!SoundCellTable[eCursor::Player1_Character].IsCached)
+						Sleep(1);
+					PlaySound(SoundCellTable[eCursor::Player1_Character].SoundData, eSettingsManager::iCursorDefaultGroup, eSettingsManager::iCursorDefaultIndex, 10, 3.390625f);
+				}
+			}
+
+		}
+		else
+		{
+			if (!(CharactersArray[eCursor::Player1_Character].ID == -2))
+			{
+				PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP1DoneGroup, eSystem::iSoundP1DoneIndex, 5, 100.0f);
+				while (!SoundCellTable[eCursor::Player1_Character].IsCached)
+					Sleep(1);
+
+				PlaySound(SoundCellTable[eCursor::Player1_Character].SoundData, eSettingsManager::iCursorDefaultGroup, eSettingsManager::iCursorDefaultIndex, 10, 3.390625f);
+			}
+
+			if (CharactersArray[eCursor::Player1_Character].ID == -2 || eCursor::Player1_Selected && eSystem::GetGameplayMode() == MODE_WATCH) {
+				PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP1DoneGroup, eSystem::iSoundP1DoneIndex, 5, 100.0f);
+			}
+			else {
+				while (!SoundCellTable[eCursor::Player1_Character].IsCached)
+					Sleep(1);
+				PlaySound(SoundCellTable[eCursor::Player1_Character].SoundData, eSettingsManager::iCursorDefaultGroup, eSettingsManager::iCursorDefaultIndex, 10, 3.390625f);
+
+			}
+		}
+
+	}
+	else
+	{
+		if (!(CharactersArray[eCursor::Player2_Character].ID == -2))
+		{
+			PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP2DoneGroup, eSystem::iSoundP2DoneIndex, 5, 100.0f);
+
+			while (!SoundCellTable[eCursor::Player2_Character].IsCached)
+				Sleep(1);
+
+			PlaySound(SoundCellTable[eCursor::Player2_Character].SoundData, 6, 1, 10, 3.390625f);
+		}
+		else
+		{
+			PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP2DoneGroup, eSystem::iSoundP2DoneIndex, 5, 100.0f);
+		}
+
+	}
+
+}
+
 void eCustomCursorManager::Process()
 {
+	if (eSettingsManager::iCursorTableOperationType == MODE_CHAR_FILE)
+		return;
+
 	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 	int Player1_Cell = 0, Player2_Cell = 0;
 

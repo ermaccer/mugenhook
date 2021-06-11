@@ -5,7 +5,7 @@ Sound * LoadSNDFile(const char * name)
 	return CallAndReturn<Sound*, 0x46EF30, const char*>(name);
 }
 
-void PlaySound(Sound * snd, int group, int unknown, int index, float vol)
+void PlaySound(Sound * snd, int group, int index, int unk, float vol)
 {
-	STDCall<0x444AA0, Sound*, int, int, int, float>(snd, group, unknown, index, vol);
+	((void(__cdecl*)(Sound*, int, int, int, float))0x46ED30)(snd, group, index, unk, vol);
 }

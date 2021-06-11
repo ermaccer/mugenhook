@@ -27,6 +27,9 @@ public:
 	static int  iAfterSelectionPauseTime;
 	static int  iStartingGameModePos;
 	static int  iCursorTableOperationType;
+	static int  iCursorDefaultGroup;
+	static int  iCursorDefaultIndex;
+	static bool bUseThreadForLoading;
 
 	/* Animated Portraits */
 	static bool bEnableSelectAnimations;
@@ -53,6 +56,8 @@ public:
 	/* Variations */
 	static bool bHookVariations;
 	static bool bHideVariationCharacters;
+	static int  iVariationChangeGroup;
+	static int  iVariationChangeIndex;
 
 	/* Magic Boxes */
 	static bool bHookMagicBoxes;

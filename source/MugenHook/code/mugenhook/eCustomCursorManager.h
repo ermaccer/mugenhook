@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "..\mugen\Sound.h"
 
 enum eCursorOperationTypes {
 	MODE_ROW_COLUMN,
@@ -19,14 +20,21 @@ struct eCellEntry {
 };
 
 
+struct eSoundEntry {
+	int			CharID;
+	bool		IsCached;
+	Sound*		SoundData;
+};
+
 
 class eCustomCursorManager {
 public:
 	static std::vector<eCellEntry> CellTable;
+	static std::vector<eSoundEntry> SoundCellTable;
 	static void Init();
 	static void ReadFile(const char* file);
 	static int  FindCell(int row, int col);
 	static int  FindCellBasedOnID(int id);
-
+	static void HookSelectSoundPlayer();
 	static void Process();
 };

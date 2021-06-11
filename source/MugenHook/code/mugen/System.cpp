@@ -74,6 +74,11 @@ void eSystem::Init()
 	}
 }
 
+Sound * eSystem::GetSystemSND()
+{
+	return *(Sound**)(*(int*)eSystem::pMugenDataPointer + 0x112C0);
+}
+
 int eSystem::GetGameFlow()
 {
 	return *(int*)(*(int*)(0x5040C4));
@@ -93,4 +98,9 @@ int eSystem::GetTimer()
 		return *(int*)(*(int*)pMugenDataPointer + 0x11E98);
 	else
 		return 0;
+}
+
+int eSystem::GetCharactersAmount()
+{
+	return iRows * iColumns;
 }

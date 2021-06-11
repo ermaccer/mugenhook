@@ -14,7 +14,7 @@ public:
 	static int HookMainMenu();
 	static int HookSelectScreenMenu();
 	static int HookGameLoop();
-
+	static int HookBeginMatch();
 	static void HookSelectScreenProcess();
 
 

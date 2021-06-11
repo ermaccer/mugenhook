@@ -17,6 +17,7 @@ int   eSlidingPortraits::p2_portrait_axis;
 int   eSlidingPortraits::portrait_slide_reset_on_move;
 bool  eSlidingPortraits::m_bStopSliding;
 bool  eSlidingPortraits::m_bStopSlidingP2;
+bool  eSlidingPortraits::m_bRequireRefresh;
 
 
 void eSlidingPortraits::Init()
@@ -31,6 +32,7 @@ void eSlidingPortraits::Init()
 	p2_portrait_axis = 0;
 	m_bStopSliding = 0;
 	m_bStopSlidingP2 = 0;
+	m_bRequireRefresh = false;
 
 	if (eSettingsManager::bEnableSlidePortraits)
 	{
@@ -111,14 +113,8 @@ void eSlidingPortraits::ProcessP2()
 
 void eSlidingPortraits::Reset()
 {
-	m_bStopSliding = false;
-	m_bStopSlidingP2 = false;
-	// reset pos
-	*(float*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0x24) = eSystem::p1_face_offset[0];
-	*(float*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0x24 + 4) = eSystem::p1_face_offset[1];
-
-	*(float*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0xD4 + 0x24 + 4) = eSystem::p2_face_offset[0];
-	*(float*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0xD4 + 0x24 + 4 + 4) = eSystem::p2_face_offset[1];
+	eSlidingPortraits::ResetPlayer(1);
+	eSlidingPortraits::ResetPlayer(2);
 }
 
 void eSlidingPortraits::ResetPlayer(int player)
