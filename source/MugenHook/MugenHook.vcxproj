@@ -250,6 +250,7 @@
     <ClInclude Include="code\mugenhook\eMagicBoxes.h" />
     <ClInclude Include="code\mugenhook\eMenuManager.h" />
     <ClInclude Include="code\mugenhook\eMugenConfig.h" />
+    <ClInclude Include="code\mugenhook\eScriptProcessor.h" />
     <ClInclude Include="code\mugenhook\eSelectScreenManager.h" />
     <ClInclude Include="code\mugenhook\eSlidingPortraits.h" />
     <ClInclude Include="code\mugenhook\eStageAnnouncer.h" />
@@ -280,6 +281,7 @@
     <ClCompile Include="code\mugenhook\eMagicBoxes.cpp" />
     <ClCompile Include="code\mugenhook\eMenuManager.cpp" />
     <ClCompile Include="code\mugenhook\eMugenConfig.cpp" />
+    <ClCompile Include="code\mugenhook\eScriptProcessor.cpp" />
     <ClCompile Include="code\mugenhook\eSelectScreenManager.cpp" />
     <ClCompile Include="code\mugenhook\eSlidingPortraits.cpp" />
     <ClCompile Include="code\mugenhook\eStageAnnouncer.cpp" />

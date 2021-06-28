@@ -96,82 +96,110 @@ int eCustomCursorManager::FindCellBasedOnID(int id)
 	return iFind;
 }
 
+int eCustomCursorManager::FindSound(int id)
+{
+	int iFind = 0;
+	for (unsigned int i = 0; i < SoundCellTable.size(); i++)
+	{
+		if (SoundCellTable[i].CharID == id) {
+			iFind = i;
+			break;
+		}
+	}
+	return iFind;
+}
+
 void eCustomCursorManager::HookSelectSoundPlayer()
 {
-	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 	int player = eInputManager::CheckLastPlayer();
 
-	if (!player)
-	{
-		if (eSystem::GetGameplayMode() == MODE_TRAINING)
-		{
-			if (eCursor::Player1_Selected)
-			{
-				if (CharactersArray[eCursor::Player2_Character].ID == -2) {
-					PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP2DoneGroup, eSystem::iSoundP2DoneIndex, 5, 100.0f);
-				}
-				else {
-					PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP2DoneGroup, eSystem::iSoundP2DoneIndex, 5, 100.0f);
-					while (!SoundCellTable[eCursor::Player2_Character].IsCached)
-						Sleep(1);
-					PlaySound(SoundCellTable[eCursor::Player2_Character].SoundData, eSettingsManager::iCursorDefaultGroup, eSettingsManager::iCursorDefaultIndex, 10, 3.390625f);
-				}
-			}
-			else
-			{
-				if (CharactersArray[eCursor::Player1_Character].ID == -2) {
-					PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP1DoneGroup, eSystem::iSoundP1DoneIndex, 5, 100.0f);
-				}
-				else {
-					PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP1DoneGroup, eSystem::iSoundP1DoneIndex, 5, 100.0f);
-					while (!SoundCellTable[eCursor::Player1_Character].IsCached)
-						Sleep(1);
-					PlaySound(SoundCellTable[eCursor::Player1_Character].SoundData, eSettingsManager::iCursorDefaultGroup, eSettingsManager::iCursorDefaultIndex, 10, 3.390625f);
-				}
-			}
+	if (player == 0)
+		ProcessSoundP1();
+	else
+		ProcessSoundP2();
+}
 
+void eCustomCursorManager::ProcessSoundP1()
+{
+	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
+	if (eSystem::GetGameplayMode() == MODE_TRAINING)
+	{
+		if (eCursor::Player1_Selected)
+		{
+			if (CharactersArray[eCursor::Player2_Character].ID == -2) {
+				PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP2DoneGroup, eSystem::iSoundP2DoneIndex, 5, 100.0f);
+			}
+			else {
+				PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP2DoneGroup, eSystem::iSoundP2DoneIndex, 5, 100.0f);
+				while (!SoundCellTable[FindSound(CharactersArray[eCursor::Player2_Character].ID)].IsCached)
+					Sleep(1);
+				PlaySound(SoundCellTable[FindSound(CharactersArray[eCursor::Player2_Character].ID)].SoundData, eSettingsManager::iCursorDefaultGroup, eSettingsManager::iCursorDefaultIndex, 10, 3.390625f);
+			}
 		}
 		else
 		{
-			if (!(CharactersArray[eCursor::Player1_Character].ID == -2))
-			{
-				PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP1DoneGroup, eSystem::iSoundP1DoneIndex, 5, 100.0f);
-				while (!SoundCellTable[eCursor::Player1_Character].IsCached)
-					Sleep(1);
-
-				PlaySound(SoundCellTable[eCursor::Player1_Character].SoundData, eSettingsManager::iCursorDefaultGroup, eSettingsManager::iCursorDefaultIndex, 10, 3.390625f);
-			}
-
-			if (CharactersArray[eCursor::Player1_Character].ID == -2 || eCursor::Player1_Selected && eSystem::GetGameplayMode() == MODE_WATCH) {
+			if (CharactersArray[eCursor::Player1_Character].ID == -2) {
 				PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP1DoneGroup, eSystem::iSoundP1DoneIndex, 5, 100.0f);
 			}
 			else {
-				while (!SoundCellTable[eCursor::Player1_Character].IsCached)
+				PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP1DoneGroup, eSystem::iSoundP1DoneIndex, 5, 100.0f);
+				while (!SoundCellTable[FindSound(CharactersArray[eCursor::Player1_Character].ID)].IsCached)
 					Sleep(1);
-				PlaySound(SoundCellTable[eCursor::Player1_Character].SoundData, eSettingsManager::iCursorDefaultGroup, eSettingsManager::iCursorDefaultIndex, 10, 3.390625f);
-
+				PlaySound(SoundCellTable[FindSound(CharactersArray[eCursor::Player1_Character].ID)].SoundData, eSettingsManager::iCursorDefaultGroup, eSettingsManager::iCursorDefaultIndex, 10, 3.390625f);
 			}
 		}
 
 	}
 	else
 	{
-		if (!(CharactersArray[eCursor::Player2_Character].ID == -2))
+		if (!(CharactersArray[eCursor::Player1_Character].ID == -2))
 		{
-			PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP2DoneGroup, eSystem::iSoundP2DoneIndex, 5, 100.0f);
-
-			while (!SoundCellTable[eCursor::Player2_Character].IsCached)
+			PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP1DoneGroup, eSystem::iSoundP1DoneIndex, 5, 100.0f);
+			while (!SoundCellTable[FindSound(CharactersArray[eCursor::Player1_Character].ID)].IsCached)
 				Sleep(1);
 
-			PlaySound(SoundCellTable[eCursor::Player2_Character].SoundData, 6, 1, 10, 3.390625f);
-		}
-		else
-		{
-			PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP2DoneGroup, eSystem::iSoundP2DoneIndex, 5, 100.0f);
+
+			PlaySound(SoundCellTable[FindSound(CharactersArray[eCursor::Player1_Character].ID)].SoundData, eSettingsManager::iCursorDefaultGroup, eSettingsManager::iCursorDefaultIndex, 10, 3.390625f);
 		}
 
+		if (CharactersArray[eCursor::Player1_Character].ID == -2 || eCursor::Player1_Selected && eSystem::GetGameplayMode() == MODE_WATCH) {
+			PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP1DoneGroup, eSystem::iSoundP1DoneIndex, 5, 100.0f);
+		}
+		else {
+			PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP1DoneGroup, eSystem::iSoundP1DoneIndex, 5, 100.0f);
+
+			while (!SoundCellTable[FindSound(CharactersArray[eCursor::Player1_Character].ID)].IsCached)
+				Sleep(1);
+			PlaySound(SoundCellTable[FindSound(CharactersArray[eCursor::Player1_Character].ID)].SoundData, eSettingsManager::iCursorDefaultGroup, eSettingsManager::iCursorDefaultIndex, 10, 3.390625f);
+
+		}
 	}
 
+}
+
+void eCustomCursorManager::ProcessSoundP2()
+{
+	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
+	if (!(CharactersArray[eCursor::Player2_Character].ID == -2))
+	{
+		PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP2DoneGroup, eSystem::iSoundP2DoneIndex, 5, 100.0f);
+		while (!SoundCellTable[FindSound(CharactersArray[eCursor::Player2_Character].ID)].IsCached)
+			Sleep(1);
+
+
+		PlaySound(SoundCellTable[FindSound(CharactersArray[eCursor::Player2_Character].ID)].SoundData, eSettingsManager::iCursorDefaultGroup, eSettingsManager::iCursorDefaultIndex, 10, 3.390625f);
+
+		PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP2DoneGroup, eSystem::iSoundP2DoneIndex, 5, 100.0f);
+		while (!SoundCellTable[FindSound(CharactersArray[eCursor::Player2_Character].ID)].IsCached)
+			Sleep(1);
+
+
+		PlaySound(SoundCellTable[FindSound(CharactersArray[eCursor::Player2_Character].ID)].SoundData, eSettingsManager::iCursorDefaultGroup, eSettingsManager::iCursorDefaultIndex, 10, 3.390625f);
+	}
+	else
+	{
+		PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP2DoneGroup, eSystem::iSoundP2DoneIndex, 5, 100.0f);
+	}
 }
 
 void eCustomCursorManager::Process()

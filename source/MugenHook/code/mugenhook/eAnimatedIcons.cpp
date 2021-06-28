@@ -74,10 +74,10 @@ void eAnimatedIcons::ReadFile(const char * file)
 
 void eAnimatedIcons::FlagCharacters()
 {
-	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
-
 	if (m_bScanRequiredForAIcons)
 	{
+		eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
+
 		for (int i = 0; i < eSystem::iRows * eSystem::iColumns; i++)
 		{
 			for (unsigned int a = 0; a < m_vAnimatedIcons.size(); a++)

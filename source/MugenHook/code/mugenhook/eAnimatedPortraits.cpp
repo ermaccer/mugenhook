@@ -26,7 +26,7 @@ int eAnimatedPortraits::pFrameTablePointer;
 
 bool eAnimatedPortraits::bReadyToDrawSprite;
 
-
+int eAnimatedPortraits::pCurrentPlayerSprite;
 
 void eAnimatedPortraits::Init()
 {
@@ -40,7 +40,7 @@ void eAnimatedPortraits::Init()
 	iTickCounter_p2 = eSystem::GetTimer();
 
 	pFrameTablePointer = 0;
-
+	pCurrentPlayerSprite = 0;
 	bReadyToDrawSprite = false;
 
 	eLog::PushMessage(__FUNCTION__, "Initialize\n");
@@ -52,7 +52,8 @@ void eAnimatedPortraits::Init()
 	eAnimatedPortraits::ReadFramesFile("cfg\\frameLoader.dat");
 	InjectHook(0x404CE2, HookRequestSprites, PATCH_JUMP);
 	InjectHook(0x406FF3, HookDisplaySprites, PATCH_CALL);
-
+	Nop(0x406F95, 6);
+	InjectHook(0x406F95, HookGrabPlayerIDForDrawing, PATCH_JUMP);
 
 }
 
@@ -547,15 +548,32 @@ void __declspec(naked) eAnimatedPortraits::HookRequestSprites()
 
 int eAnimatedPortraits::HookDisplaySprites(int a1, int a2, int a3, int a4, int a5, float a6, float a7)
 {
+	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
+
 	if (eSettingsManager::bHookAnimatedPortraits)
 	{
 		Process();
 		ProcessP2();
 	}
 
+
 	eCommonHooks::ProcessCharacterSpriteEvent();
 
-
 	return  DrawSprites(a1, a2, a3, a4, a5, a6, 0);
+}
+
+int eAnimatedPortraits::HookDisplaySprites2(int a1, int a2, int a3, int a4, int a5, float a6, float a7)
+{
+	return  DrawSprites(a1, a2, a3, a4, a5, a6, 0);
+}
+
+void __declspec(naked) eAnimatedPortraits::HookGrabPlayerIDForDrawing()
+{
+	static int jmp_playerid_next = 0x406F9B;
+	_asm {
+		mov		pCurrentPlayerSprite, ecx
+		mov     eax, [esi + 0x438]
+		jmp		jmp_playerid_next
+	}
 }
 

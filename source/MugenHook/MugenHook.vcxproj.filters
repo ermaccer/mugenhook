@@ -114,6 +114,9 @@
     <ClInclude Include="code\mugen\Sound.h">
       <Filter>Header Files\code\mugen</Filter>
     </ClInclude>
+    <ClInclude Include="code\mugenhook\eScriptProcessor.h">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -190,6 +193,9 @@
     </ClCompile>
     <ClCompile Include="code\mugen\Sound.cpp">
       <Filter>Header Files\code\mugen</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugenhook\eScriptProcessor.cpp">
+      <Filter>Header Files\code\mugenhook</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

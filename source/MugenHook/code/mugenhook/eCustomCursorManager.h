@@ -35,6 +35,9 @@ public:
 	static void ReadFile(const char* file);
 	static int  FindCell(int row, int col);
 	static int  FindCellBasedOnID(int id);
+	static int  FindSound(int id);
 	static void HookSelectSoundPlayer();
+	static void ProcessSoundP1();
+	static void ProcessSoundP2();
 	static void Process();
 };

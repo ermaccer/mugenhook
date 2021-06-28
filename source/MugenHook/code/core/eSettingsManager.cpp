@@ -50,6 +50,9 @@ int  eSettingsManager::iCursorDefaultGroup;
 int  eSettingsManager::iCursorDefaultIndex;
 bool eSettingsManager::bUseThreadForLoading;
 
+
+int  eSettingsManager::iDefaultGameModeCursor;
+
 void eSettingsManager::Init()
 {
 	ini = new CIniReader("mugenhook.ini");
@@ -80,6 +83,7 @@ void eSettingsManager::Init()
 	iAfterSelectionPauseTime = ini->ReadInteger("Settings", "iAfterSelectionPauseTime", 100);
 	iStartingGameModePos = ini->ReadInteger("Settings", "iStartingGameModePos", 1);
 	iCursorTableOperationType = ini->ReadInteger("Settings", "iCursorTableOperationType", 0);
+	iDefaultGameModeCursor = ini->ReadInteger("Settings", "iDefaultGameModeCursor", 1);
 
 	// dev mode
 	bDevMode = ini->ReadBoolean("Settings", "bDevMode", 0);

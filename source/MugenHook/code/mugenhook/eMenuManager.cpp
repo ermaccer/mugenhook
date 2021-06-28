@@ -10,6 +10,7 @@
 bool eMenuManager::m_bIsInMainMenu;
 bool eMenuManager::m_bIsInSelectScreen;
 bool eMenuManager::m_bAnimsRequireRefresh;
+bool eMenuManager::m_bWasCursorAdjusted;
 int  eMenuManager::m_fntOptions;
 int  eMenuManager::m_pSelectScreenDataPointer;
 
@@ -18,6 +19,7 @@ void eMenuManager::Init()
 	m_bIsInMainMenu     = false;
 	m_bIsInSelectScreen = false;
 	m_bAnimsRequireRefresh = true;
+	m_bWasCursorAdjusted = false;
 	m_fntOptions = 0;
 	m_pSelectScreenDataPointer = 0;
 
@@ -33,6 +35,10 @@ int eMenuManager::HookMainMenu()
 {
 	m_bIsInMainMenu = true;
 	m_bIsInSelectScreen = false;
+	m_bWasCursorAdjusted = false;
+
+	if (eSettingsManager::bHookVariations)
+		eVariationsManager::ResetVariationStatus();
 
 	if (eSettingsManager::bEnableSlidePortraits)
 		eSlidingPortraits::Reset();
@@ -42,6 +48,9 @@ int eMenuManager::HookMainMenu()
 		eMagicBoxes::GetBox();
 		eMagicBoxes::ResetBoxesStatus();
 	}
+
+	if (eSettingsManager::bHookAnimatedIcons)
+		eAnimatedIcons::FlagCharacters();
 
 	if (m_bAnimsRequireRefresh)
 	{

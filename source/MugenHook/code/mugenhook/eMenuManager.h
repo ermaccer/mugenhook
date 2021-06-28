@@ -5,6 +5,7 @@ public:
 	static bool m_bIsInMainMenu;
 	static bool m_bIsInSelectScreen;
 	static bool m_bAnimsRequireRefresh;
+	static bool m_bWasCursorAdjusted;
 	static int  m_fntOptions;
 	static int  m_pSelectScreenDataPointer;
 

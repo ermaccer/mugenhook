@@ -109,7 +109,7 @@ void eCommonHooks::ProcessCharacterSpriteEvent()
 	if (eSettingsManager::bHookMagicBoxes)
 		eMagicBoxes::Process();
 
-	eAnimatedIcons::FlagCharacters();
+	//eAnimatedIcons::FlagCharacters();
 }
 
 void eCommonHooks::HookPushDebugMessage(const char * message)

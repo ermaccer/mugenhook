@@ -112,8 +112,6 @@ void eVariationsManager::HideVariationCharacters()
 {
 	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
-
-
 	// store sprite pointers
 
 	if (m_bVariationsScanRequired)
@@ -203,7 +201,7 @@ void eVariationsManager::UpdateCharactersP1()
 					if (eInputManager::CheckLastPlayer() == false)
 					{
 						CharactersArray[CharID].CurrentVariation++;
-					    eAnimatedPortraits::ResetFrameCounter(1);
+						eAnimatedPortraits::ResetFrameCounter(1);
 					}
 
 				}
@@ -284,13 +282,32 @@ void eVariationsManager::ResetVariationStatus()
 
 	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
-	for (int i = 0; i < eSystem::iColumns * eSystem::iRows; i++)
+	for (int i = 0; i < eSystem::iRows; i++)
 	{
-		if (CharactersArray[i].CharacterFlag & CHAR_FLAG_VARIATIONS)
+		for (int a = 0; a < eSystem::iColumns; a++)
 		{
-			CharactersArray[i].CurrentVariation = 1;
-			CharactersArray[i] = m_vVariations[i].vVariationChars[0];
+			int VariationID = FindVariationData(i,a);
+
+			if (VariationID >= 0)
+			{
+				int CharID = m_vVariations[VariationID].iPlace;
+				char cVariations = 1;
+				char cFlags = CharactersArray[CharID].CharacterFlag;
+				char cExtraFlags = CharactersArray[CharID].ExtraFlags;
+
+				if (m_vVariations[VariationID].vVariationChars.size() > 0)
+				{
+					CharactersArray[CharID] = m_vVariations[VariationID].vVariationChars[0];
+					CharactersArray[CharID].CurrentVariation = cVariations;
+					CharactersArray[CharID].CharacterFlag |= cFlags;
+					CharactersArray[CharID].ExtraFlags |= cExtraFlags;
+					CharactersArray[CharID].CurrentIconIndex = 0;
+				}
+
+
+			}
 		}
+
 			
 	}
 }

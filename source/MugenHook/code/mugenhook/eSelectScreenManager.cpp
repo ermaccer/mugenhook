@@ -13,6 +13,7 @@
 #include "eMenuManager.h"
 #include "eStageAnnouncer.h"
 #include "..\mugen\Sound.h"
+#include "..\mugen\Sprite.h"
 #include "..\mugen\Common.h"
 
 int eSelectScreenManager::m_bPlayer1HasFinishedWaiting;
@@ -75,18 +76,24 @@ void eSelectScreenManager::Process()
 		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x36C) = eSettingsManager::iRandomStageGroup;
 		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x36C + 4) = rand() % eSettingsManager::iRandomStageRandomMax;
 	}
-
-	if (eSettingsManager::bHookStageAnnouncer)
+	if (eMenuManager::m_pSelectScreenDataPointer)
 	{
-		if (eMenuManager::m_pSelectScreenDataPointer)
+		if (!eMenuManager::m_bWasCursorAdjusted)
 		{
-			int stageSelection = *(int*)(eMenuManager::m_pSelectScreenDataPointer + 0x3908);
-			eStageAnnouncerEntry sound = eStageAnnouncer::m_vStageEntries[eStageAnnouncer::FindStageData(stageSelection)];
-
-			*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x36C) = sound.Group;
-			*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x36C + 4) = sound.Index;
+			// p1
+			*(int*)(eMenuManager::m_pSelectScreenDataPointer + 0x3BA4 + 12) = eSettingsManager::iDefaultGameModeCursor;
+			// p2
+			*(int*)(eMenuManager::m_pSelectScreenDataPointer + 0x3BA4  + 180 + 12) = eSettingsManager::iDefaultGameModeCursor;
+			eMenuManager::m_bWasCursorAdjusted = true;
 		}
 
+		if (eSettingsManager::bHookStageAnnouncer)
+		{
+				int stageSelection = *(int*)(eMenuManager::m_pSelectScreenDataPointer + 0x3908);
+				eStageAnnouncerEntry sound = eStageAnnouncer::m_vStageEntries[eStageAnnouncer::FindStageData(stageSelection)];
+				*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x36C) = sound.Group;
+				*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x36C + 4) = sound.Index;
+		}
 	}
 
 }
@@ -183,11 +190,12 @@ void eSelectScreenManager::PrintCharacterData()
 		oFile.close();
 	}
 }
-
+int data;
 int eSelectScreenManager::ProcessDrawingCharacterFace(int * a1, int a2, int a3, int a4, int a5, int a6, int a7)
 {
 	eMugenCharacterInfo* character;
 	_asm mov character, ecx
+
 
 	if (eSettingsManager::bHookAnimatedIcons)
 	{
@@ -265,10 +273,13 @@ void eSelectScreenManager::HookLoadCharacterData(char * file)
 
 	for (int i = 0; i < eSystem::GetCharactersAmount(); i++)
 	{
+		eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 		eSoundEntry snd;
 		snd.IsCached = false;
+		snd.SoundData = nullptr;
 		eCustomCursorManager::SoundCellTable.push_back(snd);
 	}
+
 
 	if (eSettingsManager::iCursorTableOperationType == MODE_CHAR_FILE)
 	{
@@ -291,17 +302,29 @@ void eSelectScreenManager::THREAD_CacheSoundData()
 void eSelectScreenManager::HookCacheSoundData()
 {
 	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
+	std::vector<eMugenCharacterInfo> CharactersArray_copy;
 
-	for (int i = 0; i < eCustomCursorManager::SoundCellTable.size(); i++)
+	// copy so variation changes don't mess up
+	for (int i = 0; i < eSystem::GetCharactersAmount(); i++)
 	{
-		eCustomCursorManager::SoundCellTable[i].CharID = CharactersArray[i].ID;
+		CharactersArray_copy.push_back(CharactersArray[i]);
+	}
+	for (int i = 0; i < eSystem::GetCharactersAmount(); i++)
+	{
+		eCustomCursorManager::SoundCellTable[i].CharID = CharactersArray_copy[i].ID;
+	}
 
-		std::string ini_path = CharactersArray[i].FolderName;
-		ini_path += CharactersArray[i].FileName;;
+
+	for (unsigned int i = 0; i < eCustomCursorManager::SoundCellTable.size(); i++)
+	{
+
+
+		std::string ini_path = CharactersArray_copy[i].FolderName;
+		ini_path += CharactersArray_copy[i].FileName;;
 
 		CIniReader ini((char*)ini_path.c_str());
 
-		std::string path = CharactersArray[i].FolderName;
+		std::string path = CharactersArray_copy[i].FolderName;
 
 		eLog::PushMessage(__FUNCTION__, "Processing %d/%d\n", i + 1, eSystem::GetCharactersAmount());
 
@@ -309,24 +332,27 @@ void eSelectScreenManager::HookCacheSoundData()
 		{
 			path += ini.ReadString("Files", "sound", 0);
 
-			std::size_t found = path.find_last_of(".");
+			std::size_t found = path.find_first_of(".");
 			path = path.substr(0, found + strlen("snd") + 1);
-
+			
 			Sound* sound = LoadSNDFile(path.c_str());
 
 			if (sound)
 			{
-				eLog::PushMessage(__FUNCTION__, "Loaded sound data for %s\n", CharactersArray[i].FileName);
+				eLog::PushMessage(__FUNCTION__, "Loaded sound data for %s [%d] (%s)\n", CharactersArray_copy[i].FileName, CharactersArray_copy[i].ID, path.c_str());
+				eCustomCursorManager::SoundCellTable[i].CharID = CharactersArray_copy[i].ID;
 				eCustomCursorManager::SoundCellTable[i].SoundData = sound;
 				eCustomCursorManager::SoundCellTable[i].IsCached = true;
+
 			}
 			else
 			{
-				eLog::PushMessage(__FUNCTION__, "Failed to load sound data for %s!\n", CharactersArray[i].FileName);
+				eLog::PushMessage(__FUNCTION__, "Failed to load sound data for %s!\n", CharactersArray_copy[i].FileName);
 				eLog::PushError();
 			}
 		}
 		m_bCachedSoundData = true;
 	}
 	eLog::PushMessage(__FUNCTION__, "Character sounds cached!\n");
+	CharactersArray_copy.clear();
 }

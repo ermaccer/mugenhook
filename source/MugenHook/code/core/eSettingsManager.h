@@ -30,7 +30,7 @@ public:
 	static int  iCursorDefaultGroup;
 	static int  iCursorDefaultIndex;
 	static bool bUseThreadForLoading;
-
+	static int  iCursorAnnouncerWaitTime;
 	/* Animated Portraits */
 	static bool bEnableSelectAnimations;
 	static bool bEnableAlternateAnims;
@@ -48,6 +48,7 @@ public:
 	static bool bUseLeftRightInMenu;
 	static bool bHookStageAnnouncer;
 	static bool bDisableStageSelection;
+	static int  iDefaultGameModeCursor;
 
 	/* Tag Stuff */
 	static bool bEnableTagFix;

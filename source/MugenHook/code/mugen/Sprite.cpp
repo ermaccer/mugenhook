@@ -21,3 +21,8 @@ int SpriteExists(int sprite)
 {
 	return CallAndReturn<int, 0x466840, int>(sprite);
 }
+
+int LoadSFFFile(char * file)
+{
+	return CallAndReturn<int, 0x467510, const char*>(file);
+}
