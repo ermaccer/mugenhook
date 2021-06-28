@@ -51,26 +51,31 @@ Allows to make timed cells in select screen, works exactly like Smoke in Mortal 
 Main menu can be scrolled using LEFT/RIGHT instead of UP/DOWN, game modes can be hid,
 game mode player amount can be changed and more!
 
+# Download
+#### You can download binary files from [here](https://github.com/ermaccer/mugenhook/releases).
 
 # Installation
-MUGENHOOK WORKS ONLY WITH 1.1 VERSION OF M.U.G.E.N
+**MugenHook only supports version 1.1 of M.U.G.E.N!**
 
-MugenHook requires https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases
-Rename the x86 dinput8.dll to ddraw.dll and place the asi in the main mugen folder.
+MugenHook requires https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases.
 
-Check out wiki on how to configure.
+Download **Ultimate-ASI-Loader.zip** and extract it to your game folder.
+Rename dinput8.dll to ddraw.dll.
 
+Extract mugenhook_x.zip (where X is version) to your game folder.
 
-# Build & Download
+If everything was done correctly, you'll get a notifcation about MugenHook being installed.
 
-Check for binaries in releases.
+# Configuration
 
-Tested & compiled using Visual Studio 2017.
+#### Take a look at Wiki to learn how to use MugenHook [here](https://github.com/ermaccer/mugenhook/wiki). Reading INI file is helpful too.
+
 
 
 # Gallery
 
 Projects using MugenHook:
-<iframe width="560" height="315" src="https://www.youtube.com/embed/-VKXDrJ7dnM" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/wOXgOrwxGNU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+https://youtu.be/wOXgOrwxGNU
+
+https://youtu.be/-VKXDrJ7dnM
