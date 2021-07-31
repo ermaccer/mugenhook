@@ -34,4 +34,6 @@ public:
 	static void  RestoreCharactersForGameplay();
 	static void  ProcessInactivity();
 	static void  ResetVariationStatus();
+
+	static int   GetAmountOfUsedVariationCharacters();
 };

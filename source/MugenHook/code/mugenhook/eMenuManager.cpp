@@ -38,7 +38,12 @@ int eMenuManager::HookMainMenu()
 	m_bWasCursorAdjusted = false;
 
 	if (eSettingsManager::bHookVariations)
+	{
+		if (eVariationsManager::GetAmountOfUsedVariationCharacters() > 0)
 		eVariationsManager::ResetVariationStatus();
+
+	}
+
 
 	if (eSettingsManager::bEnableSlidePortraits)
 		eSlidingPortraits::Reset();

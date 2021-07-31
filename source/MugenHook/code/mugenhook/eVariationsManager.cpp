@@ -279,8 +279,8 @@ void eVariationsManager::ProcessInactivity()
 
 void eVariationsManager::ResetVariationStatus()
 {
-
 	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
+
 
 	for (int i = 0; i < eSystem::iRows; i++)
 	{
@@ -288,6 +288,7 @@ void eVariationsManager::ResetVariationStatus()
 		{
 			int VariationID = FindVariationData(i,a);
 
+			// make sure character exists
 			if (VariationID >= 0)
 			{
 				int CharID = m_vVariations[VariationID].iPlace;
@@ -310,5 +311,16 @@ void eVariationsManager::ResetVariationStatus()
 
 			
 	}
+}
+
+int eVariationsManager::GetAmountOfUsedVariationCharacters()
+{
+	int amount = 0;
+
+	for (int i = 0; i < m_vVariations.size(); i++)
+	{
+		amount += m_vVariations[i].vVariationChars.size();
+	}
+	return amount;
 }
 
