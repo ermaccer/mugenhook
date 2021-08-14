@@ -17,6 +17,7 @@
 void eCommonHooks::Init()
 {	
 	InjectHook(0x429B14, HookDrawMugenVersionInfo, PATCH_CALL);
+	InjectHook(0x406E1D, ProcessSelectScreenEvent, PATCH_JUMP);
 }
 
 void eCommonHooks::ProcessSelectScreen()
@@ -106,10 +107,24 @@ void eCommonHooks::ProcessCharacterSpriteEvent()
 		eSlidingPortraits::ProcessP2();
 	}
 
-	if (eSettingsManager::bHookMagicBoxes)
-		eMagicBoxes::Process();
+
 
 	//eAnimatedIcons::FlagCharacters();
+}
+
+void __declspec(naked) eCommonHooks::ProcessSelectScreenEvent()
+{
+	static int jmpContinue = 0x406E23;
+	_asm {
+		mov ebx, ds:0x5040E8
+		pushad
+	}
+	if (eSettingsManager::bHookMagicBoxes)
+		eMagicBoxes::Process();
+	_asm {
+		popad
+		jmp jmpContinue
+	}
 }
 
 void eCommonHooks::HookPushDebugMessage(const char * message)

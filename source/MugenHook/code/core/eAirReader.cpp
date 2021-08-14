@@ -38,7 +38,7 @@ void eAirReader::ReadData()
 			for (int i = 0; szLine[i]; i++) {
 				szLine[i] = tolower(szLine[i]);
 			}
-
+		
 			if (sscanf(szLine, "[begin action %d]", &ID) == 1)
 			{
 				while (fgets(szLine, sizeof(szLine), pFile))
@@ -47,9 +47,8 @@ void eAirReader::ReadData()
 						szLine[i] = tolower(szLine[i]);
 					}
 
-					std::string check(szLine, strlen(szLine) - 2);
-
-					if (check == "loopstart")
+				
+					if (strncmp(szLine,"loopstart", strlen("loopstart")) == 0)
 					{
 						if (eSettingsManager::bEnableAnimationLoop)
 						{
@@ -58,11 +57,10 @@ void eAirReader::ReadData()
 						}
 
 					}
-
 					if (szLine[0] == ';' || szLine[0] == '#') continue;
 					if (szLine[0] == '\r') break;
 
-					int iGroupID, iIndex, iXPos, iYPos, iFrameTime;
+					int iGroupID = 0, iIndex = 0, iXPos = 0, iYPos = 0, iFrameTime = 0;
 					// remove , 
 					std::string strLine(szLine, strlen(szLine));
 					std::replace(strLine.begin(), strLine.end(), ',', ' ');
@@ -75,8 +73,6 @@ void eAirReader::ReadData()
 						airEntry.vAnimData.push_back(frame);
 
 					}
-
-
 				}
 				airEntry.AnimID = ID;
 				vAnimations.push_back(airEntry);
