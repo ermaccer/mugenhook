@@ -3,6 +3,7 @@
 #include "..\mugenhook\eCommonHooks.h"
 #include "..\mugenhook\base.h"
 #include "..\core\eSettingsManager.h"
+#include "..\mugen\System.h"
 
 int eCursor::Player1_Row;
 int eCursor::Player1_Column;
@@ -35,7 +36,6 @@ void eCursor::Init()
 	Player2_RandomCharacter = 0;
 	Player2_Selected = 0;
 	Player2_Turns = 0;
-
 	pCursorEax = 0;
 
 	InjectHook(0x406E51, HookCursorPointer, PATCH_JUMP);
@@ -242,4 +242,27 @@ void eCursor::Update()
 			}
 		}
 	}
+}
+
+void eCursor::StoreCursor()
+{
+	if (eCursor::Player1_Character > -1)
+	{
+		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x2DC) = Player1_Row;
+		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x2E4) = Player1_Column;
+	}
+	if (eCursor::Player2_Character > -1)
+	{
+		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x2E0) = Player2_Row;
+		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x2E8) = Player2_Column;
+	}
+}
+
+void eCursor::PopCursor()
+{
+	*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x2DC) = eSystem::p1_cursor_startcell[0];
+	*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x2E4) = eSystem::p1_cursor_startcell[1];
+
+	*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x2E0) = eSystem::p2_cursor_startcell[0];
+	*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x2E8) = eSystem::p2_cursor_startcell[1];
 }

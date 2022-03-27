@@ -1,5 +1,11 @@
 #include "eScriptProcessor.h"
 #include "base.h"
+#include "..\core\eInputManager.h"
+#include "..\mugen\System.h"
+#include "..\mugen\Draw.h"
+#include "..\core\eCursor.h"
+#include "..\mugen\System.h"
+#include "eSelectScreenManager.h"
 
 void eScriptProcessor::Init()
 {

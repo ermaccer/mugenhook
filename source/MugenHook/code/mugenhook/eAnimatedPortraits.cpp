@@ -157,8 +157,8 @@ void eAnimatedPortraits::Process()
 	eAirEntry Animation;
 	int iAnimEntry;
 
-	if (!eSettingsManager::bEnableSelectAnimations)
-	{
+	if (!eCursor::Player1_Selected || !eSettingsManager::bEnableSelectAnimations) {
+
 		eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
 		// get anims
@@ -175,6 +175,7 @@ void eAnimatedPortraits::Process()
 		}
 
 		Animation = AIR_Reader.GetAnimation(AnimationTable[iAnimEntry].SelectAnimationID + multipiler);
+
 		// set scale
 		if (eSettingsManager::bEnableAnimationScale) {
 			*(float*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0x40) = AnimationTable[iAnimEntry].SpritesScaleX; // p1.face.scale
@@ -183,54 +184,10 @@ void eAnimatedPortraits::Process()
 
 
 		// loop
-		if (iFrameCounter_p1 > Animation.MaxFrames - 1)
+		if (eCursor::Player1_Character == -2)
+			iFrameCounter_p1 = 0;
+		else
 		{
-			if (Animation.IsLooping)
-				iFrameCounter_p1 = Animation.LoopStart - 1;
-			else
-				iFrameCounter_p1 = 0;
-		}
-
-		// set sprites
-		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x80C) = Animation.vAnimData[iFrameCounter_p1].Group; // p1.face group
-		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x810) = Animation.vAnimData[iFrameCounter_p1].Index; // p1.face index
-
-																												   // perform animation
-		if (eSystem::GetTimer() - iTickCounter_p1 <= Animation.vAnimData[iFrameCounter_p1].Frametime) return;
-		iFrameCounter_p1++;
-
-		// reset timer
-		iTickCounter_p1 = eSystem::GetTimer();
-	}
-	else
-	{
-		if (!eCursor::Player1_Selected) {
-
-			eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
-
-			// get anims
-			AIR_Reader = GetAIRFromName(GetCellFName(eCursor::Player1_Row, eCursor::Player1_Column));
-			iAnimEntry = FindPortraitEntry(eCursor::Player1_Row, eCursor::Player1_Column);
-			int multipiler = 0;
-			if ((CharactersArray[eCursor::Player1_Character].CharacterFlag & CHAR_FLAG_VARIATIONS))
-			{
-				if (CharactersArray[eCursor::Player1_Character].CurrentVariation > 1)
-				{
-					multipiler = 100 * (CharactersArray[eCursor::Player1_Character].CurrentVariation - 1);
-				}
-
-			}
-
-			Animation = AIR_Reader.GetAnimation(AnimationTable[iAnimEntry].SelectAnimationID + multipiler);
-
-			// set scale
-			if (eSettingsManager::bEnableAnimationScale) {
-				*(float*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0x40) = AnimationTable[iAnimEntry].SpritesScaleX; // p1.face.scale
-				*(float*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0x44) = AnimationTable[iAnimEntry].SpritesScaleY; // p1.face.scale
-			}
-
-
-			// loop
 			if (iFrameCounter_p1 > Animation.MaxFrames - 1)
 			{
 				if (Animation.IsLooping)
@@ -238,24 +195,29 @@ void eAnimatedPortraits::Process()
 				else
 					iFrameCounter_p1 = 0;
 			}
-
-			// set sprites
-			*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x80C) = Animation.vAnimData[iFrameCounter_p1].Group; // p1.face group
-			*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x810) = Animation.vAnimData[iFrameCounter_p1].Index; // p1.face index
+		}
 
 
-																													   // perform animation
-			if (eSystem::GetTimer() - iTickCounter_p1 <= Animation.vAnimData[iFrameCounter_p1].Frametime) return;
+		// set sprites
+		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x80C) = Animation.vAnimData[iFrameCounter_p1].Group; // p1.face group
+		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x810) = Animation.vAnimData[iFrameCounter_p1].Index; // p1.face index
+
+
+																												   // perform animation
+		if (eSystem::GetTimer() - iTickCounter_p1 <= Animation.vAnimData[iFrameCounter_p1].Frametime) return;
+		if (!(eCursor::Player1_Character == -2))
 			iFrameCounter_p1++;
 
-			// reset timer
-			iTickCounter_p1 = eSystem::GetTimer();
+		// reset timer
+		iTickCounter_p1 = eSystem::GetTimer();
 
-			// fix bug where any character select animation would be stuck at last frame
-			iSelectCounter_p1 = 0;
+		// fix bug where any character select animation would be stuck at last frame
+		iSelectCounter_p1 = 0;
 
-		}
-		else
+	}
+	else
+	{
+		if (eSettingsManager::bEnableSelectAnimations)
 		{
 			eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
@@ -286,7 +248,7 @@ void eAnimatedPortraits::Process()
 				if (Animation.IsLooping)
 					iSelectCounter_p1 = Animation.LoopStart - 1;
 				else
-				    iSelectCounter_p1 = Animation.MaxFrames - 1;
+					iSelectCounter_p1 = Animation.MaxFrames - 1;
 			}
 
 			// set sprites
@@ -297,20 +259,22 @@ void eAnimatedPortraits::Process()
 			iSelectCounter_p1++;
 			iTickCounter_p1 = eSystem::GetTimer();
 		}
+
 	}
 }
-
+static bool m_bGotAnimation = false;
 void eAnimatedPortraits::ProcessP2()
 {
 	eAirReader reader;
 	eAirEntry animation, alt_anim;
 	bool m_bOnPlayerOne = false;
+
 	int  iMaxFrames;
 	int iAnimEntry;
 
 	if (eCursor::Player1_Row == eCursor::Player2_Row  && eCursor::Player1_Column == eCursor::Player2_Column) m_bOnPlayerOne = true;
 
-	if (!eSettingsManager::bEnableSelectAnimations)
+	if (!eCursor::Player2_Selected || !eSettingsManager::bEnableSelectAnimations)
 	{
 		reader = GetAIRFromName(GetCellFName(eCursor::Player2_Row, eCursor::Player2_Column));
 		iAnimEntry = FindPortraitEntry(eCursor::Player2_Row, eCursor::Player2_Column);
@@ -325,7 +289,7 @@ void eAnimatedPortraits::ProcessP2()
 			}
 
 		}
-	
+
 		animation = reader.GetAnimation(AnimationTable[iAnimEntry].SelectAnimationID + multipiler);
 		alt_anim = reader.GetAnimation(AnimationTable[iAnimEntry].SelectAnimationAlternateID + multipiler);
 
@@ -339,6 +303,8 @@ void eAnimatedPortraits::ProcessP2()
 			*(float*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0x40 + 0xD4 + 8) = AnimationTable[iAnimEntry].SpritesScaleY; // p2.face.scale
 		}
 
+
+
 		if (iFrameCounter_p2 > iMaxFrames)
 		{
 			if (animation.IsLooping || alt_anim.IsLooping)
@@ -351,7 +317,6 @@ void eAnimatedPortraits::ProcessP2()
 			else
 				iFrameCounter_p2 = 0;
 		}
-
 
 		if (m_bOnPlayerOne && eSettingsManager::bEnableAlternateAnims)
 		{
@@ -367,69 +332,11 @@ void eAnimatedPortraits::ProcessP2()
 		if (eSystem::GetTimer() - iTickCounter_p2 <= animation.vAnimData[iFrameCounter_p2].Frametime) return;
 		iFrameCounter_p2++;
 		iTickCounter_p2 = eSystem::GetTimer();
+		iSelectCounter_p2 = 0;
 	}
-	else {
-		if (!eCursor::Player2_Selected)
-		{
-			reader = GetAIRFromName(GetCellFName(eCursor::Player2_Row, eCursor::Player2_Column));
-			iAnimEntry = FindPortraitEntry(eCursor::Player2_Row, eCursor::Player2_Column);
-			eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
-
-			int multipiler = 0;
-			if ((CharactersArray[eCursor::Player2_Character].CharacterFlag & CHAR_FLAG_VARIATIONS))
-			{
-				if (CharactersArray[eCursor::Player2_Character].CurrentVariation > 1)
-				{
-					multipiler = 100 * (CharactersArray[eCursor::Player2_Character].CurrentVariation - 1);
-				}
-
-			}
-
-			animation = reader.GetAnimation(AnimationTable[iAnimEntry].SelectAnimationID + multipiler);
-			alt_anim = reader.GetAnimation(AnimationTable[iAnimEntry].SelectAnimationAlternateID + multipiler);
-
-
-			if (m_bOnPlayerOne && eSettingsManager::bEnableAlternateAnims) iMaxFrames = alt_anim.MaxFrames - 1;
-			else iMaxFrames = animation.MaxFrames - 1;
-
-			if (eSettingsManager::bEnableAnimationScale)
-			{
-				*(float*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0x40 + 0xD4 + 4) = AnimationTable[iAnimEntry].SpritesScaleX; // p2.face.scale
-				*(float*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0x40 + 0xD4 + 8) = AnimationTable[iAnimEntry].SpritesScaleY; // p2.face.scale
-			}
-
-
-			
-			if (iFrameCounter_p2 > iMaxFrames)
-			{
-				if (animation.IsLooping || alt_anim.IsLooping)
-				{
-					if (animation.IsLooping)
-						iFrameCounter_p2 = animation.LoopStart - 1;
-					else if (alt_anim.IsLooping)
-						iFrameCounter_p2 = alt_anim.LoopStart - 1;
-				}
-				else
-				   iFrameCounter_p2 = 0;
-			}
-
-			if (m_bOnPlayerOne && eSettingsManager::bEnableAlternateAnims)
-			{
-				*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x810 + 0xD0 + 4) = alt_anim.vAnimData[iFrameCounter_p2].Group;
-				*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x810 + 0xD0 + 8) = alt_anim.vAnimData[iFrameCounter_p2].Index;
-			}
-			else {
-				*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x810 + 0xD0 + 4) = animation.vAnimData[iFrameCounter_p2].Group;
-				*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x810 + 0xD0 + 8) = animation.vAnimData[iFrameCounter_p2].Index;
-			}
-
-
-			if (eSystem::GetTimer() - iTickCounter_p2 <= animation.vAnimData[iFrameCounter_p2].Frametime) return;
-			iFrameCounter_p2++;
-			iTickCounter_p2 = eSystem::GetTimer();
-			iSelectCounter_p2 = 0;
-		}
-		else
+	else
+	{
+		if (eSettingsManager::bEnableSelectAnimations)
 		{
 			reader = GetAIRFromName(GetCellFName(eCursor::Player2_Row, eCursor::Player2_Column));
 			iAnimEntry = FindPortraitEntry(eCursor::Player2_Row, eCursor::Player2_Column);
@@ -445,8 +352,6 @@ void eAnimatedPortraits::ProcessP2()
 				}
 
 			}
-
-
 			animation = GetAIRFromName(GetCellFName(eCursor::Player2_Row, eCursor::Player2_Column)).GetAnimation(AnimationTable[iAnimEntry].WinAnimationID + multipiler);
 			alt_anim = GetAIRFromName(GetCellFName(eCursor::Player2_Row, eCursor::Player2_Column)).GetAnimation(AnimationTable[iAnimEntry].WinAnimationAlternateID + multipiler);
 
@@ -462,7 +367,7 @@ void eAnimatedPortraits::ProcessP2()
 					if (animation.IsLooping)
 						iSelectCounter_p2 = animation.LoopStart - 1;
 					else if (alt_anim.IsLooping)
-						iSelectCounter_p2 = alt_anim.LoopStart - 1 ;
+						iSelectCounter_p2 = alt_anim.LoopStart - 1;
 				}
 				else
 					iSelectCounter_p2 = iMaxFrames;
@@ -555,7 +460,6 @@ int eAnimatedPortraits::HookDisplaySprites(int a1, int a2, int a3, int a4, int a
 		Process();
 		ProcessP2();
 	}
-
 
 	eCommonHooks::ProcessCharacterSpriteEvent();
 

@@ -27,4 +27,7 @@ public:
 	static void HookCursorMoveUp();
 	static void Update();
 
+	static void StoreCursor();
+	static void PopCursor();
+
 };

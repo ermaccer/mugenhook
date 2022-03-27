@@ -15,6 +15,7 @@
 #include "..\mugen\Sound.h"
 #include "..\mugen\Sprite.h"
 #include "..\mugen\Common.h"
+#include "..\mugen\Draw.h"
 
 int eSelectScreenManager::m_bPlayer1HasFinishedWaiting;
 int eSelectScreenManager::m_bPlayer2HasFinishedWaiting;
@@ -30,6 +31,8 @@ int eSelectScreenManager::m_pSelectScreenStringPointer;
 std::string eSelectScreenManager::m_pSelectScreenLastString;
 
 bool eSelectScreenManager::m_bCachedSoundData;
+
+eGameFlowData* eSelectScreenManager::m_pGameFlowData;
 
 eMugenCharacterInfo* eSelectScreenManager::m_pCharacter;
 
@@ -53,6 +56,10 @@ void eSelectScreenManager::Init()
 	InjectHook(0x407453, ProcessDrawingCharacterFace, PATCH_CALL);
 	InjectHook(0x404029, HookSelectIDs, PATCH_JUMP);
 	InjectHook(0x40380D, HookLoadCharacterData, PATCH_CALL);
+
+	Nop(0x408AA3, 7);
+	InjectHook(0x408AA3, HookCurrentScreenGameData, PATCH_JUMP);
+
 }
 
 void eSelectScreenManager::Process()
@@ -66,11 +73,17 @@ void eSelectScreenManager::Process()
 		}
 	}
 
-	if (eSettingsManager::bDev_DisplayPos) printf("Player 1: Row: %d   Column: %d  Character: %d \r", eCursor::Player1_Row, eCursor::Player1_Column, eCursor::Player1_RandomCharacter);
+	if (eSettingsManager::bDev_DisplayPos) printf("Player 1: Row: %d   Column: %d  Character: %d \r", eCursor::Player1_Row, eCursor::Player1_Column, eCursor::Player1_Character);
 
 	if (GetAsyncKeyState(VK_F5) && eSettingsManager::bDumpCharacterInfo) PrintCharacterData();
 
-
+	printf("%x %d\n", eCursor::pCursorEax + 0x39FE, eCursor::Player1_Turns);
+	int mode = eSystem::GetGameplayMode();
+	if (!(mode == MODE_VERSUS || mode == MODE_TEAM_VERSUS || mode == MODE_TEAM_COOP || mode == MODE_TRAINING))
+	{
+		ProcessPlayer2JoinIn();
+	}
+	
 	if (eSettingsManager::bRandomStageConfirmSounds && !eSettingsManager::bHookStageAnnouncer)
 	{
 		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x36C) = eSettingsManager::iRandomStageGroup;
@@ -96,6 +109,73 @@ void eSelectScreenManager::Process()
 		}
 	}
 
+}
+
+void eSelectScreenManager::ProcessEnd()
+{
+	if (eSystem::pushstart_set.active)
+	{
+		static int font = 0;
+
+		if (!font)
+			font = LoadFont(eSystem::pushstart_set.font, 1);
+
+
+		if (eSystem::GetGameFlow() == FLOW_SELECT_SCREEN)
+		{
+			if (eSystem::GetGameplayMode() == MODE_ARCADE || eSystem::GetGameplayMode() == MODE_TEAM_ARCADE)
+			{
+				int gameModeView = *(int*)(eMenuManager::m_pSelectScreenDataPointer + 0x3BA4);
+				int gameModeView_p2 = *(int*)(eMenuManager::m_pSelectScreenDataPointer + 0x3BA4 + 180);
+
+				eTextParams params = {};
+				params.m_letterSpacingX = 1.0;
+				params.m_letterSpacingY = 1.0;
+				params.field_50 = 1.0;
+				params.m_skew = 1.0;
+				params.field_3C = 0.0;
+				params.rotateY = 1.0;
+				params.field_4 = 0.0;
+
+				params.field_5C = 0xFFFF;
+				params.m_hasBackground = 1;
+
+				params.m_scaleX = eSystem::pushstart_set.scale_x;
+				params.m_scaleY = eSystem::pushstart_set.scale_y;
+				params.m_xPos = eSystem::pushstart_set.p1_x;
+				params.m_yPos = eSystem::pushstart_set.p1_y;
+
+				eTextParams params2 = params;
+				params2.m_xPos = eSystem::pushstart_set.p2_x;
+				params2.m_yPos = eSystem::pushstart_set.p2_y;
+
+				if (eCursor::Player1_Character == -1 && !eCursor::Player2_Selected)
+				{
+					if (eCursor::Player2_Turns < 1)
+					{
+						if (gameModeView == 0)
+						{
+							if (eSystem::GetTimer() & 16)
+								Draw2DText(eSystem::pushstart_set.text, font, &params, eSystem::pushstart_set.color_r, eSystem::pushstart_set.color_g, eSystem::pushstart_set.color_b, eSystem::pushstart_set.p2_align);
+						}
+					}
+				}
+
+				if (eCursor::Player2_Character == -1 && !eCursor::Player1_Selected)
+				{
+					if (eCursor::Player1_Turns < 1)
+					{
+						if (gameModeView_p2 == 0)
+						{
+							if (eSystem::GetTimer() & 16)
+								Draw2DText(eSystem::pushstart_set.text, font, &params2, eSystem::pushstart_set.color_r, eSystem::pushstart_set.color_g, eSystem::pushstart_set.color_b, eSystem::pushstart_set.p1_align);
+						}
+					}
+
+				}
+			}
+		}
+	}
 }
 
 void __declspec(naked) eSelectScreenManager::HookWaitAtCharacterSelect()
@@ -151,6 +231,10 @@ void eSelectScreenManager::ProcessWaitPlayer2()
 		m_tSelectTickCounterP2 = eSystem::GetTimer();
 		m_bPlayer2HasFinishedWaiting = 0;
 	}
+}
+
+void eSelectScreenManager::ProcessGameLoopEvent()
+{
 }
 
 void eSelectScreenManager::HookSelectScreenProcess(int a1, int a2)
@@ -262,6 +346,103 @@ void __declspec(naked) eSelectScreenManager::HookSelectIDs()
 		_asm {
 			popad
 			jmp select_done_jmp
+		}
+	}
+
+}
+
+void __declspec(naked) eSelectScreenManager::HookCurrentScreenGameData()
+{
+	static int gamedata_done_jmp = 0x408AAA;
+	_asm {
+		mov eax, esi
+		mov m_pGameFlowData, eax
+		mov esi, 0x40E7C0
+		call esi
+		mov esi, m_pGameFlowData
+		pushad
+		popad
+		jmp gamedata_done_jmp
+	}
+}
+
+
+void eSelectScreenManager::ProcessPlayer2JoinIn()
+{
+	if (!eSystem::pushstart_set.active)
+		return;
+	if (eCursor::Player1_Selected || eCursor::Player2_Selected)
+		return;
+	if (!eMenuManager::m_pSelectScreenDataPointer)
+		return;
+
+	bool joined = false;
+
+
+
+	if (eCursor::Player2_Character > -1)
+	{
+		if (eInputManager::CheckLastPlayer() == false)
+		{
+			if (eInputManager::GetKeyAction(INPUT_ACTION_START))
+			{
+				if (!eCursor::Player2_Selected && eCursor::Player2_Turns < 1)
+					joined = true;
+			}
+		}
+	}
+	else
+	{
+		if (eCursor::Player1_Character > -1)
+		{
+			if (eInputManager::CheckLastPlayer() == true)
+			{
+				if (eInputManager::GetKeyAction(INPUT_ACTION_START))
+				{
+					if (!eCursor::Player1_Selected && eCursor::Player1_Turns < 1)
+						joined = true;
+				}
+			}
+		}
+
+	}
+	
+	eGameplayModes mode = MODE_VERSUS;
+	eGameplayModes curMode = (eGameplayModes)eSystem::GetGameplayMode();
+
+	switch (curMode)
+	{
+	case MODE_ARCADE:
+		mode = MODE_VERSUS;
+		break;
+	case MODE_TEAM_ARCADE:
+		mode = MODE_TEAM_VERSUS;
+		break;
+	default:
+		mode = MODE_VERSUS;
+		break;
+	}
+
+	if (joined)
+	{
+		// when refreshing screen cursor gets set to starting pos
+		// so current cursor is saved as setting then reset at select
+		// screen init
+		eCursor::StoreCursor();
+		eSystem::ClearScreenparams(m_pGameFlowData->params);
+		eSystem::SetGameplayMode(mode);
+		eSystem::SetScreenParams(m_pGameFlowData->params, mode, 1);
+		
+		if (eSystem::pushstart_set.group >= 0 && eSystem::pushstart_set.index >= 0)
+		{
+			Sound* snd = eSystem::GetSystemSND();
+			PlaySound(snd, eSystem::pushstart_set.group, eSystem::pushstart_set.index, 0, 3.390625f);
+		}
+
+		if (mode == MODE_VERSUS)
+		{
+			*(int*)(eMenuManager::m_pSelectScreenDataPointer + 0x3BA4) = 0;
+			*(int*)(eMenuManager::m_pSelectScreenDataPointer + 0x3BA4 + 180) = 0;
 		}
 	}
 

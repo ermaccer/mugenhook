@@ -22,7 +22,10 @@ enum eGameModes {
 
 
 enum eGameFlowType {
-	FLOW_INTRO = 3,
+	FLOW_0,
+	FLOW_1,
+	FLOW_2,
+	FLOW_INTRO,
 	FLOW_MENU,
 	FLOW_OPTIONS,
 	FLOW_RESET_VARS,
@@ -30,7 +33,8 @@ enum eGameFlowType {
 	FLOW_8,
 	FLOW_9,
 	FLOW_VERSUS,
-	FLOW_IN_GAME
+	FLOW_IN_GAME,
+	FLOW_QUIT_LOOP = 20
 };
 
 
@@ -75,6 +79,35 @@ struct eMugenData {
 
 };
 
+struct eSelectScreenParams {
+	char data[1200];
+};
+
+struct eGameFlowData {
+	int status;
+	eSelectScreenParams* params;
+	char _pad[60];
+	int  deinit;
+	char __pad[32];
+	int quit;
+};
+
+struct pushstart_settings {
+	int active;
+	char text[512] = {};
+	char font[512] = {};
+	int flash;
+	int color_r;
+	int color_g;
+	int color_b;
+	float scale_x;
+	float scale_y;
+	int p1_x, p1_y;
+	int p2_x, p2_y;
+	int p1_align, p2_align;
+	int group, index;
+};
+
 
 class eSystem {
 public:
@@ -97,6 +130,13 @@ public:
 	static float p1_face_offset[2];
 	static float p2_face_offset[2];
 
+	static int p1_cursor_startcell[2];
+	static int p2_cursor_startcell[2];
+
+	// join in settings
+
+	static pushstart_settings pushstart_set;
+
 	static void Init();
 
 	static Sound* GetSystemSND();
@@ -104,4 +144,11 @@ public:
 	static int GetGameplayMode();
 	static int GetTimer();
 	static int GetCharactersAmount();
+
+	static void SetGameFlow(eGameFlowType flow);
+	static void SetGameplayMode(eGameplayModes mode);
+
+
+	static void ClearScreenparams(eSelectScreenParams* params);
+	static void SetScreenParams(eSelectScreenParams* params, int gameMode, int unk);
 };

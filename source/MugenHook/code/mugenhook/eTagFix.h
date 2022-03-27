@@ -8,4 +8,6 @@ public:
 	static void Init();
 	static void  Hook();
 	static void  HookGameModeCommand();
+	static void  HookTeamLifeFix();
+	static void  HookTeamLifeFixP2();
 };

@@ -6,6 +6,7 @@
 #include "eMagicBoxes.h"
 #include "eVariationsManager.h"
 #include "eAnimatedIcons.h"
+#include "..\core\eCursor.h"
 
 bool eMenuManager::m_bIsInMainMenu;
 bool eMenuManager::m_bIsInSelectScreen;
@@ -73,6 +74,7 @@ int eMenuManager::HookSelectScreenMenu()
 	m_bIsInMainMenu = false;
 	m_bIsInSelectScreen = true;
 	m_bAnimsRequireRefresh = true;
+	eCursor::PopCursor();
 	return CallAndReturn<int, 0x408A80>();
 }
 
