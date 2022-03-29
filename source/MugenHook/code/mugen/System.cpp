@@ -2,6 +2,7 @@
 #include <filesystem>
 #include "..\core\eLog.h"
 #include "..\mugenhook\base.h"
+#include <shellapi.h>
 
 int eSystem::iRows;
 int eSystem::iColumns;
@@ -56,7 +57,32 @@ void eSystem::Init()
 	if (std::filesystem::exists("data\\mugen.cfg"))
 	{
 		CIniReader mugenConfig("data\\mugen.cfg");
+
+
+		int argc;
+		LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+
 		motif = mugenConfig.ReadString("Options", "motif", 0);
+
+		if (argv)
+		{
+			for (int i = 0; i < argc; i++)
+			{
+				if (wcscmp(argv[i], L"-r") == 0)
+				{
+					std::wstring wstr = argv[i + 1];
+					std::string str("", wstr.length());
+					std::copy(wstr.begin(), wstr.end(), str.begin());
+
+					std::string motif_str = "data\\";
+					motif_str += str;
+					motif = (char*)motif_str.c_str();
+				}
+			}
+		}
+
+		LocalFree(argv);
+
 		if (motif)
 		{
 			CIniReader system(motif);

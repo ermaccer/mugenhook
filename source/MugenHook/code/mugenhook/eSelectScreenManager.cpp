@@ -77,7 +77,6 @@ void eSelectScreenManager::Process()
 
 	if (GetAsyncKeyState(VK_F5) && eSettingsManager::bDumpCharacterInfo) PrintCharacterData();
 
-	printf("%x %d\n", eCursor::pCursorEax + 0x39FE, eCursor::Player1_Turns);
 	int mode = eSystem::GetGameplayMode();
 	if (!(mode == MODE_VERSUS || mode == MODE_TEAM_VERSUS || mode == MODE_TEAM_COOP || mode == MODE_TRAINING))
 	{
