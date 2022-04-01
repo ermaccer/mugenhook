@@ -53,7 +53,7 @@ int eStageAnnouncer::FindStageData(int id)
 	int iFind = 0;
 	for (unsigned int i = 0; i < m_vStageEntries.size(); i++)
 	{
-		if (m_vStageEntries[i].StageID== id) {
+		if (m_vStageEntries[i].StageID == id) {
 			iFind = i;
 			break;
 		}

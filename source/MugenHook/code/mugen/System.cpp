@@ -70,6 +70,7 @@ void eSystem::Init()
 			{
 				if (wcscmp(argv[i], L"-r") == 0)
 				{
+					printf("%ws\n", argv[i + 1]);
 					std::wstring wstr = argv[i + 1];
 					std::string str("", wstr.length());
 					std::copy(wstr.begin(), wstr.end(), str.begin());
@@ -82,6 +83,8 @@ void eSystem::Init()
 		}
 
 		LocalFree(argv);
+
+		eLog::PushMessage(__FUNCTION__, "Loading %s\n", motif);
 
 		if (motif)
 		{
@@ -109,7 +112,6 @@ void eSystem::Init()
 			{
 				if (pushstart_set.text[i] == 0x5C)
 				{
-					printf("patching\n");
 					if (pushstart_set.text[i + 1] == 0x6E)
 					{
 						pushstart_set.text[i] = 0xD;

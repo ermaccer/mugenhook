@@ -89,17 +89,17 @@ void eAirReader::ReadData()
 	fclose(pFile);
 }
 
-eAirEntry eAirReader::GetAnimation(int id)
+eAirEntry* eAirReader::GetAnimation(int id)
 {
-	eAirEntry air;
+	eAirEntry* air = nullptr;
 	for (unsigned int i = 0; i < vAnimations.size(); i++)
 	{
 		if (vAnimations[i].AnimID == id) {
-			air = vAnimations[i];
+			air = &vAnimations[i];
 			break;
 		}
 		else
-			air = vAnimations[0];
+			air = &vAnimations[0];
 	}
 	return air;
 }
@@ -113,17 +113,17 @@ bool eAirReader::CheckName(std::string name)
 		return false;
 }
 
-eAirReader GetAIRFromName(std::string name)
+eAirReader* GetAIRFromName(std::string name)
 {
-	eAirReader temp;
+	eAirReader* temp = nullptr;
 	for (unsigned int i = 0; i < eAirManager.size(); i++)
 	{
 		if (eAirManager[i].CheckName(name)) {
-			temp = eAirManager[i];
+			temp = &eAirManager[i];
 			break;
 		}
 		else
-			temp = eAirManager[0];
+			temp = &eAirManager[0];
 	}
 	return temp;
 }

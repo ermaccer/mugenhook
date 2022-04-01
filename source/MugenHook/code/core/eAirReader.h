@@ -29,11 +29,11 @@ public:
 	void ReadData();
 	bool CheckName(std::string name);
 
-	eAirEntry GetAnimation(int id);
+	eAirEntry* GetAnimation(int id);
 
 };
 
 extern std::vector<eAirReader> eAirManager;
-eAirReader GetAIRFromName(std::string name);
+eAirReader* GetAIRFromName(std::string name);
 int GlobalGetAnimCount();
 

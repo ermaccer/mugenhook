@@ -112,24 +112,24 @@ void eAnimatedIcons::Animate(eMugenCharacterInfo* character)
 {
 	int iIcon = FindIconEntry(character->ID);
 
-	eAirReader AIR_Reader;
-	eAirEntry Animation;
+	eAirReader* AIR_Reader;
+	eAirEntry* Animation;
 
 	AIR_Reader = GetAIRFromName(m_vAnimatedIcons[iIcon].AirFileName);
 
-	Animation = AIR_Reader.GetAnimation(m_vAnimatedIcons[iIcon].AnimationID);
+	Animation = AIR_Reader->GetAnimation(m_vAnimatedIcons[iIcon].AnimationID);
 
 
 	if (character->ExtraFlags & EXTRA_FLAG_VAR_SPECIAL_CONTROLLER && character->CharacterFlag & CHAR_FLAG_VARIATIONS)
 	{
 
-		if (character->CurrentIconIndex > Animation.MaxFrames - 1)
-			character->CurrentIconIndex = Animation.MaxFrames - 1;
+		if (character->CurrentIconIndex > Animation->MaxFrames - 1)
+			character->CurrentIconIndex = Animation->MaxFrames - 1;
 
-		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x230 + 4) = Animation.vAnimData[character->CurrentIconIndex].Group;
-		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x230 + 8) = Animation.vAnimData[character->CurrentIconIndex].Index;
+		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x230 + 4) = Animation->vAnimData[character->CurrentIconIndex].Group;
+		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x230 + 8) = Animation->vAnimData[character->CurrentIconIndex].Index;
 
-		if (eSystem::GetTimer() - character->IconTimer <= Animation.vAnimData[character->CurrentIconIndex].Frametime) return;
+		if (eSystem::GetTimer() - character->IconTimer <= Animation->vAnimData[character->CurrentIconIndex].Frametime) return;
 		character->CurrentIconIndex++;
 
 		// reset timer
@@ -139,20 +139,20 @@ void eAnimatedIcons::Animate(eMugenCharacterInfo* character)
 	{
 		if (character->ExtraFlags & EXTRA_FLAG_ANIM_PLAYS_ONCE)
 		{
-			if (character->CurrentIconIndex > Animation.MaxFrames - 1)
-				character->CurrentIconIndex = Animation.MaxFrames - 1;
+			if (character->CurrentIconIndex > Animation->MaxFrames - 1)
+				character->CurrentIconIndex = Animation->MaxFrames - 1;
 		}
 		else
 		{
-			if (character->CurrentIconIndex > Animation.MaxFrames - 1)
+			if (character->CurrentIconIndex > Animation->MaxFrames - 1)
 				character->CurrentIconIndex = 0;
 		}
 
 
-		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x230 + 4) = Animation.vAnimData[character->CurrentIconIndex].Group;
-		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x230 + 8) = Animation.vAnimData[character->CurrentIconIndex].Index;
+		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x230 + 4) = Animation->vAnimData[character->CurrentIconIndex].Group;
+		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x230 + 8) = Animation->vAnimData[character->CurrentIconIndex].Index;
 
-		if (eSystem::GetTimer() - character->IconTimer <= Animation.vAnimData[character->CurrentIconIndex].Frametime) return;
+		if (eSystem::GetTimer() - character->IconTimer <= Animation->vAnimData[character->CurrentIconIndex].Frametime) return;
 		character->CurrentIconIndex++;
 
 		// reset timer
@@ -166,8 +166,8 @@ void eAnimatedIcons::RefreshAnimationCounters()
 	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
 
-	eAirReader AIR_Reader;
-	eAirEntry Animation;
+	eAirReader* AIR_Reader;
+	eAirEntry* Animation;
 
 	for (int i = 0; i < eSystem::iColumns * eSystem::iRows; i++)
 		for (unsigned int a = 0; a < m_vAnimatedIcons.size(); a++)
@@ -179,8 +179,8 @@ void eAnimatedIcons::RefreshAnimationCounters()
 					// we want variation character to be on last image
 					int iIcon = FindIconEntry(CharactersArray[i].ID);
 					AIR_Reader = GetAIRFromName(m_vAnimatedIcons[iIcon].AirFileName);
-					Animation = AIR_Reader.GetAnimation(m_vAnimatedIcons[iIcon].AnimationID);
-					CharactersArray[i].CurrentIconIndex = Animation.MaxFrames - 1;
+					Animation = AIR_Reader->GetAnimation(m_vAnimatedIcons[iIcon].AnimationID);
+					CharactersArray[i].CurrentIconIndex = Animation->MaxFrames - 1;
 				}
 				else
 					CharactersArray[i].CurrentIconIndex = 0;
