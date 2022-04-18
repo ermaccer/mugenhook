@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 
 struct eTextDrawEntry {
 	bool m_bIsActive;
@@ -10,17 +11,32 @@ struct eTextDrawEntry {
 
 enum eNewCNSCommands {
 	SetRoundTime = 2540,
+	AddRoundTime,
+	SetBGM
+};
+
+union eMugenVar {
+	int number;
+	char* string;
+	float real;
 };
 
 struct eMugenMachine{
 	char pad[16];
 	int commandID;
+	char _pad[4];
+	int* var;
 };
+
 
 class eScriptProcessor {
 public:
 
 	static eMugenMachine* vm;
+	static int			  vm_cur_line;
+	static int			  vm_buff;
+	static int			  vm_cur_proc;
+	static std::vector<std::string> stringTable;
 
 	static void Init();
 	static void Hook2DDraw();
@@ -34,4 +50,8 @@ public:
 	static void ExecuteCommand(int id);
 
 	static bool IsCommandValid(int id);
+
+	static void AddStringToTable(std::string str);
+	static int  FindString(std::string str);
+
 };

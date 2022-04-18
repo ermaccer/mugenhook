@@ -27,6 +27,7 @@ bool eSettingsManager::bEnableAlternateAnims;
 bool eSettingsManager::bEnableAnimationScale;
 bool eSettingsManager::bEnableAnimationLoop;
 bool eSettingsManager::bHookAnimatedPortraits;
+int  eSettingsManager::iAnimatedPortraitsOperationType;
 bool eSettingsManager::bEnableSlidePortraits;
 int  eSettingsManager::iSelectableFighters;
 int  eSettingsManager::iRandomStageGroup;
@@ -42,6 +43,7 @@ bool  eSettingsManager::bHookStageAnnouncer;
 bool  eSettingsManager::bDisableStageSelection;
 char* eSettingsManager::szFightLogFile;
 bool eSettingsManager::bHookAnimatedIcons;
+bool eSettingsManager::bDisplayStageSelectionOnlyWhenCharactersSelected;
 
 int  eSettingsManager::iVariationChangeGroup;
 int  eSettingsManager::iVariationChangeIndex;
@@ -97,7 +99,7 @@ void eSettingsManager::Init()
 	bEnableSelectAnimations = ini->ReadBoolean("Settings", "bEnableSelectAnimations", 0);
 	bEnableAnimationScale = ini->ReadBoolean("Settings", "bEnableAnimationScale", 0);
 	bEnableAnimationLoop = ini->ReadBoolean("Settings", "bEnableAnimationLoop", 0);
-
+	iAnimatedPortraitsOperationType = ini->ReadInteger("Settings", "iAnimatedPortraitsOperationType", 0);
 
 	bHookAnimatedIcons = ini->ReadBoolean("Settings", "bHookAnimatedIcons", 0);
 
@@ -113,4 +115,6 @@ void eSettingsManager::Init()
 	iCursorDefaultGroup = ini->ReadInteger("Settings", "iCursorDefaultGroup", 6);
 	iCursorDefaultIndex = ini->ReadInteger("Settings", "iCursorDefaultIndex", 1);
 	bUseThreadForLoading = ini->ReadBoolean("Settings", "bUseThreadForLoading", false);
+
+	bDisplayStageSelectionOnlyWhenCharactersSelected = ini->ReadBoolean("Settings", "bDisplayStageSelectionOnlyWhenCharactersSelected", false);
 }

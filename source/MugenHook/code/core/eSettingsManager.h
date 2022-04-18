@@ -37,7 +37,7 @@ public:
 	static bool bEnableAnimationScale;
 	static bool bHookAnimatedPortraits;
 	static bool bEnableAnimationLoop;
-
+	static int  iAnimatedPortraitsOperationType;
 	/* Slide Portraits */
 	static bool bEnableSlidePortraits;
 
@@ -48,6 +48,7 @@ public:
 	static bool bUseLeftRightInMenu;
 	static bool bHookStageAnnouncer;
 	static bool bDisableStageSelection;
+	static bool bDisplayStageSelectionOnlyWhenCharactersSelected;
 	static int  iDefaultGameModeCursor;
 
 	/* Tag Stuff */

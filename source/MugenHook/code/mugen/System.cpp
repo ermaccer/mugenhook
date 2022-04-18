@@ -23,6 +23,7 @@ int eSystem::p2_cursor_startcell[2];
 float eSystem::p1_face_offset[2];
 float eSystem::p2_face_offset[2];
 pushstart_settings eSystem::pushstart_set = {};
+screentimer_settings eSystem::screentimer = {};
 
 void eSystem::Init()
 {
@@ -140,6 +141,8 @@ void eSystem::Init()
 			pushstart_set.group = system.ReadInteger("Select Info", "pushstart.snd.group", -1);
 			pushstart_set.index = system.ReadInteger("Select Info", "pushstart.snd.index", -1);
 
+			screentimer.active = system.ReadInteger("Select Info", "screentimer.active", 1);
+
 			eLog::PushMessage(__FUNCTION__, "Success! Done reading motif data\n");
 		}
 	}
@@ -216,4 +219,44 @@ void  __declspec(naked) eSystem::SetScreenParams(eSelectScreenParams * params, i
 		pop ebp
 		ret
 	}
+}
+
+void eSystem::SetRoundTime(int value)
+{
+	*(int*)(*(int*)eSystem::pMugenDataPointer + 0x12768) = value;
+}
+
+int eSystem::GetRoundTime()
+{
+	return *(int*)(*(int*)eSystem::pMugenDataPointer + 0x12768);
+}
+
+char* CNS_ReadValue(int ini, const char * name)
+{
+	return CallAndReturn<char*, 0x46A5E0, int, const char*>(ini, name);
+}
+
+bool CNS_StoreValue(char * line, int dst, int buff, int unk, int type)
+{
+	return CallAndReturn<bool, 0x4023D0, char*, int, int, int ,int>(line, dst, buff, unk, type);
+}
+
+int CNS_RecallValue(int proc, int from, int type)
+{
+	return CallAndReturn<int, 0x4028C0, int, int, int>(proc, from, type);
+}
+
+int GetCharacterIDFromSprite(int sprite)
+{
+	int id = -1;
+	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
+	for (int i = 0; i < eSystem::GetCharactersAmount(); i++)
+	{
+		if (CharactersArray[i].SpritePointer == sprite)
+		{
+			id = CharactersArray[i].ID;
+			break;
+		}
+	}
+	return id;
 }

@@ -317,7 +317,7 @@ int eVariationsManager::GetAmountOfUsedVariationCharacters()
 {
 	int amount = 0;
 
-	for (int i = 0; i < m_vVariations.size(); i++)
+	for (unsigned int i = 0; i < m_vVariations.size(); i++)
 	{
 		amount += m_vVariations[i].vVariationChars.size();
 	}

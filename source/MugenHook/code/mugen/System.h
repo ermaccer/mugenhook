@@ -75,7 +75,9 @@ struct eMugenData {
 	char  pad[512];
 	char  GameFolder[512];
 	char  _pad[16];
-	char  LastStage[1024];
+	char  LastStage[1024]; // 2064
+	char __pad[4816];
+	char  StageData[1472];
 
 };
 
@@ -109,6 +111,22 @@ struct pushstart_settings {
 };
 
 
+struct screentimer_settings {
+	int active;
+	char format[128] = {};
+	int color_r;
+	int color_g;
+	int color_b;
+	float scale_x;
+	float scale_y;
+
+	int x, y;
+	int group, index;
+
+	int ticks_per_sec;
+	int amount;
+};
+
 class eSystem {
 public:
 	static int iRows;
@@ -137,6 +155,8 @@ public:
 
 	static pushstart_settings pushstart_set;
 
+	static screentimer_settings screentimer;
+
 	static void Init();
 
 	static Sound* GetSystemSND();
@@ -151,4 +171,13 @@ public:
 
 	static void ClearScreenparams(eSelectScreenParams* params);
 	static void SetScreenParams(eSelectScreenParams* params, int gameMode, int unk);
+
+	static void SetRoundTime(int value);
+	static int  GetRoundTime();
 };
+
+char* CNS_ReadValue(int ini, const char* name);
+bool  CNS_StoreValue(char* line, int dst, int buff, int unk, int type);
+int   CNS_RecallValue(int proc, int from, int type);
+
+int  GetCharacterIDFromSprite(int sprite);

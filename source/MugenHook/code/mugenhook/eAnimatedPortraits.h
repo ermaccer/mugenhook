@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 
+
 struct ePortraitEntry {
 	int       RowID;
 	int       ColumnID;
@@ -12,6 +13,7 @@ struct ePortraitEntry {
 	std::string AirFileName;
 	float     SpritesScaleY;
 	float     SpritesScaleX;
+	int		  CharID;
 };
 
 
@@ -37,7 +39,11 @@ public:
 	static int iTickCounter_p2;
 
 	static int pFrameTablePointer;
+
+	static int iCurrentPlayerDrawID;
+
 	static int pCurrentPlayerSprite;
+	static int pCurrentPlayerSpriteP2;
 
 	static bool bReadyToDrawSprite;
 
@@ -52,7 +58,9 @@ public:
 
 
 	static int         FindPortraitEntry(int row, int col);
+	static int         FindPortraitEntryID(int id);
 	static std::string GetCellFName(int row, int col);
+	static std::string GetCellFNameID(int id);
 
 	static void HookRequestSprites();
 	static int  HookDisplaySprites(int a1, int a2, int a3, int a4, int a5, float a6, float a7);

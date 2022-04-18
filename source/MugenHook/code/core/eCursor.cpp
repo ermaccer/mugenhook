@@ -4,6 +4,10 @@
 #include "..\mugenhook\base.h"
 #include "..\core\eSettingsManager.h"
 #include "..\mugen\System.h"
+#include "..\mugenhook\eAnimatedPortraits.h"
+#include "..\mugen\System.h"
+#include "..\mugenhook\eMenuManager.h"
+#include "..\mugenhook\eCustomCursorManager.h"
 
 int eCursor::Player1_Row;
 int eCursor::Player1_Column;
@@ -19,6 +23,9 @@ int eCursor::Player2_RandomCharacter;
 int eCursor::Player2_Selected;
 int eCursor::Player2_Turns;
 
+eSelection eCursor::Selection;
+eSelection eCursor::SelectionP1;
+eSelection eCursor::SelectionP2;
 int eCursor::pCursorEax;
 
 void eCursor::Init()
@@ -43,6 +50,8 @@ void eCursor::Init()
 	InjectHook(0x409207, HookCursorMovePositive, PATCH_JUMP);
 	InjectHook(0x409307, HookCursorMoveDown, PATCH_JUMP);
 	InjectHook(0x409288, HookCursorMoveUp, PATCH_JUMP);
+	InjectHook(0x406848, HookSelection, PATCH_JUMP);
+
 }
 
 void __declspec(naked) eCursor::HookCursorPointer()
@@ -139,6 +148,38 @@ void __declspec(naked) eCursor::HookCursorMoveUp()
 	{
 		popad
 		jmp c_pos_up_jmp
+	}
+}
+
+void __declspec(naked) eCursor::HookSelection()
+{
+	static int jmp_continue = 0x40684F;
+	static int _edx = 0;
+	static int _eax, _ecx;
+	_asm {
+		pushad
+		mov _eax, eax
+		mov _ecx, ecx
+
+		mov     eax, [edi + 20]
+		lea     ecx, [eax + eax * 4]
+		mov     ecx, [edi + ecx * 4 + 36]
+		mov     Selection.Who, ecx
+		mov		eax, [edx]
+		mov     Selection.ID, eax
+
+		mov eax, _eax
+		mov ecx, _ecx
+	}
+	if (Selection.Who == 0)
+		SelectionP1 = Selection;
+	else
+		SelectionP2 = Selection;
+	eCustomCursorManager::ProcessSelection();
+	_asm {
+		popad
+		mov     edx, [eax + ecx * 4 + 840]
+		jmp jmp_continue
 	}
 }
 
@@ -265,4 +306,9 @@ void eCursor::PopCursor()
 
 	*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x2E0) = eSystem::p2_cursor_startcell[0];
 	*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x2E8) = eSystem::p2_cursor_startcell[1];
+}
+
+void eCursor::UpdateRandomSelect()
+{
+
 }

@@ -40,8 +40,11 @@ public:
 	static void HookCurrentScreenGameData();
 
 	static void ProcessPlayer2JoinIn();
+	static void ProcessScreenTimer();
 
 	static void HookLoadCharacterData(char* file);
 	static void HookCacheSoundData();
 	static void THREAD_CacheSoundData();
+
+	static void HookStageDisplay();
 };

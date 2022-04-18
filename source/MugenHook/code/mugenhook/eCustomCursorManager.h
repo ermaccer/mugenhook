@@ -40,4 +40,6 @@ public:
 	static void ProcessSoundP1();
 	static void ProcessSoundP2();
 	static void Process();
+
+	static void ProcessSelection();
 };

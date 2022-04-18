@@ -1,5 +1,10 @@
 #pragma once
 
+struct eSelection {
+	int ID;
+	int Who;
+};
+
 class eCursor {
 public:
 	static int Player1_Row;
@@ -16,6 +21,9 @@ public:
 	static int Player2_Selected;
 	static int Player2_Turns;
 
+	static eSelection Selection;
+	static eSelection SelectionP1;
+	static eSelection SelectionP2;
 	static int pCursorEax;
 
 
@@ -25,9 +33,12 @@ public:
 	static void HookCursorMovePositive();
 	static void HookCursorMoveDown();
 	static void HookCursorMoveUp();
+	static void HookSelection();
 	static void Update();
 
 	static void StoreCursor();
 	static void PopCursor();
+
+	static void UpdateRandomSelect();
 
 };

@@ -16,6 +16,7 @@
 #include "..\mugen\Sprite.h"
 #include "..\mugen\Common.h"
 #include "..\mugen\Draw.h"
+#include "eAnimatedPortraits.h"
 
 int eSelectScreenManager::m_bPlayer1HasFinishedWaiting;
 int eSelectScreenManager::m_bPlayer2HasFinishedWaiting;
@@ -60,6 +61,11 @@ void eSelectScreenManager::Init()
 	Nop(0x408AA3, 7);
 	InjectHook(0x408AA3, HookCurrentScreenGameData, PATCH_JUMP);
 
+	if (eSettingsManager::bDisplayStageSelectionOnlyWhenCharactersSelected)
+	{
+		Nop(0x407E15, 7);
+		InjectHook(0x407E15, HookStageDisplay, PATCH_JUMP);
+	}
 }
 
 void eSelectScreenManager::Process()
@@ -72,8 +78,12 @@ void eSelectScreenManager::Process()
 			ProcessWaitPlayer2();
 		}
 	}
-
-	if (eSettingsManager::bDev_DisplayPos) printf("Player 1: Row: %d   Column: %d  Character: %d \r", eCursor::Player1_Row, eCursor::Player1_Column, eCursor::Player1_Character);
+	if (eSettingsManager::bDev_DisplayPos)
+	{
+		eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
+		if (eCursor::Player1_Character > 0)
+			printf("Player 1: Row: %d   Column: %d  Character ID: %d %x\r", eCursor::Player1_Row, eCursor::Player1_Column, CharactersArray[eCursor::Player1_Character].ID, eAnimatedPortraits::pCurrentPlayerSprite);
+	}
 
 	if (GetAsyncKeyState(VK_F5) && eSettingsManager::bDumpCharacterInfo) PrintCharacterData();
 
@@ -447,10 +457,12 @@ void eSelectScreenManager::ProcessPlayer2JoinIn()
 
 }
 
+void eSelectScreenManager::ProcessScreenTimer()
+{
+}
+
 void eSelectScreenManager::HookLoadCharacterData(char * file)
 {
-	PushDebugMessage(file);
-
 	for (int i = 0; i < eSystem::GetCharactersAmount(); i++)
 	{
 		eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
@@ -477,6 +489,28 @@ void eSelectScreenManager::THREAD_CacheSoundData()
 {
 	while (!m_bCachedSoundData)
 		HookCacheSoundData();
+}
+
+void __declspec(naked) eSelectScreenManager::HookStageDisplay()
+{
+	static int jmp_continue = 0x407E1C;
+	static int jmp_false = 0x407EF5;
+
+	if (!(eCursor::Player1_Selected && eCursor::Player2_Selected))
+	{
+		_asm {
+			jmp jmp_false
+		}
+
+	}
+	else
+	{
+		_asm {
+			cmp     dword ptr[edx + 15264], 0
+			jmp jmp_continue
+		}
+	}
+
 }
 
 void eSelectScreenManager::HookCacheSoundData()

@@ -146,9 +146,6 @@
     <ClCompile Include="code\mugen\System.cpp">
       <Filter>Header Files\code\mugen</Filter>
     </ClCompile>
-    <ClCompile Include="IniReader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="code\mugenhook\eMugenConfig.cpp">
       <Filter>Header Files\code\mugenhook</Filter>
     </ClCompile>
@@ -196,6 +193,9 @@
     </ClCompile>
     <ClCompile Include="code\mugenhook\eScriptProcessor.cpp">
       <Filter>Header Files\code\mugenhook</Filter>
+    </ClCompile>
+    <ClCompile Include="IniReader.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

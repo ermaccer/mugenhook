@@ -7,6 +7,7 @@
 #include "..\core\eCursor.h"
 #include "..\mugenhook\eCommonHooks.h"
 
+#include "eCustomCursorManager.h"
 #include "eSelectScreenManager.h"
 
 
@@ -27,6 +28,9 @@ int eAnimatedPortraits::pFrameTablePointer;
 bool eAnimatedPortraits::bReadyToDrawSprite;
 
 int eAnimatedPortraits::pCurrentPlayerSprite;
+int eAnimatedPortraits::pCurrentPlayerSpriteP2;
+
+int eAnimatedPortraits::iCurrentPlayerDrawID;
 
 void eAnimatedPortraits::Init()
 {
@@ -84,17 +88,29 @@ void eAnimatedPortraits::ReadFile(const char * file)
 			if (sscanf(szLine, "%d", &iRowID) == 1)
 			{
 				char airPath[512];
-				int iColumnID, iGroupID, iGroupP2ID, iSelectGroupID, iSelectGroupP2ID;
+				int parsed = 0;
+				int iColumnID, iGroupID, iGroupP2ID, iSelectGroupID, iSelectGroupP2ID, iCharacterID;
 
 				float fSpriteScaleX, fSpriteScaleY;
+				if (eSettingsManager::iAnimatedPortraitsOperationType == MODE_CHAR_ID)
+					parsed = sscanf(szLine, "%d %d %d %d %d %s %f %f", &iCharacterID, &iGroupID, &iGroupP2ID, &iSelectGroupID, &iSelectGroupP2ID, &airPath, &fSpriteScaleX, &fSpriteScaleY);
+				else
+					parsed = sscanf(szLine, "%d %d %d %d %d %d %s %f %f", &iRowID, &iColumnID, &iGroupID, &iGroupP2ID, &iSelectGroupID, &iSelectGroupP2ID, &airPath, &fSpriteScaleX, &fSpriteScaleY);
 
-				sscanf(szLine, "%d %d %d %d %d %d %s %f %f", &iRowID, &iColumnID, &iGroupID, &iGroupP2ID, &iSelectGroupID, &iSelectGroupP2ID, &airPath, &fSpriteScaleX, &fSpriteScaleY);
+				if (eSettingsManager::iAnimatedPortraitsOperationType == MODE_CHAR_ID)
+				{
+					if (parsed > 8)
+					{
+						eLog::PushMessage(__FUNCTION__, "Current operation mode is set to ID, but the data line seems to be made for Row/Column!");
+						eLog::PushError();
+					}
+				}
 
 				std::string strAirName(airPath, strlen(airPath));
 				// create entry
 
 				ePortraitEntry entry = { iRowID, iColumnID, iGroupID, iGroupP2ID, iSelectGroupID,
-					iSelectGroupP2ID, strAirName,fSpriteScaleX,fSpriteScaleY };
+					iSelectGroupP2ID, strAirName,fSpriteScaleX,fSpriteScaleY,iCharacterID};
 
 				AnimationTable.push_back(entry);
 
@@ -160,18 +176,54 @@ void eAnimatedPortraits::Process()
 	if (!eCursor::Player1_Selected || !eSettingsManager::bEnableSelectAnimations) {
 
 		eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
-
-		// get anims
-		AIR_Reader = GetAIRFromName(GetCellFName(eCursor::Player1_Row, eCursor::Player1_Column));
-		iAnimEntry = FindPortraitEntry(eCursor::Player1_Row, eCursor::Player1_Column);
 		if (eCursor::Player1_Character > -1)
 		{
+
+			std::string air;
+			// handle random
+			if (CharactersArray[eCursor::Player1_Character].ID == -2)
+			{
+				air = GetCellFNameID(GetCharacterIDFromSprite(pCurrentPlayerSprite));
+			}
+			else
+			{
+				if (eSettingsManager::iAnimatedPortraitsOperationType == MODE_CHAR_ID)
+					air = GetCellFNameID(CharactersArray[eCursor::Player1_Character].ID);
+				else
+					air = GetCellFName(eCursor::Player1_Row, eCursor::Player1_Column);
+			}
+
+
+
+
+			// get anims
+			AIR_Reader = GetAIRFromName(air);
+
+			// handle random
+			if (CharactersArray[eCursor::Player1_Character].ID == -2)
+			{
+				iAnimEntry = FindPortraitEntryID(GetCharacterIDFromSprite(pCurrentPlayerSprite));
+			}
+			else
+			{
+				if (eSettingsManager::iAnimatedPortraitsOperationType == MODE_CHAR_ID)
+					iAnimEntry = FindPortraitEntryID(CharactersArray[eCursor::Player1_Character].ID);
+				else
+					iAnimEntry = FindPortraitEntry(eCursor::Player1_Row, eCursor::Player1_Column);
+			}
+
+
+
+
 			if (AIR_Reader)
 			{
 				int cur_var = CharactersArray[eCursor::Player1_Character].CurrentVariation - 1;
 				int var_offset = 0;
 				if (cur_var >= 1)
 					var_offset = 100 * cur_var;
+
+				if (eSettingsManager::iAnimatedPortraitsOperationType == MODE_CHAR_ID)
+					var_offset = 0;
 
 				Animation = AIR_Reader->GetAnimation(AnimationTable[iAnimEntry].SelectAnimationID + var_offset);
 
@@ -223,17 +275,39 @@ void eAnimatedPortraits::Process()
 		{
 			eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
-			AIR_Reader = GetAIRFromName(GetCellFName(eCursor::Player1_Row, eCursor::Player1_Column));
-			iAnimEntry = FindPortraitEntry(eCursor::Player1_Row, eCursor::Player1_Column);
-
 			if (eCursor::Player1_Character > -1)
 			{
+
+				std::string air;
+				if (eSettingsManager::iAnimatedPortraitsOperationType == MODE_CHAR_ID)
+				{
+					air = GetCellFNameID(eCursor::SelectionP1.ID);
+				}
+
+				else
+					air = GetCellFName(eCursor::Player1_Row, eCursor::Player1_Column);
+		
+
+				// get anims
+				AIR_Reader = GetAIRFromName(air);
+
+				if (eSettingsManager::iAnimatedPortraitsOperationType == MODE_CHAR_ID)
+				{
+					iAnimEntry = FindPortraitEntryID(eCursor::SelectionP1.ID);
+				}
+				else
+					iAnimEntry = FindPortraitEntry(eCursor::Player1_Row, eCursor::Player1_Column);
+
 				if (AIR_Reader)
 				{
 					int cur_var = CharactersArray[eCursor::Player1_Character].CurrentVariation - 1;
 					int var_offset = 0;
 					if (cur_var >= 1)
 						var_offset = 100 * cur_var;
+
+
+					if (eSettingsManager::iAnimatedPortraitsOperationType == MODE_CHAR_ID)
+						var_offset = 0;
 
 					Animation = AIR_Reader->GetAnimation(AnimationTable[iAnimEntry].WinAnimationID + var_offset);
 
@@ -288,17 +362,52 @@ void eAnimatedPortraits::ProcessP2()
 	if (!eCursor::Player2_Selected || !eSettingsManager::bEnableSelectAnimations)
 	{
 		eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
-
-		AIR_Reader = GetAIRFromName(GetCellFName(eCursor::Player2_Row, eCursor::Player2_Column));
-		iAnimEntry = FindPortraitEntry(eCursor::Player2_Row, eCursor::Player2_Column);
 		if (eCursor::Player2_Character > -1)
 		{
+
+			std::string air;
+			// handle random
+			if (CharactersArray[eCursor::Player2_Character].ID == -2)
+			{
+				air = GetCellFNameID(GetCharacterIDFromSprite(pCurrentPlayerSpriteP2));
+			}
+			else
+			{
+				if (eSettingsManager::iAnimatedPortraitsOperationType == MODE_CHAR_ID)
+					air = GetCellFNameID(CharactersArray[eCursor::Player2_Character].ID);
+				else
+					air = GetCellFName(eCursor::Player2_Row, eCursor::Player2_Column);
+			}
+
+
+
+
+			// get anims
+			AIR_Reader = GetAIRFromName(air);
+
+			// handle random
+			if (CharactersArray[eCursor::Player2_Character].ID == -2)
+			{
+				iAnimEntry = FindPortraitEntryID(GetCharacterIDFromSprite(pCurrentPlayerSpriteP2));
+			}
+			else
+			{
+				if (eSettingsManager::iAnimatedPortraitsOperationType == MODE_CHAR_ID)
+					iAnimEntry = FindPortraitEntryID(CharactersArray[eCursor::Player2_Character].ID);
+				else
+					iAnimEntry = FindPortraitEntry(eCursor::Player2_Row, eCursor::Player2_Column);
+			}
+
+
 			if (AIR_Reader)
 			{
 				int cur_var = CharactersArray[eCursor::Player2_Character].CurrentVariation - 1;
 				int var_offset = 0;
 				if (cur_var >= 1)
 					var_offset = 100 * cur_var;
+
+				if (eSettingsManager::iAnimatedPortraitsOperationType == MODE_CHAR_ID)
+					var_offset = 0;
 
 				animation = AIR_Reader->GetAnimation(AnimationTable[iAnimEntry].SelectAnimationID + var_offset);
 				alt_anim = AIR_Reader->GetAnimation(AnimationTable[iAnimEntry].SelectAnimationAlternateID + var_offset);
@@ -354,11 +463,31 @@ void eAnimatedPortraits::ProcessP2()
 		{
 			eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
-			AIR_Reader = GetAIRFromName(GetCellFName(eCursor::Player2_Row, eCursor::Player2_Column));
-			iAnimEntry = FindPortraitEntry(eCursor::Player2_Row, eCursor::Player2_Column);
-
 			if (eCursor::Player2_Character > -1)
 			{
+				std::string air;
+				if (eSettingsManager::iAnimatedPortraitsOperationType == MODE_CHAR_ID)
+				{
+						air = GetCellFNameID(eCursor::SelectionP2.ID);
+				}
+
+				else
+					air = GetCellFName(eCursor::Player2_Row, eCursor::Player2_Column);
+
+
+
+				// get anims
+				AIR_Reader = GetAIRFromName(air);
+
+				if (eSettingsManager::iAnimatedPortraitsOperationType == MODE_CHAR_ID)
+				{
+					iAnimEntry = FindPortraitEntryID(eCursor::SelectionP2.ID);
+				}
+				else
+					iAnimEntry = FindPortraitEntry(eCursor::Player2_Row, eCursor::Player2_Column);
+
+
+
 				if (AIR_Reader)
 				{
 					int cur_var = CharactersArray[eCursor::Player2_Character].CurrentVariation - 1;
@@ -366,8 +495,11 @@ void eAnimatedPortraits::ProcessP2()
 					if (cur_var >= 1)
 						var_offset = 100 * cur_var;
 
-					animation = GetAIRFromName(GetCellFName(eCursor::Player2_Row, eCursor::Player2_Column))->GetAnimation(AnimationTable[iAnimEntry].WinAnimationID + var_offset);
-					alt_anim = GetAIRFromName(GetCellFName(eCursor::Player2_Row, eCursor::Player2_Column))->GetAnimation(AnimationTable[iAnimEntry].WinAnimationAlternateID + var_offset);
+					if (eSettingsManager::iAnimatedPortraitsOperationType == MODE_CHAR_ID)
+						var_offset = 0;
+
+					animation = AIR_Reader->GetAnimation(AnimationTable[iAnimEntry].WinAnimationID + var_offset);
+					alt_anim = AIR_Reader->GetAnimation(AnimationTable[iAnimEntry].WinAnimationAlternateID + var_offset);
 
 					if (animation && alt_anim)
 					{
@@ -442,6 +574,20 @@ int eAnimatedPortraits::FindPortraitEntry(int row, int col)
 	return iFind;
 }
 
+int eAnimatedPortraits::FindPortraitEntryID(int id)
+{
+	int iFind = 0;
+	for (unsigned int i = 0; i < AnimationTable.size(); i++)
+	{
+		if (AnimationTable[i].CharID == id) 
+		{
+			iFind = i;
+			break;
+		}
+	}
+	return iFind;
+}
+
 std::string eAnimatedPortraits::GetCellFName(int row, int col)
 {
 	std::string strFind;
@@ -453,6 +599,20 @@ std::string eAnimatedPortraits::GetCellFName(int row, int col)
 				strFind = AnimationTable[i].AirFileName;
 				break;
 			}
+		}
+	}
+	return strFind;
+}
+
+std::string eAnimatedPortraits::GetCellFNameID(int id)
+{
+	std::string strFind;
+	for (unsigned int i = 0; i < AnimationTable.size(); i++)
+	{
+		if (AnimationTable[i].CharID == id) 
+		{
+				strFind = AnimationTable[i].AirFileName;
+				break;
 		}
 	}
 	return strFind;
@@ -473,6 +633,29 @@ void __declspec(naked) eAnimatedPortraits::HookRequestSprites()
 
 int eAnimatedPortraits::HookDisplaySprites(int a1, int a2, int a3, int a4, int a5, float a6, float a7)
 {
+	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
+	if (iCurrentPlayerDrawID == 0)
+	{
+		if (eCursor::Player1_Character > -1)
+		{
+			if (CharactersArray[eCursor::Player1_Character].ID > -1)
+				a2 = CharactersArray[eCursor::Player1_Character].SpritePointer;
+		}
+
+		pCurrentPlayerSprite = a2;
+	}
+	else if (iCurrentPlayerDrawID == 4)
+	{
+		if (eCursor::Player2_Character > -1)
+		{
+			if (CharactersArray[eCursor::Player2_Character].ID > -1)
+				a2 = CharactersArray[eCursor::Player2_Character].SpritePointer;
+		}
+
+		pCurrentPlayerSpriteP2 = a2;
+	}
+	
+
 	if (eSettingsManager::bHookAnimatedPortraits)
 	{
 		Process();
@@ -493,7 +676,7 @@ void __declspec(naked) eAnimatedPortraits::HookGrabPlayerIDForDrawing()
 {
 	static int jmp_playerid_next = 0x406F9B;
 	_asm {
-		mov		pCurrentPlayerSprite, ecx
+		mov		iCurrentPlayerDrawID, ecx
 		mov     eax, [esi + 0x438]
 		jmp		jmp_playerid_next
 	}
