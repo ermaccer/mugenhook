@@ -503,6 +503,18 @@ void __declspec(naked) eSelectScreenManager::HookStageDisplay()
 		}
 
 	}
+	else if (eCursor::Player2_Character < 0 && !eCursor::Player1_Selected)
+	{
+		_asm {
+			jmp jmp_false
+		}
+	}
+	else if (eCursor::Player1_Character < 0 && !eCursor::Player2_Selected)
+	{
+		_asm {
+			jmp jmp_false
+		}
+	}
 	else
 	{
 		_asm {
