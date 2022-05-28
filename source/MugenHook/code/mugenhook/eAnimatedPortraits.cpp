@@ -633,7 +633,7 @@ void __declspec(naked) eAnimatedPortraits::HookRequestSprites()
 
 int eAnimatedPortraits::HookDisplaySprites(int a1, int a2, int a3, int a4, int a5, float a6, float a7)
 {
-	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
+#ifdef IMPROVE_SPRITE_DISPLAY
 	if (iCurrentPlayerDrawID == 0)
 	{
 		if (eCursor::Player1_Character > -1)
@@ -646,15 +646,24 @@ int eAnimatedPortraits::HookDisplaySprites(int a1, int a2, int a3, int a4, int a
 	}
 	else if (iCurrentPlayerDrawID == 4)
 	{
-		if (eCursor::Player2_Character > -1)
+		if (!(eSystem::GetGameplayMode() == MODE_WATCH))
 		{
-			if (CharactersArray[eCursor::Player2_Character].ID > -1)
-				a2 = CharactersArray[eCursor::Player2_Character].SpritePointer;
+			if (eCursor::Player2_Character > -1)
+			{
+				if (CharactersArray[eCursor::Player2_Character].ID > -1)
+					a2 = CharactersArray[eCursor::Player2_Character].SpritePointer;
+			}
+
 		}
 
 		pCurrentPlayerSpriteP2 = a2;
 	}
-	
+#else
+	if (iCurrentPlayerDrawID == 0)
+		pCurrentPlayerSprite = a2;
+	if (iCurrentPlayerDrawID == 4)
+		pCurrentPlayerSpriteP2 = a2;
+#endif
 
 	if (eSettingsManager::bHookAnimatedPortraits)
 	{
