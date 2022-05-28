@@ -1,7 +1,7 @@
 #pragma once
 #include "..\..\MemoryMgr.h"
 #include "..\..\IniReader.h"
-#define MUGENHOOK_VERSION "0.6.4"
+#define MUGENHOOK_VERSION "0.6.5"
 
 
 typedef unsigned char uint8;
