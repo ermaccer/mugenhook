@@ -5,6 +5,7 @@
 #include "..\mugen\Draw.h"
 #include "..\core\eCursor.h"
 #include "..\mugen\System.h"
+#include "..\mugen\Sound.h"
 #include "eSelectScreenManager.h"
 #include "..\core\eLog.h"
 #include <algorithm>
@@ -108,6 +109,11 @@ int eScriptProcessor::GetCommandID(int esp)
 
 		result = 1;
 	}
+	if (strcmp(commandName, "restorebgm") == 0)
+	{
+		vm->commandID = RestoreBGM;
+		result = 1;
+	}
 	return result;
 }
 
@@ -186,7 +192,20 @@ void eScriptProcessor::ExecuteCommand(int id)
 		int value = CNS_RecallValue(vm_cur_proc, (int)vm + 24, 0);
 		static char bgmPath[512] = {};
 		sprintf(bgmPath, "%s%s", data->GameFolder, stringTable[value].c_str());
-		Call<0x470C10, const char*>(bgmPath);
+		LoadBGM(bgmPath);
+	}
+	else if (id == RestoreBGM)
+	{
+
+		eMugenData* data = *(eMugenData**)eSystem::pMugenDataPointer;
+		CIniReader stage(data->LastStage);
+		char* music = stage.ReadString("Music", "bgmusic", 0);
+		if (music)
+		{
+			static char bgmPath[512] = {};
+			sprintf(bgmPath, "%s%s", data->GameFolder, music);
+			LoadBGM(bgmPath);
+		}
 	}
 	else if (id == SetRoundTime)
 	{

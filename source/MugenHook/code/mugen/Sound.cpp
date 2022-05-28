@@ -1,6 +1,7 @@
 #include "Sound.h"
 #include "..\mugenhook\base.h"
 #include "System.h"
+
 Sound * LoadSNDFile(const char * name)
 {
 	return CallAndReturn<Sound*, 0x46EF30, const char*>(name);
@@ -9,4 +10,9 @@ Sound * LoadSNDFile(const char * name)
 void PlaySound(Sound * snd, int group, int index, int unk, double vol)
 {
 	((void(__cdecl*)(Sound*, int, int, int, float))0x46ED30)(snd, group, index, unk, vol);
+}
+
+void LoadBGM(const char * name)
+{
+	Call<0x470C10, const char*>(name);
 }

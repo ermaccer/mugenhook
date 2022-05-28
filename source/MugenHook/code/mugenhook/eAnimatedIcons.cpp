@@ -48,7 +48,7 @@ void eAnimatedIcons::ReadFile(const char * file)
 			{
 				char airPath[512];
 
-				int iCharacterID, iAnimationID, iFlags;
+				int iCharacterID = 0, iAnimationID = 0, iFlags = 0;
 
 
 				sscanf(szLine, "%d %d %s %d", &iCharacterID, &iAnimationID, &airPath, &iFlags);

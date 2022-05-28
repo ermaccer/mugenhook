@@ -89,7 +89,7 @@ void eAnimatedPortraits::ReadFile(const char * file)
 			{
 				char airPath[512];
 				int parsed = 0;
-				int iColumnID, iGroupID, iGroupP2ID, iSelectGroupID, iSelectGroupP2ID, iCharacterID;
+				int iColumnID = 0, iGroupID = 0, iGroupP2ID = 0, iSelectGroupID = 0, iSelectGroupP2ID = 0, iCharacterID = 0;
 
 				float fSpriteScaleX, fSpriteScaleY;
 				if (eSettingsManager::iAnimatedPortraitsOperationType == MODE_CHAR_ID)
