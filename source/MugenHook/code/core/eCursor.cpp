@@ -289,13 +289,17 @@ void eCursor::StoreCursor()
 {
 	if (eCursor::Player1_Character > -1)
 	{
-		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x2DC) = Player1_Row;
-		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x2E4) = Player1_Column;
+		if (Player1_Row)
+			*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x2DC) = Player1_Row;
+		if (Player1_Column)
+			*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x2E4) = Player1_Column;
 	}
 	if (eCursor::Player2_Character > -1)
 	{
-		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x2E0) = Player2_Row;
-		*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x2E8) = Player2_Column;
+		if (Player2_Row)
+			*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x2E0) = Player2_Row;
+		if (Player2_Column)
+			*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x2E8) = Player2_Column;
 	}
 }
 

@@ -106,6 +106,8 @@ void eSystem::Init()
 			sscanf(system.ReadString("Select Info", "p2.cursor.done.snd", 0), "%d,%d", &iSoundP2DoneGroup, &iSoundP2DoneIndex);
 			sscanf(system.ReadString("Select Info", "portrait.spr", 0), "%d,%d", &iPortraitGroup, &iPortraitIndex);
 
+
+			// PUSHSTART
 			pushstart_set.active = system.ReadInteger("Select Info", "pushstart.active", 0);
 			sprintf(pushstart_set.text, system.ReadString("Select Info", "pushstart.text", 0));
 			sprintf(pushstart_set.font, system.ReadString("Select Info", "pushstart.font", "font/F-4X6.fnt"));
@@ -115,6 +117,11 @@ void eSystem::Init()
 			pushstart_set.color_r = system.ReadInteger("Select Info", "pushstart.color.r", 0);
 			pushstart_set.color_g = system.ReadInteger("Select Info", "pushstart.color.g", 0);
 			pushstart_set.color_b = system.ReadInteger("Select Info", "pushstart.color.b", 0);
+
+
+			pushstart_set.color2_r = system.ReadInteger("Select Info", "pushstart.color2.r", 0);
+			pushstart_set.color2_g = system.ReadInteger("Select Info", "pushstart.color2.g", 0);
+			pushstart_set.color2_b = system.ReadInteger("Select Info", "pushstart.color2.b", 0);
 
 			pushstart_set.scale_x = system.ReadFloat("Select Info", "pushstart.scale.x", 0);
 			pushstart_set.scale_y = system.ReadFloat("Select Info", "pushstart.scale.y", 0);
@@ -131,6 +138,11 @@ void eSystem::Init()
 			pushstart_set.group = system.ReadInteger("Select Info", "pushstart.snd.group", -1);
 			pushstart_set.index = system.ReadInteger("Select Info", "pushstart.snd.index", -1);
 
+			pushstart_set.flash = system.ReadInteger("Select Info", "pushstart.flash", 0);
+			pushstart_set.flash_rate = system.ReadInteger("Select Info", "pushstart.flash.rate", 16);
+
+			// SCREENTIMER
+
 			screentimer.active = system.ReadInteger("Select Info", "screentimer.active", 1);
 			screentimer.amount = system.ReadInteger("Select Info", "screentimer.amount", 10);
 			screentimer.ticks_per_sec = system.ReadInteger("Select Info", "screentimer.ticks", 60);
@@ -143,6 +155,7 @@ void eSystem::Init()
 			screentimer.color_r = system.ReadInteger("Select Info", "screentimer.color.r", 0);
 			screentimer.color_g = system.ReadInteger("Select Info", "screentimer.color.g", 0);
 			screentimer.color_b = system.ReadInteger("Select Info", "screentimer.color.b", 0);
+
 
 			screentimer.scale_x = system.ReadFloat("Select Info", "screentimer.scale.x", 0);
 			screentimer.scale_y = system.ReadFloat("Select Info", "screentimer.scale.y", 0);

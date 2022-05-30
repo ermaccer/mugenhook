@@ -513,7 +513,19 @@ void eSelectScreenManager::DrawJoinIn()
 				{
 					if (gameModeView == 0)
 					{
-						if (eSystem::GetTimer() & 16)
+						if (eSystem::pushstart_set.flash == PUSHSTART_FLASH_BLINK)
+						{
+							if (eSystem::GetTimer() & eSystem::pushstart_set.flash_rate)
+								Draw2DText(eSystem::pushstart_set.text, font, &params, eSystem::pushstart_set.color_r, eSystem::pushstart_set.color_g, eSystem::pushstart_set.color_b, eSystem::pushstart_set.p2_align);
+						}
+						else if (eSystem::pushstart_set.flash == PUSHSTART_FLASH_COLOR)
+						{
+							if (eSystem::GetTimer() & eSystem::pushstart_set.flash_rate)
+								Draw2DText(eSystem::pushstart_set.text, font, &params, eSystem::pushstart_set.color_r, eSystem::pushstart_set.color_g, eSystem::pushstart_set.color_b, eSystem::pushstart_set.p2_align);
+							else
+								Draw2DText(eSystem::pushstart_set.text, font, &params, eSystem::pushstart_set.color2_r, eSystem::pushstart_set.color2_g, eSystem::pushstart_set.color2_b, eSystem::pushstart_set.p2_align);
+						}
+						else
 							Draw2DText(eSystem::pushstart_set.text, font, &params, eSystem::pushstart_set.color_r, eSystem::pushstart_set.color_g, eSystem::pushstart_set.color_b, eSystem::pushstart_set.p2_align);
 					}
 				}
@@ -525,7 +537,19 @@ void eSelectScreenManager::DrawJoinIn()
 				{
 					if (gameModeView_p2 == 0)
 					{
-						if (eSystem::GetTimer() & 16)
+						if (eSystem::pushstart_set.flash == PUSHSTART_FLASH_BLINK)
+						{
+							if (eSystem::GetTimer() & eSystem::pushstart_set.flash_rate)
+								Draw2DText(eSystem::pushstart_set.text, font, &params2, eSystem::pushstart_set.color_r, eSystem::pushstart_set.color_g, eSystem::pushstart_set.color_b, eSystem::pushstart_set.p1_align);
+						}
+						else if (eSystem::pushstart_set.flash == PUSHSTART_FLASH_COLOR)
+						{
+							if (eSystem::GetTimer() & eSystem::pushstart_set.flash_rate)
+								Draw2DText(eSystem::pushstart_set.text, font, &params2, eSystem::pushstart_set.color_r, eSystem::pushstart_set.color_g, eSystem::pushstart_set.color_b, eSystem::pushstart_set.p1_align);
+							else
+								Draw2DText(eSystem::pushstart_set.text, font, &params2, eSystem::pushstart_set.color2_r, eSystem::pushstart_set.color2_g, eSystem::pushstart_set.color2_b, eSystem::pushstart_set.p1_align);
+						}
+						else
 							Draw2DText(eSystem::pushstart_set.text, font, &params2, eSystem::pushstart_set.color_r, eSystem::pushstart_set.color_g, eSystem::pushstart_set.color_b, eSystem::pushstart_set.p1_align);
 					}
 				}

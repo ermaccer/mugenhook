@@ -35,7 +35,7 @@ void eSelectTimer::DrawTimer()
 {
 	static int font;
 	if (!font)
-		font = LoadFont("font\\KombatZone.fnt", 1);
+		font = LoadFont(eSystem::screentimer.font, 1);
 
 	eTextParams params = {};
 	params.m_letterSpacingX = 1.0;

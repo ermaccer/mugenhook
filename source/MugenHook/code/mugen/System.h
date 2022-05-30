@@ -109,14 +109,26 @@ struct eGameFlowData {
 	int quit;
 };
 
+enum pushstart_flash {
+	PUSHSTART_FLASH_NONE,
+	PUSHSTART_FLASH_BLINK,
+	PUSHSTART_FLASH_COLOR
+};
+
 struct pushstart_settings {
 	int active;
 	char text[512] = {};
 	char font[512] = {};
 	int flash;
+	int flash_rate;
 	int color_r;
 	int color_g;
 	int color_b;
+
+	int color2_r;
+	int color2_g;
+	int color2_b;
+
 	float scale_x;
 	float scale_y;
 	int p1_x, p1_y;
