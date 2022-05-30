@@ -18,7 +18,6 @@ public:
 	static int HookBeginMatch();
 	static void HookSelectScreenProcess();
 
-
-
-
+	static bool IsGameModeSelectOn();
+	static bool AreCharactersSelected();
 };

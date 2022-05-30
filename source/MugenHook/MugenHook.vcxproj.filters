@@ -117,6 +117,9 @@
     <ClInclude Include="code\mugenhook\eScriptProcessor.h">
       <Filter>Header Files\code\mugenhook</Filter>
     </ClInclude>
+    <ClInclude Include="code\mugenhook\eSelectTimer.h">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -196,6 +199,9 @@
     </ClCompile>
     <ClCompile Include="IniReader.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugenhook\eSelectTimer.cpp">
+      <Filter>Header Files\code\mugenhook</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

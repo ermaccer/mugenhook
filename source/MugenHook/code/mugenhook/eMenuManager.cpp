@@ -7,6 +7,7 @@
 #include "eVariationsManager.h"
 #include "eAnimatedIcons.h"
 #include "..\core\eCursor.h"
+#include "eSelectTimer.h"
 
 bool eMenuManager::m_bIsInMainMenu;
 bool eMenuManager::m_bIsInSelectScreen;
@@ -75,6 +76,7 @@ int eMenuManager::HookSelectScreenMenu()
 	m_bIsInSelectScreen = true;
 	m_bAnimsRequireRefresh = true;
 	eCursor::PopCursor();
+	eSelectTimer::Init();
 	return CallAndReturn<int, 0x408A80>();
 }
 
@@ -102,6 +104,26 @@ void __declspec(naked) eMenuManager::HookSelectScreenProcess()
 		popad
 		jmp sel_proc_continue
 	}
+}
+
+bool eMenuManager::IsGameModeSelectOn()
+{
+	if (!m_pSelectScreenDataPointer)
+		return false;
+
+	return *(int*)(eMenuManager::m_pSelectScreenDataPointer + 0x3BA4) || *(int*)(eMenuManager::m_pSelectScreenDataPointer + 0x3BA4 + 180);
+}
+
+bool eMenuManager::AreCharactersSelected()
+{
+	if (eCursor::Player2_Character < 0 && eCursor::Player1_Selected)
+		return true;
+	if (eCursor::Player1_Character < 0 && eCursor::Player2_Selected)
+		return true;
+	if (eCursor::Player1_Selected && eCursor::Player2_Selected)
+		return true;
+
+	return false;
 }
 
 

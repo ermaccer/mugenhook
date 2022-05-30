@@ -155,7 +155,7 @@ void __declspec(naked) eScriptProcessor::ExecuteCommand_Hook()
 	static int cmd_ex_continue = 0x449055;
 	static int cmd_id = 0;
 	_asm {
-		mov		[esp + 36], eax
+		mov[esp + 36], eax
 		mov     eax, [edi + 16]
 		mov     vm, edi
 		mov cmd_id, eax
@@ -169,7 +169,7 @@ void __declspec(naked) eScriptProcessor::ExecuteCommand_Hook()
 		_asm {
 			popad
 			xor eax, eax
-			pop edi 
+			pop edi
 			pop esi
 			pop ebp
 			pop ebx
@@ -228,7 +228,7 @@ void eScriptProcessor::ExecuteCommand(int id)
 
 		int value = CNS_RecallValue(vm_cur_proc, (int)vm + 24, 0);
 		int subtract = CNS_RecallValue(vm_cur_proc, (int)vm + 36, 0);
-		
+
 		int new_time = eSystem::GetRoundTime();
 		if (subtract)
 			new_time -= 60 * value;
@@ -250,7 +250,6 @@ bool eScriptProcessor::IsCommandValid(int id)
 void eScriptProcessor::AddStringToTable(std::string str)
 {
 	stringTable.push_back(str);
-//	std::sort(stringTable.begin(), stringTable.end());
 	stringTable.erase(std::unique(stringTable.begin(), stringTable.end()), stringTable.end());
 }
 

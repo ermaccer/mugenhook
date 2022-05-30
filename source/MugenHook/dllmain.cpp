@@ -19,7 +19,7 @@
 #include "code/mugenhook/eTagFix.h"
 #include "code/mugenhook/eStageAnnouncer.h"
 #include "code/mugenhook/eScriptProcessor.h"
-
+#include "code/mugenhook/eSelectTimer.h"
 int  GenericTrueReturn() { return 1; }
 int  GenericFalseReturn() { return 0; }
 void GenericDummy() { }
@@ -118,6 +118,15 @@ void Init()
 	if (eSettingsManager::bGameModeTurnsHide)  Patch<char>(0x40AE3C, 4);
 
 	eStageAnnouncer::Init();
+
+
+	if (eSystem::screentimer.active)
+	{
+		InjectHook(0x406822, eSelectTimer::ForceSelection_Hook, PATCH_JUMP);
+		// sets default pal to 0 if forced selection, mugen uses 3 for some reason?
+		Nop(0x40696F, 6);
+		InjectHook(0x40696F, eSelectTimer::ForceSelection_PalFix_Hook, PATCH_JUMP);
+	}
 
 	PushDebugMessage("MugenHook loaded!\n");
 

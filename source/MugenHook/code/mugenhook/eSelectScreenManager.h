@@ -47,4 +47,6 @@ public:
 	static void THREAD_CacheSoundData();
 
 	static void HookStageDisplay();
+
+	static void DrawJoinIn();
 };

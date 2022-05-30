@@ -2,6 +2,8 @@
 #include <filesystem>
 #include "..\core\eLog.h"
 #include "..\mugenhook\base.h"
+#include "..\mugenhook\eSelectTimer.h"
+#include "..\..\IniReader.h"
 #include <shellapi.h>
 
 int eSystem::iRows;
@@ -71,7 +73,6 @@ void eSystem::Init()
 			{
 				if (wcscmp(argv[i], L"-r") == 0)
 				{
-					printf("%ws\n", argv[i + 1]);
 					std::wstring wstr = argv[i + 1];
 					std::string str("", wstr.length());
 					std::copy(wstr.begin(), wstr.end(), str.begin());
@@ -90,7 +91,7 @@ void eSystem::Init()
 		if (motif)
 		{
 			CIniReader system(motif);
-			iRows =    system.ReadInteger("Select Info", "rows", 0);
+			iRows = system.ReadInteger("Select Info", "rows", 0);
 			iColumns = system.ReadInteger("Select Info", "columns", 0);
 
 			sscanf(system.ReadString("Select Info", "p1.cursor.startcell", 0), "%d,%d", &p1_cursor_startcell[0], &p1_cursor_startcell[1]);
@@ -109,18 +110,7 @@ void eSystem::Init()
 			sprintf(pushstart_set.text, system.ReadString("Select Info", "pushstart.text", 0));
 			sprintf(pushstart_set.font, system.ReadString("Select Info", "pushstart.font", "font/F-4X6.fnt"));
 
-			for (int i = 0; i < 512; i++)
-			{
-				if (pushstart_set.text[i] == 0x5C)
-				{
-					if (pushstart_set.text[i + 1] == 0x6E)
-					{
-						pushstart_set.text[i] = 0xD;
-						pushstart_set.text[i + 1] = 0xA;
-					}
-				}
-			}
-
+			ConvertNewLine(pushstart_set.text, strlen(pushstart_set.text));
 
 			pushstart_set.color_r = system.ReadInteger("Select Info", "pushstart.color.r", 0);
 			pushstart_set.color_g = system.ReadInteger("Select Info", "pushstart.color.g", 0);
@@ -142,6 +132,25 @@ void eSystem::Init()
 			pushstart_set.index = system.ReadInteger("Select Info", "pushstart.snd.index", -1);
 
 			screentimer.active = system.ReadInteger("Select Info", "screentimer.active", 1);
+			screentimer.amount = system.ReadInteger("Select Info", "screentimer.amount", 10);
+			screentimer.ticks_per_sec = system.ReadInteger("Select Info", "screentimer.ticks", 60);
+			screentimer.num0s = system.ReadInteger("Select Info", "screentimer.zeros", 0);
+
+			sprintf(screentimer.format, system.ReadString("Select Info", "screentimer.text", 0));
+			ConvertNewLine(screentimer.format, strlen(screentimer.format));
+			sprintf(screentimer.font, system.ReadString("Select Info", "screentimer.font", "font/F-4X6.fnt"));
+
+			screentimer.color_r = system.ReadInteger("Select Info", "screentimer.color.r", 0);
+			screentimer.color_g = system.ReadInteger("Select Info", "screentimer.color.g", 0);
+			screentimer.color_b = system.ReadInteger("Select Info", "screentimer.color.b", 0);
+
+			screentimer.scale_x = system.ReadFloat("Select Info", "screentimer.scale.x", 0);
+			screentimer.scale_y = system.ReadFloat("Select Info", "screentimer.scale.y", 0);
+
+			screentimer.x = system.ReadInteger("Select Info", "screentimer.x", 0);
+			screentimer.y = system.ReadInteger("Select Info", "screentimer.y", 0);
+
+			screentimer.text_align = system.ReadInteger("Select Info", "screentimer.align", 0);
 
 			eLog::PushMessage(__FUNCTION__, "Success! Done reading motif data\n");
 		}
@@ -160,7 +169,10 @@ Sound * eSystem::GetSystemSND()
 
 int eSystem::GetGameFlow()
 {
-	return *(int*)(*(int*)(0x5040C4));
+	if (*(int*)(0x5040C4))
+		return *(int*)(*(int*)(0x5040C4));
+	else
+		return 0;
 }
 
 int eSystem::GetGameplayMode()
@@ -231,6 +243,20 @@ int eSystem::GetRoundTime()
 	return *(int*)(*(int*)eSystem::pMugenDataPointer + 0x12768);
 }
 
+eMugenData * eSystem::GetData()
+{
+	return *(eMugenData**)eSystem::pMugenDataPointer;
+}
+
+char * eSystem::GetDirectory()
+{
+	if (!eSystem::pMugenDataPointer)
+		return nullptr;
+
+	eMugenData* data = *(eMugenData**)eSystem::pMugenDataPointer;
+	return data->GameFolder;
+}
+
 char* CNS_ReadValue(int ini, const char * name)
 {
 	return CallAndReturn<char*, 0x46A5E0, int, const char*>(ini, name);
@@ -238,7 +264,7 @@ char* CNS_ReadValue(int ini, const char * name)
 
 bool CNS_StoreValue(char * line, int dst, int buff, int unk, int type)
 {
-	return CallAndReturn<bool, 0x4023D0, char*, int, int, int ,int>(line, dst, buff, unk, type);
+	return CallAndReturn<bool, 0x4023D0, char*, int, int, int, int>(line, dst, buff, unk, type);
 }
 
 int CNS_RecallValue(int proc, int from, int type)
@@ -259,4 +285,24 @@ int GetCharacterIDFromSprite(int sprite)
 		}
 	}
 	return id;
+}
+
+void SystemError(const char * text)
+{
+	Call<0x40C140, const char*>(text);
+}
+
+void ConvertNewLine(char * text, int len)
+{
+	for (int i = 0; i < len; i++)
+	{
+		if (text[i] == 0x5C)
+		{
+			if (text[i + 1] == 0x6E)
+			{
+				text[i] = 0xD;
+				text[i + 1] = 0xA;
+			}
+		}
+	}
 }

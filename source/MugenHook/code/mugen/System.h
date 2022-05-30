@@ -38,6 +38,20 @@ enum eGameFlowType {
 };
 
 
+enum eInputs {
+	INPUT_JUMP,
+	INPUT_CROUCH,
+	INPUT_LEFT,
+	INPUT_RIGHT,
+	INPUT_A,
+	INPUT_B,
+	INPUT_C,
+	INPUT_X,
+	INPUT_Y,
+	INPUT_Z,
+	INPUT_START
+};
+
 
 struct eMugenCharacterInfo {
 	int   ID;
@@ -58,7 +72,7 @@ struct eMugenStage {
 	char StageName[84];
 };
 
-struct eMugenCharacterData{
+struct eMugenCharacterData {
 	int ID;
 	int Unknown[2];
 	char pad[512];
@@ -72,7 +86,8 @@ struct eMugenCharacterData{
 
 
 struct eMugenData {
-	char  pad[512];
+	char  pad[256];
+	char  CacheMusic[256];
 	char  GameFolder[512];
 	char  _pad[16];
 	char  LastStage[1024]; // 2064
@@ -114,6 +129,8 @@ struct pushstart_settings {
 struct screentimer_settings {
 	int active;
 	char format[128] = {};
+	char font[512] = {};
+	int  num0s;
 	int color_r;
 	int color_g;
 	int color_b;
@@ -125,6 +142,8 @@ struct screentimer_settings {
 
 	int ticks_per_sec;
 	int amount;
+
+	int text_align;
 };
 
 class eSystem {
@@ -137,14 +156,14 @@ public:
 	static int iSoundP2DoneGroup;
 	static int iSoundP2DoneIndex;
 
-	static int iPortraitGroup; 
+	static int iPortraitGroup;
 	static int iPortraitIndex;
 
 	static int pMugenResourcesPointer;
 	static int pMugenCharactersPointer;
 	static int pMugenDataPointer;
 
-    // system def stuff
+	// system def stuff
 	static float p1_face_offset[2];
 	static float p2_face_offset[2];
 
@@ -174,6 +193,11 @@ public:
 
 	static void SetRoundTime(int value);
 	static int  GetRoundTime();
+
+
+	static eMugenData* GetData();
+
+	static char* GetDirectory();
 };
 
 char* CNS_ReadValue(int ini, const char* name);
@@ -181,3 +205,6 @@ bool  CNS_StoreValue(char* line, int dst, int buff, int unk, int type);
 int   CNS_RecallValue(int proc, int from, int type);
 
 int  GetCharacterIDFromSprite(int sprite);
+void SystemError(const char* text);
+
+void ConvertNewLine(char* text, int len);

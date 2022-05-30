@@ -35,7 +35,7 @@ void eStageAnnouncer::ReadFile(const char * file)
 				int Group = 0;
 				int Index = 0;
 
-					sscanf(szLine, "%d %d %d %d %d %d", &iStageID, &Group,&Index);
+					sscanf(szLine, "%d %d %d", &iStageID, &Group,&Index);
 
 				// create entry
 				eStageAnnouncerEntry stg = { iStageID,Group,Index };

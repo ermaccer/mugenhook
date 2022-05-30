@@ -260,6 +260,7 @@
     <ClInclude Include="code\mugenhook\eMugenConfig.h" />
     <ClInclude Include="code\mugenhook\eScriptProcessor.h" />
     <ClInclude Include="code\mugenhook\eSelectScreenManager.h" />
+    <ClInclude Include="code\mugenhook\eSelectTimer.h" />
     <ClInclude Include="code\mugenhook\eSlidingPortraits.h" />
     <ClInclude Include="code\mugenhook\eStageAnnouncer.h" />
     <ClInclude Include="code\mugenhook\eTagFix.h" />
@@ -291,6 +292,7 @@
     <ClCompile Include="code\mugenhook\eMugenConfig.cpp" />
     <ClCompile Include="code\mugenhook\eScriptProcessor.cpp" />
     <ClCompile Include="code\mugenhook\eSelectScreenManager.cpp" />
+    <ClCompile Include="code\mugenhook\eSelectTimer.cpp" />
     <ClCompile Include="code\mugenhook\eSlidingPortraits.cpp" />
     <ClCompile Include="code\mugenhook\eStageAnnouncer.cpp" />
     <ClCompile Include="code\mugenhook\eTagFix.cpp" />

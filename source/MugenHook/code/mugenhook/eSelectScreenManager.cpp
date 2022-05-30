@@ -17,6 +17,7 @@
 #include "..\mugen\Common.h"
 #include "..\mugen\Draw.h"
 #include "eAnimatedPortraits.h"
+#include "eSelectTimer.h"
 
 int eSelectScreenManager::m_bPlayer1HasFinishedWaiting;
 int eSelectScreenManager::m_bPlayer2HasFinishedWaiting;
@@ -122,69 +123,8 @@ void eSelectScreenManager::Process()
 
 void eSelectScreenManager::ProcessEnd()
 {
-	if (eSystem::pushstart_set.active)
-	{
-		static int font = 0;
-
-		if (!font)
-			font = LoadFont(eSystem::pushstart_set.font, 1);
-
-
-		if (eSystem::GetGameFlow() == FLOW_SELECT_SCREEN)
-		{
-			if (eSystem::GetGameplayMode() == MODE_ARCADE || eSystem::GetGameplayMode() == MODE_TEAM_ARCADE)
-			{
-				int gameModeView = *(int*)(eMenuManager::m_pSelectScreenDataPointer + 0x3BA4);
-				int gameModeView_p2 = *(int*)(eMenuManager::m_pSelectScreenDataPointer + 0x3BA4 + 180);
-
-				eTextParams params = {};
-				params.m_letterSpacingX = 1.0;
-				params.m_letterSpacingY = 1.0;
-				params.field_50 = 1.0;
-				params.m_skew = 1.0;
-				params.field_3C = 0.0;
-				params.rotateY = 1.0;
-				params.field_4 = 0.0;
-
-				params.field_5C = 0xFFFF;
-				params.m_hasBackground = 1;
-
-				params.m_scaleX = eSystem::pushstart_set.scale_x;
-				params.m_scaleY = eSystem::pushstart_set.scale_y;
-				params.m_xPos = eSystem::pushstart_set.p1_x;
-				params.m_yPos = eSystem::pushstart_set.p1_y;
-
-				eTextParams params2 = params;
-				params2.m_xPos = eSystem::pushstart_set.p2_x;
-				params2.m_yPos = eSystem::pushstart_set.p2_y;
-
-				if (eCursor::Player1_Character == -1 && !eCursor::Player2_Selected)
-				{
-					if (eCursor::Player2_Turns < 1)
-					{
-						if (gameModeView == 0)
-						{
-							if (eSystem::GetTimer() & 16)
-								Draw2DText(eSystem::pushstart_set.text, font, &params, eSystem::pushstart_set.color_r, eSystem::pushstart_set.color_g, eSystem::pushstart_set.color_b, eSystem::pushstart_set.p2_align);
-						}
-					}
-				}
-
-				if (eCursor::Player2_Character == -1 && !eCursor::Player1_Selected)
-				{
-					if (eCursor::Player1_Turns < 1)
-					{
-						if (gameModeView_p2 == 0)
-						{
-							if (eSystem::GetTimer() & 16)
-								Draw2DText(eSystem::pushstart_set.text, font, &params2, eSystem::pushstart_set.color_r, eSystem::pushstart_set.color_g, eSystem::pushstart_set.color_b, eSystem::pushstart_set.p1_align);
-						}
-					}
-
-				}
-			}
-		}
-	}
+	eSelectTimer::Process();
+	DrawJoinIn();
 }
 
 void __declspec(naked) eSelectScreenManager::HookWaitAtCharacterSelect()
@@ -442,6 +382,9 @@ void eSelectScreenManager::ProcessPlayer2JoinIn()
 		eSystem::SetGameplayMode(mode);
 		eSystem::SetScreenParams(m_pGameFlowData->params, mode, 1);
 		
+		// refresh timer on join in
+		eSelectTimer::Init();
+
 		if (eSystem::pushstart_set.group >= 0 && eSystem::pushstart_set.index >= 0)
 		{
 			Sound* snd = eSystem::GetSystemSND();
@@ -523,6 +466,73 @@ void __declspec(naked) eSelectScreenManager::HookStageDisplay()
 		}
 	}
 
+}
+
+void eSelectScreenManager::DrawJoinIn()
+{
+	if (!eSystem::pushstart_set.active)
+		return;
+
+	static int font = 0;
+
+	if (!font)
+		font = LoadFont(eSystem::pushstart_set.font, 1);
+
+
+	if (eSystem::GetGameFlow() == FLOW_SELECT_SCREEN)
+	{
+		if (eSystem::GetGameplayMode() == MODE_ARCADE || eSystem::GetGameplayMode() == MODE_TEAM_ARCADE)
+		{
+			int gameModeView = *(int*)(eMenuManager::m_pSelectScreenDataPointer + 0x3BA4);
+			int gameModeView_p2 = *(int*)(eMenuManager::m_pSelectScreenDataPointer + 0x3BA4 + 180);
+
+			eTextParams params = {};
+			params.m_letterSpacingX = 1.0;
+			params.m_letterSpacingY = 1.0;
+			params.field_50 = 1.0;
+			params.m_skew = 1.0;
+			params.field_3C = 0.0;
+			params.rotateY = 1.0;
+			params.field_4 = 0.0;
+
+			params.field_5C = 0xFFFF;
+			params.m_hasBackground = 1;
+
+			params.m_scaleX = eSystem::pushstart_set.scale_x;
+			params.m_scaleY = eSystem::pushstart_set.scale_y;
+			params.m_xPos = eSystem::pushstart_set.p1_x;
+			params.m_yPos = eSystem::pushstart_set.p1_y;
+
+			eTextParams params2 = params;
+			params2.m_xPos = eSystem::pushstart_set.p2_x;
+			params2.m_yPos = eSystem::pushstart_set.p2_y;
+
+			if (eCursor::Player1_Character == -1 && !eCursor::Player2_Selected)
+			{
+				if (eCursor::Player2_Turns < 1)
+				{
+					if (gameModeView == 0)
+					{
+						if (eSystem::GetTimer() & 16)
+							Draw2DText(eSystem::pushstart_set.text, font, &params, eSystem::pushstart_set.color_r, eSystem::pushstart_set.color_g, eSystem::pushstart_set.color_b, eSystem::pushstart_set.p2_align);
+					}
+				}
+			}
+
+			if (eCursor::Player2_Character == -1 && !eCursor::Player1_Selected)
+			{
+				if (eCursor::Player1_Turns < 1)
+				{
+					if (gameModeView_p2 == 0)
+					{
+						if (eSystem::GetTimer() & 16)
+							Draw2DText(eSystem::pushstart_set.text, font, &params2, eSystem::pushstart_set.color_r, eSystem::pushstart_set.color_g, eSystem::pushstart_set.color_b, eSystem::pushstart_set.p1_align);
+					}
+				}
+
+			}
+		}
+	}
 }
 
 void eSelectScreenManager::HookCacheSoundData()

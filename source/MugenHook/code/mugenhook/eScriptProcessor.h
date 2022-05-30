@@ -22,7 +22,7 @@ union eMugenVar {
 	float real;
 };
 
-struct eMugenMachine{
+struct eMugenMachine {
 	char pad[16];
 	int commandID;
 	char _pad[4];
