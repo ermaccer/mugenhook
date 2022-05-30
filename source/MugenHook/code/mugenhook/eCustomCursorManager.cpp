@@ -222,7 +222,10 @@ void eCustomCursorManager::ProcessSelection()
 		else if (eCursor::Selection.Who == 1)
 		{
 			int	Player2_Cell = FindCellBasedOnID(eCursor::SelectionP2.ID);
-			eMugenConfig::SetCursorSound(1, CellTable[Player2_Cell].SoundGroupP2ID, CellTable[Player2_Cell].SoundIndexP2ID);
+			if (eSystem::GetGameplayMode() == MODE_TRAINING || eSystem::GetGameplayMode() == MODE_WATCH)
+				eMugenConfig::SetCursorSound(1, CellTable[Player2_Cell].SoundGroupP2ID, CellTable[Player2_Cell].SoundIndexP2ID);
+			else
+				eMugenConfig::SetCursorSound(2, CellTable[Player2_Cell].SoundGroupP2ID, CellTable[Player2_Cell].SoundIndexP2ID);
 		}
 	}
 }
