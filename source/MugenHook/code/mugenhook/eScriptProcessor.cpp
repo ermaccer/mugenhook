@@ -96,22 +96,38 @@ int eScriptProcessor::GetCommandID(int esp)
 	else if (strcmp(commandName, "setbgm") == 0)
 	{
 		vm->commandID = SetBGM;
+
+
 		char* value = (char*)CNS_ReadValue(vm_cur_line, "value");
+		if (value)
+		{
+			std::string str = value;
+			str.erase(std::remove(str.begin(), str.end(), '"'), str.end());
+			if (str == "restore")
+			{
+				if (CNS_StoreValue("1", (int)vm + 36, vm_buff, 0, 1))
+					result = 1;
+			}
+			else
+			{
+				AddStringToTable(str);
+				int id = FindString(str);
+				std::string output = std::to_string(id);
+				if (CNS_StoreValue((char*)output.c_str(), (int)vm + 24, vm_buff, 0, 1))
+					result = 1;
+				if (CNS_StoreValue("0", (int)vm + 36, vm_buff, 0, 1))
+					result = 1;
+			}
 
-		std::string str = value;
-		str.erase(std::remove(str.begin(), str.end(), '"'), str.end());
-		AddStringToTable(str);
+		}
 
-		int id = FindString(str);
-		std::string output = std::to_string(id);
-		if (CNS_StoreValue((char*)output.c_str(), (int)vm + 24, vm_buff, 0, 1))
-			result = 1;
+		char* restore = (char*)CNS_ReadValue(vm_cur_line, "restore");
+		if (restore)
+		{
+			if (CNS_StoreValue(restore, (int)vm + 36, vm_buff, 0, 1))
+				result = 1;
+		}
 
-		result = 1;
-	}
-	if (strcmp(commandName, "restorebgm") == 0)
-	{
-		vm->commandID = RestoreBGM;
 		result = 1;
 	}
 	return result;
@@ -190,22 +206,24 @@ void eScriptProcessor::ExecuteCommand(int id)
 	{
 		eMugenData* data = *(eMugenData**)eSystem::pMugenDataPointer;
 		int value = CNS_RecallValue(vm_cur_proc, (int)vm + 24, 0);
+		int restore = CNS_RecallValue(vm_cur_proc, (int)vm + 36, 0);
 		static char bgmPath[512] = {};
-		sprintf(bgmPath, "%s%s", data->GameFolder, stringTable[value].c_str());
-		LoadBGM(bgmPath);
-	}
-	else if (id == RestoreBGM)
-	{
-
-		eMugenData* data = *(eMugenData**)eSystem::pMugenDataPointer;
-		CIniReader stage(data->LastStage);
-		char* music = stage.ReadString("Music", "bgmusic", 0);
-		if (music)
+		if (restore == 0)
 		{
-			static char bgmPath[512] = {};
-			sprintf(bgmPath, "%s%s", data->GameFolder, music);
+			sprintf(bgmPath, "%s%s", data->GameFolder, stringTable[value].c_str());
 			LoadBGM(bgmPath);
 		}
+		else
+		{
+			CIniReader stage(data->LastStage);
+			char* music = stage.ReadString("Music", "bgmusic", 0);
+			if (music)
+			{
+				sprintf(bgmPath, "%s%s", data->GameFolder, music);
+				LoadBGM(bgmPath);
+			}
+		}
+
 	}
 	else if (id == SetRoundTime)
 	{

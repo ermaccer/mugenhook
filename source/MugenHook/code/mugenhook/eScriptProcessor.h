@@ -12,8 +12,7 @@ struct eTextDrawEntry {
 enum eNewCNSCommands {
 	SetRoundTime = 2540,
 	AddRoundTime,
-	SetBGM,
-	RestoreBGM
+	SetBGM
 };
 
 union eMugenVar {
