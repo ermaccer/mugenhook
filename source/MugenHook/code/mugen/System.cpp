@@ -61,12 +61,12 @@ void eSystem::Init()
 	{
 		CIniReader mugenConfig("data\\mugen.cfg");
 
-
 		int argc;
 		LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 
 		motif = mugenConfig.ReadString("Options", "motif", 0);
 
+		static char motifPath[256] = {}; // fix for w7
 		if (argv)
 		{
 			for (int i = 0; i < argc; i++)
@@ -77,9 +77,10 @@ void eSystem::Init()
 					std::string str("", wstr.length());
 					std::copy(wstr.begin(), wstr.end(), str.begin());
 
-					std::string motif_str = "data\\";
+					std::string motif_str = "data/";
 					motif_str += str;
-					motif = (char*)motif_str.c_str();
+					sprintf(motifPath, motif_str.c_str());
+					motif = motifPath;
 				}
 			}
 		}
@@ -143,7 +144,7 @@ void eSystem::Init()
 
 			// SCREENTIMER
 
-			screentimer.active = system.ReadInteger("Select Info", "screentimer.active", 1);
+			screentimer.active = system.ReadInteger("Select Info", "screentimer.active", 0);
 			screentimer.amount = system.ReadInteger("Select Info", "screentimer.amount", 10);
 			screentimer.ticks_per_sec = system.ReadInteger("Select Info", "screentimer.ticks", 60);
 			screentimer.num0s = system.ReadInteger("Select Info", "screentimer.zeros", 0);

@@ -112,7 +112,6 @@ int eCustomCursorManager::FindSound(int id)
 
 void eCustomCursorManager::HookSelectSoundPlayer()
 {
-
 	if (eCursor::Selection.Who == 0)
 		ProcessSoundP1();
 	else
@@ -122,18 +121,13 @@ void eCustomCursorManager::HookSelectSoundPlayer()
 void eCustomCursorManager::ProcessSoundP1()
 {
 	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
-
-
-	PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP1DoneGroup, eSystem::iSoundP1DoneIndex, 5, 100.0f);
-
-
 	// run twice to amplify the sound
 	while (!SoundCellTable[FindSound(eCursor::Selection.ID)].IsCached)
 		Sleep(1);
-	PlaySound(SoundCellTable[FindSound(eCursor::Selection.ID)].SoundData, eSettingsManager::iCursorDefaultGroup, eSettingsManager::iCursorDefaultIndex, 10, 3.390625f);
 
-	while (!SoundCellTable[FindSound(eCursor::Selection.ID)].IsCached)
-		Sleep(1);
+	PlaySound(SoundCellTable[FindSound(eCursor::Selection.ID)].SoundData, eSettingsManager::iCursorDefaultGroup, eSettingsManager::iCursorDefaultIndex, 10, 3.390625f);
+	PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP1DoneGroup, eSystem::iSoundP1DoneIndex, 5, 100.0f);
+	PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP1DoneGroup, eSystem::iSoundP1DoneIndex, 5, 100.0f);
 	PlaySound(SoundCellTable[FindSound(eCursor::Selection.ID)].SoundData, eSettingsManager::iCursorDefaultGroup, eSettingsManager::iCursorDefaultIndex, 10, 3.390625f);
 }
 
@@ -141,17 +135,13 @@ void eCustomCursorManager::ProcessSoundP2()
 {
 	eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 
-
-	PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP2DoneGroup, eSystem::iSoundP2DoneIndex, 5, 100.0f);
-
-
 	// run twice to amplify the sound
 	while (!SoundCellTable[FindSound(eCursor::Selection.ID)].IsCached)
 		Sleep(1);
-	PlaySound(SoundCellTable[FindSound(eCursor::Selection.ID)].SoundData, eSettingsManager::iCursorDefaultGroup, eSettingsManager::iCursorDefaultIndex, 10, 3.390625f);
 
-	while (!SoundCellTable[FindSound(eCursor::Selection.ID)].IsCached)
-		Sleep(1);
+	PlaySound(SoundCellTable[FindSound(eCursor::Selection.ID)].SoundData, eSettingsManager::iCursorDefaultGroup, eSettingsManager::iCursorDefaultIndex, 10, 3.390625f);
+	PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP2DoneGroup, eSystem::iSoundP2DoneIndex, 5, 100.0f);
+	PlaySound(eSystem::GetSystemSND(), eSystem::iSoundP2DoneGroup, eSystem::iSoundP2DoneIndex, 5, 100.0f);
 	PlaySound(SoundCellTable[FindSound(eCursor::Selection.ID)].SoundData, eSettingsManager::iCursorDefaultGroup, eSettingsManager::iCursorDefaultIndex, 10, 3.390625f);
 }
 
