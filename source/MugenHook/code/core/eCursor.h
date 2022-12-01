@@ -24,6 +24,8 @@ public:
 	static eSelection Selection;
 	static eSelection SelectionP1;
 	static eSelection SelectionP2;
+
+	static eSelection SelectionData[2][4];
 	static int pCursorEax;
 
 
@@ -40,5 +42,10 @@ public:
 	static void PopCursor();
 
 	static void UpdateRandomSelect();
+
+	static void PrintSelections();
+	static void ClearSelections();
+
+	static int GetPlayerSelections(int player);
 
 };

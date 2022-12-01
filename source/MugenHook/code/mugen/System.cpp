@@ -5,6 +5,7 @@
 #include "..\mugenhook\eSelectTimer.h"
 #include "..\..\IniReader.h"
 #include <shellapi.h>
+#include <algorithm>
 
 int eSystem::iRows;
 int eSystem::iColumns;
@@ -24,6 +25,8 @@ int eSystem::p1_cursor_startcell[2];
 int eSystem::p2_cursor_startcell[2];
 float eSystem::p1_face_offset[2];
 float eSystem::p2_face_offset[2];
+int eSystem::face_draw_priority;
+
 pushstart_settings eSystem::pushstart_set = {};
 screentimer_settings eSystem::screentimer = {};
 
@@ -52,6 +55,8 @@ void eSystem::Init()
 	p2_cursor_startcell[0] = 0;
 	p2_cursor_startcell[1] = 0;
 
+	face_draw_priority = FACEDRAW_DEFAULT;
+
 	pMugenResourcesPointer = 0x503388;
 	pMugenCharactersPointer = 0x503394;
 	pMugenDataPointer = 0x5040E8;
@@ -77,8 +82,19 @@ void eSystem::Init()
 					std::string str("", wstr.length());
 					std::copy(wstr.begin(), wstr.end(), str.begin());
 
+					
+					for (unsigned char c : str)
+						c = std::tolower(c);
+
+					if (str.find(".def") == std::string::npos)
+						str += "/system.def";
+
+
 					std::string motif_str = "data/";
 					motif_str += str;
+
+
+
 					sprintf(motifPath, motif_str.c_str());
 					motif = motifPath;
 				}
@@ -166,6 +182,11 @@ void eSystem::Init()
 
 			screentimer.text_align = system.ReadInteger("Select Info", "screentimer.align", 0);
 
+
+			// CORE
+
+			face_draw_priority = system.ReadInteger("Select Info", "face.draw.priority", FACEDRAW_DEFAULT);
+
 			eLog::PushMessage(__FUNCTION__, "Success! Done reading motif data\n");
 		}
 	}
@@ -208,6 +229,14 @@ int eSystem::GetTimer()
 int eSystem::GetCharactersAmount()
 {
 	return iRows * iColumns;
+}
+
+int eSystem::GetDrawData()
+{
+	if (*(int*)pMugenDataPointer)
+		return (*(int*)pMugenDataPointer + 0x29E4);
+	else
+		return 0;
 }
 
 void eSystem::SetGameFlow(eGameFlowType flow)

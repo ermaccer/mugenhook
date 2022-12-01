@@ -173,9 +173,13 @@ void eAnimatedPortraits::Process()
 	eAirEntry* Animation;
 	int iAnimEntry;
 
+	MugenExplod* characterExplod = (MugenExplod*)(*(int*)eSystem::pMugenResourcesPointer + 0x808);
+
 	if (!eCursor::Player1_Selected || !eSettingsManager::bEnableSelectAnimations) {
 
 		eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
+
+
 		if (eCursor::Player1_Character > -1)
 		{
 
@@ -231,8 +235,10 @@ void eAnimatedPortraits::Process()
 				{
 					// set scale
 					if (eSettingsManager::bEnableAnimationScale) {
-						*(float*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0x40) = AnimationTable[iAnimEntry].SpritesScaleX; // p1.face.scale
-						*(float*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0x44) = AnimationTable[iAnimEntry].SpritesScaleY; // p1.face.scale
+						characterExplod->scaleX = AnimationTable[iAnimEntry].SpritesScaleX;
+						characterExplod->scaleY = AnimationTable[iAnimEntry].SpritesScaleY;
+						//*(float*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0x40) = AnimationTable[iAnimEntry].SpritesScaleX // p1.face.scale
+						//*(float*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0x44) = AnimationTable[iAnimEntry].SpritesScaleY; // p1.face.scale
 					}
 
 
@@ -251,8 +257,10 @@ void eAnimatedPortraits::Process()
 					}
 
 					// set sprites
-					*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x80C) = Animation->vAnimData[iFrameCounter_p1].Group; // p1.face group
-					*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x810) = Animation->vAnimData[iFrameCounter_p1].Index; // p1.face index
+					characterExplod->index = Animation->vAnimData[iFrameCounter_p1].Index;
+					characterExplod->group = Animation->vAnimData[iFrameCounter_p1].Group;
+					//*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x80C) = Animation->vAnimData[iFrameCounter_p1].Group; // p1.face group
+					//*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x810) = Animation->vAnimData[iFrameCounter_p1].Index; // p1.face index
 
 
 																															   // perform animation
@@ -315,8 +323,8 @@ void eAnimatedPortraits::Process()
 					{
 						// set scale
 						if (eSettingsManager::bEnableAnimationScale) {
-							*(float*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0x40) = AnimationTable[iAnimEntry].SpritesScaleX; // p1.face.scale
-							*(float*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0x44) = AnimationTable[iAnimEntry].SpritesScaleY; // p1.face.scale
+							characterExplod->scaleX = AnimationTable[iAnimEntry].SpritesScaleX;
+							characterExplod->scaleY = AnimationTable[iAnimEntry].SpritesScaleY;
 						}
 
 
@@ -330,8 +338,8 @@ void eAnimatedPortraits::Process()
 						}
 
 						// set sprites
-						*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x80C) = Animation->vAnimData[iSelectCounter_p1].Group;
-						*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x810) = Animation->vAnimData[iSelectCounter_p1].Index;
+						characterExplod->group = Animation->vAnimData[iSelectCounter_p1].Group;
+						characterExplod->index = Animation->vAnimData[iSelectCounter_p1].Index;
 
 						if (eSystem::GetTimer() - iTickCounter_p1 <= Animation->vAnimData[iSelectCounter_p1].Frametime) return;
 						iSelectCounter_p1++;
@@ -344,11 +352,15 @@ void eAnimatedPortraits::Process()
 		}
 	}
 }
-static bool m_bGotAnimation = false;
+
 void eAnimatedPortraits::ProcessP2()
 {
 	eAirReader* AIR_Reader;
 	eAirEntry* animation, *alt_anim;
+
+
+	MugenExplod* characterExplod = (MugenExplod*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0xD8);
+
 	bool m_bOnPlayerOne = false;
 
 	int  iMaxFrames;
@@ -356,7 +368,6 @@ void eAnimatedPortraits::ProcessP2()
 
 	if (eCursor::Player1_Row == eCursor::Player2_Row  
 		&& eCursor::Player1_Column == eCursor::Player2_Column) 
-		
 		m_bOnPlayerOne = true;
 
 	if (!eCursor::Player2_Selected || !eSettingsManager::bEnableSelectAnimations)
@@ -421,8 +432,8 @@ void eAnimatedPortraits::ProcessP2()
 
 					if (eSettingsManager::bEnableAnimationScale)
 					{
-						*(float*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0x40 + 0xD4 + 4) = AnimationTable[iAnimEntry].SpritesScaleX; // p2.face.scale
-						*(float*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0x40 + 0xD4 + 8) = AnimationTable[iAnimEntry].SpritesScaleY; // p2.face.scale
+						characterExplod->scaleX = AnimationTable[iAnimEntry].SpritesScaleX; // p2.face.scale
+						characterExplod->scaleY = AnimationTable[iAnimEntry].SpritesScaleY; // p2.face.scale
 					}
 
 					if (iFrameCounter_p2 > iMaxFrames)
@@ -438,16 +449,16 @@ void eAnimatedPortraits::ProcessP2()
 							iFrameCounter_p2 = 0;
 					}
 
+
 					if (m_bOnPlayerOne && eSettingsManager::bEnableAlternateAnims)
 					{
-						*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x810 + 0xD0 + 4) = alt_anim->vAnimData[iFrameCounter_p2].Group;
-						*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x810 + 0xD0 + 8) = alt_anim->vAnimData[iFrameCounter_p2].Index;
+						characterExplod->group = alt_anim->vAnimData[iFrameCounter_p2].Group;
+						characterExplod->index = alt_anim->vAnimData[iFrameCounter_p2].Index;
 					}
 					else {
-						*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x810 + 0xD0 + 4) = animation->vAnimData[iFrameCounter_p2].Group;
-						*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x810 + 0xD0 + 8) = animation->vAnimData[iFrameCounter_p2].Index;
+						characterExplod->group = alt_anim->vAnimData[iFrameCounter_p2].Group;
+						characterExplod->index = alt_anim->vAnimData[iFrameCounter_p2].Index;
 					}
-
 
 					if (eSystem::GetTimer() - iTickCounter_p2 <= animation->vAnimData[iFrameCounter_p2].Frametime) return;
 					iFrameCounter_p2++;
@@ -523,21 +534,19 @@ void eAnimatedPortraits::ProcessP2()
 
 						if (eSettingsManager::bEnableAnimationScale)
 						{
-							*(float*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0x40 + 0xD4 + 4) = AnimationTable[iAnimEntry].SpritesScaleX; // p2.face.scale
-							*(float*)(*(int*)eSystem::pMugenResourcesPointer + 0x808 + 0x40 + 0xD4 + 8) = AnimationTable[iAnimEntry].SpritesScaleY; // p2.face.scale
+							characterExplod->scaleX = AnimationTable[iAnimEntry].SpritesScaleX; // p2.face.scale
+							characterExplod->scaleY = AnimationTable[iAnimEntry].SpritesScaleY; // p2.face.scale
 						}
 
 						if (m_bOnPlayerOne && eSettingsManager::bEnableAlternateAnims)
 						{
-							*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x810 + 0xD0 + 4) = alt_anim->vAnimData[iSelectCounter_p2].Group;
-							*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x810 + 0xD0 + 8) = alt_anim->vAnimData[iSelectCounter_p2].Index;
+							characterExplod->group = alt_anim->vAnimData[iSelectCounter_p2].Group;
+							characterExplod->index = alt_anim->vAnimData[iSelectCounter_p2].Index;
 						}
-						else
-						{
-							*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x810 + 0xD0 + 4) = animation->vAnimData[iSelectCounter_p2].Group;
-							*(int*)(*(int*)eSystem::pMugenResourcesPointer + 0x810 + 0xD0 + 8) = animation->vAnimData[iSelectCounter_p2].Index;
+						else {
+							characterExplod->group = alt_anim->vAnimData[iSelectCounter_p2].Group;
+							characterExplod->index = alt_anim->vAnimData[iSelectCounter_p2].Index;
 						}
-
 
 						if (eSystem::GetTimer() - iTickCounter_p2 <= animation->vAnimData[iSelectCounter_p2].Frametime) return;
 						iSelectCounter_p2++;
@@ -664,6 +673,17 @@ int eAnimatedPortraits::HookDisplaySprites(int a1, int a2, int a3, int a4, int a
 	if (iCurrentPlayerDrawID == 4)
 		pCurrentPlayerSpriteP2 = a2;
 #endif
+
+
+#ifdef MULTICHAR_DEBUG
+	if (eSelectScreenManager::m_bDrawExtraCharacterP1)
+	{
+		eMugenCharacterInfo* chr = GetCharInfo(eCursor::SelectionData[0][eSelectScreenManager::m_nSelectScreenCurrentCharacterDraw].ID);
+		if (chr)
+			a2 = chr->SpritePointer;
+	}
+
+#endif // MULTICHAR_DEBUG	
 
 	if (eSettingsManager::bHookAnimatedPortraits)
 	{

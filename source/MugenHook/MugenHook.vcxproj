@@ -31,19 +31,19 @@
     <ProjectGuid>{BD4D4962-FA5F-4FB5-975D-CF2188FC76E1}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>MugenHook</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -57,13 +57,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -251,10 +251,13 @@
     <ClInclude Include="code\core\eLog.h" />
     <ClInclude Include="code\core\eSettingsManager.h" />
     <ClInclude Include="code\mugenhook\base.h" />
+    <ClInclude Include="code\mugenhook\config.h" />
     <ClInclude Include="code\mugenhook\eAnimatedIcons.h" />
     <ClInclude Include="code\mugenhook\eAnimatedPortraits.h" />
+    <ClInclude Include="code\mugenhook\eCommandLineParams.h" />
     <ClInclude Include="code\mugenhook\eCommonHooks.h" />
     <ClInclude Include="code\mugenhook\eCustomCursorManager.h" />
+    <ClInclude Include="code\mugenhook\eFightLog.h" />
     <ClInclude Include="code\mugenhook\eMagicBoxes.h" />
     <ClInclude Include="code\mugenhook\eMenuManager.h" />
     <ClInclude Include="code\mugenhook\eMugenConfig.h" />
@@ -267,7 +270,9 @@
     <ClInclude Include="code\mugenhook\eVariationsManager.h" />
     <ClInclude Include="code\mugen\Character.h" />
     <ClInclude Include="code\mugen\Common.h" />
+    <ClInclude Include="code\mugen\Data.h" />
     <ClInclude Include="code\mugen\Draw.h" />
+    <ClInclude Include="code\mugen\ProcData.h" />
     <ClInclude Include="code\mugen\Sound.h" />
     <ClInclude Include="code\mugen\Sprite.h" />
     <ClInclude Include="code\mugen\System.h" />
@@ -285,8 +290,10 @@
     <ClCompile Include="code\core\eSettingsManager.cpp" />
     <ClCompile Include="code\mugenhook\eAnimatedIcons.cpp" />
     <ClCompile Include="code\mugenhook\eAnimatedPortraits.cpp" />
+    <ClCompile Include="code\mugenhook\eCommandLineParams.cpp" />
     <ClCompile Include="code\mugenhook\eCommonHooks.cpp" />
     <ClCompile Include="code\mugenhook\eCustomCursorManager.cpp" />
+    <ClCompile Include="code\mugenhook\eFightLog.cpp" />
     <ClCompile Include="code\mugenhook\eMagicBoxes.cpp" />
     <ClCompile Include="code\mugenhook\eMenuManager.cpp" />
     <ClCompile Include="code\mugenhook\eMugenConfig.cpp" />
@@ -297,7 +304,9 @@
     <ClCompile Include="code\mugenhook\eStageAnnouncer.cpp" />
     <ClCompile Include="code\mugenhook\eTagFix.cpp" />
     <ClCompile Include="code\mugenhook\eVariationsManager.cpp" />
+    <ClCompile Include="code\mugen\Character.cpp" />
     <ClCompile Include="code\mugen\Common.cpp" />
+    <ClCompile Include="code\mugen\Data.cpp" />
     <ClCompile Include="code\mugen\Draw.cpp" />
     <ClCompile Include="code\mugen\Sound.cpp" />
     <ClCompile Include="code\mugen\Sprite.cpp" />

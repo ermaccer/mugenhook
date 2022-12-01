@@ -37,7 +37,7 @@ void eSlidingPortraits::Init()
 	if (eSettingsManager::bEnableSlidePortraits)
 	{
 		char* motif;
-		if (std::experimental::filesystem::exists("data\\mugen.cfg"))
+		if (std::filesystem::exists("data\\mugen.cfg"))
 		{
 			CIniReader mugenConfig("data\\mugen.cfg");
 			motif = mugenConfig.ReadString("Options", "motif", 0);

@@ -12,4 +12,4 @@ struct SoundData {
 
 Sound* LoadSNDFile(const char* name);
 void PlaySound(Sound* snd, int group, int index, int unk, double vol);
-void LoadBGM(const char* name);
+void LoadBGM(char* name);

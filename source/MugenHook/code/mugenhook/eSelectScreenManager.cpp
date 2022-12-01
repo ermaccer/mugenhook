@@ -27,16 +27,17 @@ int eSelectScreenManager::m_tSelectTickCounter;
 int eSelectScreenManager::m_tSelectTickCounterP2;
 
 int eSelectScreenManager::m_pSelectScreenProcessPointer;
-
+int	 eSelectScreenManager::m_nSelectScreenCurrentCharacterDraw;
 
 int eSelectScreenManager::m_pSelectScreenStringPointer;
 std::string eSelectScreenManager::m_pSelectScreenLastString;
 
 bool eSelectScreenManager::m_bCachedSoundData;
-
+bool eSelectScreenManager::m_bDrawExtraCharacterP1;
 eGameFlowData* eSelectScreenManager::m_pGameFlowData;
 
 eMugenCharacterInfo* eSelectScreenManager::m_pCharacter;
+MugenExplod eSelectScreenManager::m_expStageSelect = {};
 
 void eSelectScreenManager::Init()
 {
@@ -49,6 +50,8 @@ void eSelectScreenManager::Init()
 	m_tSelectTickCounter = 0;
 	m_tSelectTickCounterP2 = 0;
 	m_bCachedSoundData = false;
+	m_nSelectScreenCurrentCharacterDraw = 0;
+	m_bDrawExtraCharacterP1 = true;
 	eLog::PushMessage(__FUNCTION__, "Initialize\n");
 
 	if (eSettingsManager::bEnableAfterSelectionPause)
@@ -67,6 +70,8 @@ void eSelectScreenManager::Init()
 		Nop(0x407E15, 7);
 		InjectHook(0x407E15, HookStageDisplay, PATCH_JUMP);
 	}
+	InjectHook(0x40EA37, Hook_DrawSprites, PATCH_JUMP);
+	//InjectHook(0x409724, Hook_ReadSpriteConfig, PATCH_JUMP);
 }
 
 void eSelectScreenManager::Process()
@@ -83,7 +88,7 @@ void eSelectScreenManager::Process()
 	{
 		eMugenCharacterInfo* CharactersArray = *(eMugenCharacterInfo**)0x503394;
 		if (eCursor::Player1_Character > 0)
-			printf("Player 1: Row: %d   Column: %d  Character ID: %d %x\r", eCursor::Player1_Row, eCursor::Player1_Column, CharactersArray[eCursor::Player1_Character].ID, eAnimatedPortraits::pCurrentPlayerSprite);
+			printf("Player 1: Row: %d   Column: %d  Character ID: %d [%d] \r", eCursor::Player1_Row, eCursor::Player1_Column, CharactersArray[eCursor::Player1_Character].ID, eCursor::Player1_Character);
 	}
 
 	if (GetAsyncKeyState(VK_F5) && eSettingsManager::bDumpCharacterInfo) PrintCharacterData();
@@ -400,6 +405,13 @@ void eSelectScreenManager::ProcessPlayer2JoinIn()
 
 }
 
+void eSelectScreenManager::ProcessTestDraw()
+{
+	//return;
+
+	
+}
+
 void eSelectScreenManager::ProcessScreenTimer()
 {
 }
@@ -557,6 +569,106 @@ void eSelectScreenManager::DrawJoinIn()
 			}
 		}
 	}
+}
+
+void __declspec(naked) eSelectScreenManager::Hook_ReadSpriteConfig()
+{
+	static int  jmp_point = 0x40972A;
+	static int _edi = 0;
+	_asm mov _edi, edi
+	readExplodConfig("stageSelect", _edi, &m_expStageSelect);
+	_asm {
+		mov esi,ds:0x503388
+		jmp jmp_point
+	}
+}
+
+void eSelectScreenManager::HideSelectScreenSprites(bool characterOnly)
+{
+	if (!characterOnly)
+	{
+		Patch<char>(0x406F41 + 1, 0x84);
+		Patch<char>(0x407125 + 1, 0x8E);
+
+		char cmpBytes[5] = { 0x83, 0x7C, 0x84, 0x38, 0x00 };
+		for (int i = 0; i < 5; i++)
+		{
+			Patch<char>(0x407826 + i, cmpBytes[i]);
+		}
+	}
+	else
+	{
+		Patch<char>(0x4075A1 + 1, 0x85);
+		Patch<char>(0x4075A1 + 1, 0x84);
+		Nop(0x407826, 5);
+		Patch<char>(0x406F41 + 1, 0x85);
+		Patch<char>(0x407125 + 1, 0x85);
+
+	}
+}
+
+void __declspec(naked) eSelectScreenManager::Hook_DrawSprites()
+{
+	static int jmp_cursor = 0x40EA3E;
+	static int cur_func = 0;
+	static int target_func = (int)&eSelectScreenManager::HookSelectScreenProcess;
+	static int original_eax = 0;
+	_asm {
+		mov     edx, [ebx + 4]
+		push    edx
+		push    ebx
+		mov cur_func, eax
+		mov original_eax, eax
+		pushad
+	}
+	if (cur_func == target_func && eSystem::face_draw_priority == FACEDRAW_ONTOP)
+	{
+		HideSelectScreenSprites(false);
+		_asm {
+			popad
+			call eax
+			pushad
+		}
+		HideSelectScreenSprites(true);
+#ifdef MULTICHAR_DEBUG
+		if (eAnimatedPortraits::iCurrentPlayerDrawID == 0)
+		{
+			_asm 		popad
+
+			m_bDrawExtraCharacterP1 = true;
+			{
+				for (m_nSelectScreenCurrentCharacterDraw = 0; m_nSelectScreenCurrentCharacterDraw < eCursor::GetPlayerSelections(0); m_nSelectScreenCurrentCharacterDraw++)
+				{
+					_asm {
+						mov    eax, original_eax
+						call eax
+					}
+				}
+			}
+
+			m_bDrawExtraCharacterP1 = false;
+			_asm {
+				mov    eax, original_eax
+				call eax
+			}
+		}
+#else
+		_asm {
+			popad
+			mov    eax, original_eax
+			call eax
+		}
+#endif // MULTICHAR_DEBUG
+	}
+	else
+	{
+		_asm {
+			popad
+			call eax
+		}
+	}
+
+	_asm jmp jmp_cursor
 }
 
 void eSelectScreenManager::HookCacheSoundData()

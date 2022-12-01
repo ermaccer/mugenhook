@@ -1,5 +1,8 @@
 #pragma once
 #include <vector>
+#include <string>
+#include "../mugen/Data.h"
+
 
 struct eTextDrawEntry {
 	bool m_bIsActive;
@@ -12,7 +15,8 @@ struct eTextDrawEntry {
 enum eNewCNSCommands {
 	SetRoundTime = 2540,
 	AddRoundTime,
-	SetBGM
+	SetBGM,
+	SetStage
 };
 
 union eMugenVar {
@@ -36,6 +40,7 @@ public:
 	static int			  vm_cur_line;
 	static int			  vm_buff;
 	static int			  vm_cur_proc;
+	static bool			  updateMusic;
 	static std::vector<std::string> stringTable;
 
 	static void Init();
@@ -54,4 +59,21 @@ public:
 	static void AddStringToTable(std::string str);
 	static int  FindString(std::string str);
 
+
+	// parsers
+	static void PARSE_SetBGM();
+	static void PARSE_SetStage();
+	static void PARSE_AddRoundTime();
+	static void PARSE_SetRoundTime();
+
+	// commands
+	static void CMD_SetBGM();
+	static void CMD_AddRoundTime();
+	static void CMD_SetRoundTime();
+	static void CMD_SetStage();
+
+
+	// functions
+
+	static void SwapStage(char* name);
 };

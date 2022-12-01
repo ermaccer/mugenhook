@@ -1,5 +1,6 @@
 #pragma once
 #include "..\mugen\System.h"
+#include "..\mugen\Sprite.h"
 #include <string>
 
 #define CHAR_FLAG_HIDDEN 1
@@ -9,9 +10,14 @@
 
 
 
+
 class eSelectScreenManager {
 public:
+
+	static MugenExplod m_expStageSelect;
+
 	static bool m_bCachedSoundData;
+	static bool m_bDrawExtraCharacterP1;
 
 	static int  m_bPlayer1HasFinishedWaiting;
 	static int  m_bPlayer2HasFinishedWaiting;
@@ -19,6 +25,8 @@ public:
 	static int  m_tSelectTickCounterP2;
 	static int  m_pSelectScreenProcessPointer;
 	static int  m_pSelectScreenStringPointer;
+
+	static int	m_nSelectScreenCurrentCharacterDraw;
 
 	static eGameFlowData* m_pGameFlowData;
 
@@ -40,6 +48,7 @@ public:
 	static void HookCurrentScreenGameData();
 
 	static void ProcessPlayer2JoinIn();
+	static void ProcessTestDraw();
 	static void ProcessScreenTimer();
 
 	static void HookLoadCharacterData(char* file);
@@ -49,4 +58,12 @@ public:
 	static void HookStageDisplay();
 
 	static void DrawJoinIn();
+
+	static void Hook_ReadSpriteConfig();
+
+
+	// drawing hacks
+	static void HideSelectScreenSprites(bool characterOnly);
+
+	static void Hook_DrawSprites();
 };

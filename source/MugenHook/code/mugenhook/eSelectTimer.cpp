@@ -55,7 +55,6 @@ void eSelectTimer::DrawTimer()
 	params.m_yPos = eSystem::screentimer.y;
 
 	char sTextBuff[128];
-	char* zero_str;
 
 	switch (eSystem::screentimer.num0s)
 	{

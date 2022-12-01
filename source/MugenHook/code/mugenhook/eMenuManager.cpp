@@ -8,6 +8,7 @@
 #include "eAnimatedIcons.h"
 #include "..\core\eCursor.h"
 #include "eSelectTimer.h"
+#include "eSelectScreenManager.h"
 
 bool eMenuManager::m_bIsInMainMenu;
 bool eMenuManager::m_bIsInSelectScreen;
@@ -38,7 +39,8 @@ int eMenuManager::HookMainMenu()
 	m_bIsInMainMenu = true;
 	m_bIsInSelectScreen = false;
 	m_bWasCursorAdjusted = false;
-
+	eCursor::ClearSelections();
+	eSelectScreenManager::m_nSelectScreenCurrentCharacterDraw = 0;
 	if (eSettingsManager::bHookVariations)
 	{
 		if (eVariationsManager::GetAmountOfUsedVariationCharacters() > 0)
@@ -76,6 +78,7 @@ int eMenuManager::HookSelectScreenMenu()
 	m_bIsInSelectScreen = true;
 	m_bAnimsRequireRefresh = true;
 	eCursor::PopCursor();
+	eCursor::ClearSelections();
 	eSelectTimer::Init();
 	return CallAndReturn<int, 0x408A80>();
 }

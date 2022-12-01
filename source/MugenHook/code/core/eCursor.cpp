@@ -26,6 +26,9 @@ int eCursor::Player2_Turns;
 eSelection eCursor::Selection;
 eSelection eCursor::SelectionP1;
 eSelection eCursor::SelectionP2;
+
+eSelection eCursor::SelectionData[2][4] = {};
+
 int eCursor::pCursorEax;
 
 void eCursor::Init()
@@ -44,6 +47,12 @@ void eCursor::Init()
 	Player2_Selected = 0;
 	Player2_Turns = 0;
 	pCursorEax = 0;
+
+	for (int i = 0; i < 2; i++)
+	{
+		for (int a = 0; a < 4; a++)
+			SelectionData[i][a] = { -1, -1 };
+	}
 
 	InjectHook(0x406E51, HookCursorPointer, PATCH_JUMP);
 	InjectHook(0x409196, HookCursorMoveNegative, PATCH_JUMP);
@@ -172,10 +181,18 @@ void __declspec(naked) eCursor::HookSelection()
 		mov ecx, _ecx
 	}
 	if (Selection.Who == 0)
+	{
 		SelectionP1 = Selection;
+		SelectionData[0][eCursor::Player1_Turns] = Selection;
+	}
 	else
+	{
 		SelectionP2 = Selection;
+		SelectionData[1][eCursor::Player2_Turns] = Selection;
+	}
+
 	eCustomCursorManager::ProcessSelection();
+
 	_asm {
 		popad
 		mov     edx, [eax + ecx * 4 + 840]
@@ -185,7 +202,6 @@ void __declspec(naked) eCursor::HookSelection()
 
 void eCursor::Update()
 {
-
 	Player1_Character = *(int*)(pCursorEax + 14846 + 18 + 4 + 4);
 	Player1_RandomCharacter = *(int*)(pCursorEax + 14846 + 18 + 4 + 4 + 12);
 	Player1_Row = (*(int*)(pCursorEax + 14846 + 18 + 4));
@@ -315,4 +331,48 @@ void eCursor::PopCursor()
 void eCursor::UpdateRandomSelect()
 {
 
+}
+
+void eCursor::PrintSelections()
+{
+	for (int i = 0; i < 2; i++)
+	{
+		for (int a = 0; a < 4; a++)
+		{
+			if (SelectionData[i][a].ID >= 0)
+			{
+				eMugenCharacterInfo* chr = GetCharInfo(SelectionData[i][a].ID);
+				if (chr)
+				{
+					printf("P%d|%d - %d [%s]\n", i + 1, a, SelectionData[i][a].ID, chr->Name);
+				}
+
+			}
+
+		}
+			
+	}
+}
+
+void eCursor::ClearSelections()
+{
+	for (int i = 0; i < 2; i++)
+	{
+		for (int a = 0; a < 4; a++)
+		{
+			SelectionData[i][a] = { -1, -1 };
+		}
+	}
+}
+
+int eCursor::GetPlayerSelections(int player)
+{
+	int result = 0;
+	for (int a = 0; a < 4; a++)
+	{
+		if (SelectionData[0][a].ID >= 0)
+			result++;
+
+	}
+	return result;
 }

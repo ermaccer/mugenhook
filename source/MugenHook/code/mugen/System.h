@@ -1,5 +1,8 @@
 #pragma once
+#include "Character.h"
 #include "Sound.h"
+#include "Data.h"
+
 
 enum eGameplayModes {
 	MODE_ARCADE,
@@ -53,47 +56,10 @@ enum eInputs {
 };
 
 
-struct eMugenCharacterInfo {
-	int   ID;
-	char  CharacterFlag;
-	char  CurrentVariation;
-	char  CurrentIconIndex;
-	char  ExtraFlags;
-	char  Name[48];
-	char  FileName[512];
-	char  FolderName[508]; // originally 512, but we need data for timer, don't think it'll exceed 260 anyway
-	int   IconTimer;       // set with 0 anyway
-	int   SpritePointer;
-	float Scale;
-};
 
 struct eMugenStage {
 	char FileName[512];
 	char StageName[84];
-};
-
-struct eMugenCharacterData {
-	int ID;
-	int Unknown[2];
-	char pad[512];
-	char FileName[512];
-	char FilePath[1536];
-	char _pad[84]; // most likely pal assoc?
-	char IntroFile[512];
-	char EndingFile[512];
-	char __pad[528];
-};
-
-
-struct eMugenData {
-	char  pad[256];
-	char  CacheMusic[256];
-	char  GameFolder[512];
-	char  _pad[16];
-	char  LastStage[1024]; // 2064
-	char __pad[4816];
-	char  StageData[1472];
-
 };
 
 struct eSelectScreenParams {
@@ -113,6 +79,14 @@ enum pushstart_flash {
 	PUSHSTART_FLASH_NONE,
 	PUSHSTART_FLASH_BLINK,
 	PUSHSTART_FLASH_COLOR
+};
+
+
+enum facedraw_priority {
+	FACEDRAW_DEFAULT,
+	FACEDRAW_ONTOP,
+	// todo
+	FACEDRAW_BEHIND
 };
 
 struct pushstart_settings {
@@ -160,6 +134,7 @@ struct screentimer_settings {
 
 class eSystem {
 public:
+	// todo: system.def nice reader
 	static int iRows;
 	static int iColumns;
 	static int iSoundP1DoneGroup;
@@ -182,6 +157,8 @@ public:
 	static int p1_cursor_startcell[2];
 	static int p2_cursor_startcell[2];
 
+	static int face_draw_priority;
+
 	// join in settings
 
 	static pushstart_settings pushstart_set;
@@ -195,6 +172,8 @@ public:
 	static int GetGameplayMode();
 	static int GetTimer();
 	static int GetCharactersAmount();
+
+	static int GetDrawData();
 
 	static void SetGameFlow(eGameFlowType flow);
 	static void SetGameplayMode(eGameplayModes mode);

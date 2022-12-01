@@ -120,6 +120,21 @@
     <ClInclude Include="code\mugenhook\eSelectTimer.h">
       <Filter>Header Files\code\mugenhook</Filter>
     </ClInclude>
+    <ClInclude Include="code\mugen\Data.h">
+      <Filter>Header Files\code\mugen</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugen\ProcData.h">
+      <Filter>Header Files\code\mugen</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugenhook\eFightLog.h">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugenhook\eCommandLineParams.h">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClInclude>
+    <ClInclude Include="code\mugenhook\config.h">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -202,6 +217,18 @@
     </ClCompile>
     <ClCompile Include="code\mugenhook\eSelectTimer.cpp">
       <Filter>Header Files\code\mugenhook</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugen\Data.cpp">
+      <Filter>Header Files\code\mugen</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugenhook\eFightLog.cpp">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugenhook\eCommandLineParams.cpp">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugen\Character.cpp">
+      <Filter>Header Files\code\mugen</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -20,6 +20,8 @@
 #include "code/mugenhook/eStageAnnouncer.h"
 #include "code/mugenhook/eScriptProcessor.h"
 #include "code/mugenhook/eSelectTimer.h"
+#include "code/mugenhook/eFightLog.h"
+
 int  GenericTrueReturn() { return 1; }
 int  GenericFalseReturn() { return 0; }
 void GenericDummy() { }
@@ -51,8 +53,11 @@ void Init()
 			InjectHook(0x40C4A0, eCommonHooks::HookPushDebugMessage, PATCH_JUMP);
 	}
 
+	//Nop(0x407103, 0x407822 - 0x407103);
 
-
+	eFightLog::Clear();
+	InjectHook(0x415407, eFightLog::InitialSave);
+	InjectHook(0x412CCF, eFightLog::EndSave);
 	eSystem::Init();
 	eCursor::Init();
 	eCommonHooks::Init();
