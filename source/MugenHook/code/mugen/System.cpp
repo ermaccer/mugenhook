@@ -286,9 +286,37 @@ int eSystem::GetRoundTime()
 	return *(int*)(*(int*)eSystem::pMugenDataPointer + 0x12768);
 }
 
+int eSystem::GetFont(int id)
+{
+	int font = 0;
+	if (*(int*)pMugenDataPointer)
+	{
+		if (id >= 0 && id < 10)
+		{
+			int pFontArray = (*(int*)pMugenDataPointer + 0x114C8);
+			font = *(int*)(pFontArray + (id * sizeof(int)));
+		}
+		if (!font)
+			font = *(int*)(*(int*)pMugenDataPointer + 0x8738);
+	}
+
+	return font;
+}
+
 eMugenData * eSystem::GetData()
 {
 	return *(eMugenData**)eSystem::pMugenDataPointer;
+}
+
+float eSystem::GetSystemScale()
+{
+	if (*(int*)pMugenDataPointer)
+	{
+		double systemScale = *(double*)(*(int*)pMugenDataPointer + 0x110A8);
+		return static_cast<float>(systemScale);
+	}
+	else
+		return 0.0f;
 }
 
 char * eSystem::GetDirectory()
@@ -313,6 +341,24 @@ bool CNS_StoreValue(char * line, int dst, int buff, int unk, int type)
 int CNS_RecallValue(int proc, int from, int type)
 {
 	return CallAndReturn<int, 0x4028C0, int, int, int>(proc, from, type);
+}
+
+float __declspec(naked) CNS_RecallFloat(int proc, int from)
+{
+	_asm {
+		push ebp
+		mov ebp, esp
+		sub esp, __LOCAL_SIZE
+
+		mov edx, from
+		mov eax, proc
+		mov ebx, 0x4029A0
+		call ebx
+
+		mov esp, ebp
+		pop ebp
+		ret
+	}
 }
 
 int GetCharacterIDFromSprite(int sprite)
@@ -347,5 +393,28 @@ void ConvertNewLine(char * text, int len)
 				text[i + 1] = 0xA;
 			}
 		}
+	}
+}
+
+void DrawFightDef(int unk)
+{
+	Call<0x417880, int>(unk);
+}
+
+int __declspec(naked) mugen_calloc(int memSize)
+{
+	_asm {
+		push ebp
+		mov ebp, esp
+		sub esp, __LOCAL_SIZE
+
+		mov eax, memSize
+		mov ecx, 1
+		mov ebx, 0x4612E0
+		call ebx
+
+		mov esp, ebp
+		pop ebp
+		ret
 	}
 }

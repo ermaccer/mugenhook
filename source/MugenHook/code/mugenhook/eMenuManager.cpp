@@ -9,6 +9,7 @@
 #include "..\core\eCursor.h"
 #include "eSelectTimer.h"
 #include "eSelectScreenManager.h"
+#include "eTextDraw.h"
 
 bool eMenuManager::m_bIsInMainMenu;
 bool eMenuManager::m_bIsInSelectScreen;
@@ -40,6 +41,7 @@ int eMenuManager::HookMainMenu()
 	m_bIsInSelectScreen = false;
 	m_bWasCursorAdjusted = false;
 	eCursor::ClearSelections();
+	eTextDrawProcessor::InitTextDraw();
 	eSelectScreenManager::m_nSelectScreenCurrentCharacterDraw = 0;
 	if (eSettingsManager::bHookVariations)
 	{
@@ -80,6 +82,7 @@ int eMenuManager::HookSelectScreenMenu()
 	eCursor::PopCursor();
 	eCursor::ClearSelections();
 	eSelectTimer::Init();
+	eTextDrawProcessor::InitTextDraw();
 	return CallAndReturn<int, 0x408A80>();
 }
 
@@ -92,6 +95,8 @@ int eMenuManager::HookBeginMatch()
 {
 	if (eSettingsManager::bEnableSlidePortraits)
 		eSlidingPortraits::Reset();
+	eTextDrawProcessor::InitTextDraw();
+
 	return CallAndReturn<int, 0x4227D0>();
 }
 

@@ -135,6 +135,9 @@
     <ClInclude Include="code\mugenhook\config.h">
       <Filter>Header Files\code\mugenhook</Filter>
     </ClInclude>
+    <ClInclude Include="code\mugenhook\eTextDraw.h">
+      <Filter>Header Files\code\mugenhook</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -229,6 +232,9 @@
     </ClCompile>
     <ClCompile Include="code\mugen\Character.cpp">
       <Filter>Header Files\code\mugen</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mugenhook\eTextDraw.cpp">
+      <Filter>Header Files\code\mugenhook</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

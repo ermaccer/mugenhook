@@ -184,9 +184,12 @@ public:
 
 	static void SetRoundTime(int value);
 	static int  GetRoundTime();
+	static int  GetFont(int id);
 
 
 	static eMugenData* GetData();
+
+	static float GetSystemScale();
 
 	static char* GetDirectory();
 };
@@ -194,8 +197,12 @@ public:
 char* CNS_ReadValue(int ini, const char* name);
 bool  CNS_StoreValue(char* line, int dst, int buff, int unk, int type);
 int   CNS_RecallValue(int proc, int from, int type);
-
+float   CNS_RecallFloat(int proc, int from);
 int  GetCharacterIDFromSprite(int sprite);
 void SystemError(const char* text);
 
 void ConvertNewLine(char* text, int len);
+
+void DrawFightDef(int unk);
+
+int mugen_calloc(int memSize);

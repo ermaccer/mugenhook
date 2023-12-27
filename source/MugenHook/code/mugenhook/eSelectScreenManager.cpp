@@ -508,7 +508,7 @@ void eSelectScreenManager::DrawJoinIn()
 			params.field_4 = 0.0;
 
 			params.field_5C = 0xFFFF;
-			params.m_hasBackground = 1;
+			params.m_alpha = 1;
 
 			params.m_scaleX = eSystem::pushstart_set.scale_x;
 			params.m_scaleY = eSystem::pushstart_set.scale_y;

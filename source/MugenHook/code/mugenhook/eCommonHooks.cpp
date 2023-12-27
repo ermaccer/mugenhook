@@ -8,16 +8,24 @@
 #include "..\core\eSettingsManager.h"
 #include "base.h"
 #include "..\mugen\System.h"
+#include "..\mugen\Draw.h"
 #include "..\core\eCursor.h"
 #include "eVariationsManager.h"
 #include "eMagicBoxes.h"
 #include "eAnimatedIcons.h"
+#include "eTextDraw.h"
 
 
 void eCommonHooks::Init()
 {	
 	InjectHook(0x429B14, HookDrawMugenVersionInfo, PATCH_CALL);
 	InjectHook(0x4089A4, HookSelectScreenProcessEnd, PATCH_JUMP);
+	InjectHook(0x40D213, HookDrawHUDLow, PATCH_JUMP);
+	InjectHook(0x40D84D, HookDrawHUDHigh, PATCH_JUMP);
+	InjectHook(0x40D663, HookDrawHUDMedium, PATCH_JUMP);
+	InjectHook(0x40D255, HookDrawAfterHUDLow, PATCH_CALL);
+	InjectHook(0x40D675, HookDrawAfterHUDMedium, PATCH_CALL);
+	InjectHook(0x40D862, HookDrawAfterHUDHigh, PATCH_CALL);
 }
 
 void eCommonHooks::ProcessSelectScreen()
@@ -118,6 +126,70 @@ void eCommonHooks::HookPushDebugMessage(const char * message)
 	printf(message);
 }
 
+void __declspec(naked) eCommonHooks::HookDrawHUDLow()
+{
+	static int jmp_continue = 0x40D219;
+	_asm {
+		pushad
+	}
+	eTextDrawProcessor::DrawTextDraws(0);
+	_asm {
+		popad
+		mov     eax, [ebp + 8]
+		cmp     dword ptr[eax], 4
+		jmp jmp_continue
+	}
+}
+
+void  __declspec(naked) eCommonHooks::HookDrawHUDMedium()
+{
+	static int jmp_continue = 0x40D66A;
+	_asm {
+		pushad
+	}
+	eTextDrawProcessor::DrawTextDraws(1);
+	_asm {
+		popad
+		cmp     dword ptr[esi + 0x12854], 0
+		jmp jmp_continue
+	}
+}
+
+void __declspec(naked) eCommonHooks::HookDrawHUDHigh()
+{
+	static int jmp_continue = 0x40D853;
+	_asm {
+		pushad
+	}
+	eTextDrawProcessor::DrawTextDraws(2);
+	_asm {
+		popad
+		mov     eax, [ebp + 8]
+		cmp     dword ptr[eax], 4
+		jmp jmp_continue
+	}
+}
+
+void eCommonHooks::HookDrawAfterHUDLow(int unk)
+{
+	eTextDrawProcessor::DrawTextDraws(3);
+	DrawFightDef(unk);
+	eTextDrawProcessor::DrawTextDraws(6);
+}
+
+void eCommonHooks::HookDrawAfterHUDMedium(int unk)
+{
+	eTextDrawProcessor::DrawTextDraws(4);
+	DrawFightDef(unk);
+	eTextDrawProcessor::DrawTextDraws(7);
+}
+
+void eCommonHooks::HookDrawAfterHUDHigh(int unk)
+{
+	eTextDrawProcessor::DrawTextDraws(5);
+	DrawFightDef(unk);
+	eTextDrawProcessor::DrawTextDraws(8);
+}
 
 void __declspec(naked) eCommonHooks::HookSelectScreenProcessEnd()
 {

@@ -63,6 +63,21 @@ eMugenCharacter* eMugenData::GetCharacter(int team, int slot)
 	return GetCharacter(team + slot * 2);
 }
 
+int eMugenData::GetIDFromObject(int object)
+{
+	int field_12474 = *(int*)((int)this + 0x12474);
+	int numObjects = *(int*)((int)this + 0x12478);
+	eMugenCharacter* character = nullptr;
+
+	for (int i = 0; i < numObjects; i++)
+	{
+		int object_ptr = ((int)this + 0x12274 + (4 * i));
+		if (object_ptr == object)
+			return i - 1;
+	}
+	return 0;
+}
+
 void eMugenData::PrintAllCharacters()
 {
 	

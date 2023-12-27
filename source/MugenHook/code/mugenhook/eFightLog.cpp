@@ -4,15 +4,18 @@
 #include <iostream>
 #include "eCommandLineParams.h"
 #include "..\mugen\Data.h"
+#include "eTextDraw.h"
 
 void eFightLog::InitialSave()
 {
 	SaveData();
+	eTextDrawProcessor::InitTextDraw();
 	Call<0x424310>();
 }
 
 void eFightLog::EndSave()
 {
+	eTextDrawProcessor::InitTextDraw();
 	SaveData();
 }
 

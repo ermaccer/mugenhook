@@ -45,6 +45,7 @@ public:
 
 	eMugenCharacter* GetCharacter(int id);
 	eMugenCharacter* GetCharacter(int team, int slot);
+	int				 GetIDFromObject(int object);
 
 	void PrintAllCharacters();
 

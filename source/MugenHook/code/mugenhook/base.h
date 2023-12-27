@@ -2,7 +2,7 @@
 #include "..\..\MemoryMgr.h"
 #include "..\..\IniReader.h"
 #include "config.h"
-#define MUGENHOOK_VERSION "0.6.6"
+#define MUGENHOOK_VERSION "0.6.7"
 
 
 typedef unsigned char uint8;

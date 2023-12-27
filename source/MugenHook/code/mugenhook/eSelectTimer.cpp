@@ -47,7 +47,7 @@ void eSelectTimer::DrawTimer()
 	params.field_4 = 0.0;
 
 	params.field_5C = 0xFFFF;
-	params.m_hasBackground = 1;
+	params.m_alpha = 1;
 
 	params.m_scaleX = eSystem::screentimer.scale_x;
 	params.m_scaleY = eSystem::screentimer.scale_y;

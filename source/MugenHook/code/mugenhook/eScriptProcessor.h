@@ -4,19 +4,13 @@
 #include "../mugen/Data.h"
 
 
-struct eTextDrawEntry {
-	bool m_bIsActive;
-	int  m_pFont;
-	char m_szDisplayText[512] = {};
-};
-
-
-
 enum eNewCNSCommands {
 	SetRoundTime = 2540,
 	AddRoundTime,
 	SetBGM,
-	SetStage
+	SetStage,
+	TextDraw,
+	DisableTextDraw,
 };
 
 union eMugenVar {
@@ -33,6 +27,30 @@ struct eMugenMachine {
 };
 
 
+enum TextDraw_Params {
+	TDP_Align = 12 * 2,
+	TDP_PosX = 12 * 3,
+	TDP_PosY = 12 * 4,
+	TDP_ScaleX = 12 * 5,
+	TDP_ScaleY = 12 * 6,
+	TDP_R = 12 * 7,
+	TDP_G = 12 * 8,
+	TDP_B = 12 * 9,
+	TDP_ID = 12 * 10,
+	TDP_STRING = 12 * 11,
+	TDP_Order = 12 * 12,
+	TDP_Duration = 12 * 13,
+	TDP_Font = 12 * 14,
+	TDP_Flags = 12 * 15,
+	TDP_ArgsNum = 12 * 16,
+	TDP_ArgTypes = 12 * 17,
+	TDP_Arg0 = 12 * 18,
+	TDP_Arg1 = 12 * 19,
+	TDP_Arg2 = 12 * 20,
+};
+
+
+
 class eScriptProcessor {
 public:
 
@@ -40,8 +58,10 @@ public:
 	static int			  vm_cur_line;
 	static int			  vm_buff;
 	static int			  vm_cur_proc;
+	static int			  vm_last_obj;
 	static bool			  updateMusic;
 	static std::vector<std::string> stringTable;
+
 
 	static void Init();
 	static void Hook2DDraw();
@@ -71,6 +91,11 @@ public:
 	static void CMD_AddRoundTime();
 	static void CMD_SetRoundTime();
 	static void CMD_SetStage();
+	static void CMD_TextDraw();
+	static void CMD_DisableTextDraw();
+
+	// helpers
+	static int GetCharacterIDFromObject(eMugenCharacter* obj);
 
 
 	// functions

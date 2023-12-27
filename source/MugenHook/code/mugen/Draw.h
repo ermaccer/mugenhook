@@ -54,7 +54,7 @@ struct eTextParams
 	char field_49;
 	char field_4A;
 	char field_4B;
-	int m_hasBackground;
+	int m_alpha;
 	float field_50;
 	char field_54;
 	char field_55;
